@@ -1,28 +1,59 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Card } from 'react-native-paper'
+import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 type VocabularyCardPropsType = {
   thai: string
   romanization: string
   english: string
   onPress: (id: string) => void
   id: string
+  tag: string
 }
 const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
-  const { thai, romanization, english, onPress, id } = props
+  const { thai, romanization, english, onPress, id, tag } = props
   return (
-    <View className="border-2 border-muay-purple rounded-xl w-[150px] bg-muay-white shadow-md px-6 py-4 mb-6 h-[150px]">
+    <Card
+      style={{
+        borderRadius: 16,
+        borderWidth: 2,
+        borderColor: MUAY_PURPLE,
+        width: 150,
+        height: 150,
+        backgroundColor: MUAY_WHITE,
+        shadowColor: MUAY_PURPLE,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        padding: 16,
+        marginBottom: 24,
+      }}
+    >
       <Text
         className="w-full h-full"
         onPress={() => onPress(id)}
         style={{ textAlignVertical: 'center' }}
       >
-        <Text className="text-[35px] font-bold text-center text-muay-purple mb-2">{thai}</Text>
+        <Text
+          style={{
+            fontSize: 35,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: MUAY_PURPLE,
+            marginBottom: 8,
+          }}
+        >
+          {thai}
+        </Text>
         {'\n'}
-        <Text className="text-[20px] text-muay-purple/70 italic text-center">{romanization}</Text>
+        <Text style={{ fontSize: 20, textAlign: 'center', fontStyle: 'italic', margin: '5px 0' }}>
+          {romanization}
+        </Text>
         {'\n'}
-        <Text className="text-[20px] text-gray-700 text-center">{english}</Text>
+        <Text style={{ fontSize: 20, textAlign: 'center' }}>{english}</Text>
       </Text>
-    </View>
+    </Card>
   )
 }
 

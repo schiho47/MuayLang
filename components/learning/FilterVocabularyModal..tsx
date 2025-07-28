@@ -20,6 +20,10 @@ import { FilterDataType, VocabularyDataType, VocabularyFieldEnum } from './type'
 
 import { useGetVocabularyTagList } from '../../lib/learningAPI'
 import CustomDropDownPick from '../CustomDropDownPick'
+import { MUAY_PURPLE } from '@/constants/Colors'
+import useGetTagList from '@/hooks/useGetTagList'
+import CustomDatePicker from '../CustomDatePicker'
+import CustomMultiSelect from '../CustomMultiSelect'
 
 type FilterVocabularyModalProps = {
   handleClose: (isUpdate: boolean) => void
@@ -29,6 +33,8 @@ type FilterVocabularyModalProps = {
 
 const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
   const { handleClose, handleConfirm, vocabularies } = props
+
+  const { tagsList } = useGetTagList()
   const [filterData, setFilterData] = useState<FilterDataType>({
     vocabulary: '',
     createdAt: '',
@@ -54,39 +60,6 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
     [vocabularies]
   )
 
-  const createdDateItems = useMemo(
-    () => [
-      { label: 'All', value: undefined },
-      ...(vocabularies?.map((item) => ({
-        label: item.createdAt,
-        value: item.createdAt,
-      })) || []),
-    ],
-    [vocabularies]
-  )
-
-  const tagItems = useMemo(
-    () => [
-      { label: 'All', value: undefined },
-      ...(vocabularies?.map((item) => ({
-        label: item.tag,
-        value: item.tag,
-      })) || []),
-    ],
-    [vocabularies]
-  )
-
-  // const tagItems = useMemo(
-  //   () => [
-  //     { label: 'All', value: undefined },
-  //     ...(vocabularyTagList?.map((item: { tag: string }) => ({
-  //       label: item.tag,
-  //       value: item.tag,
-  //     })) || []),
-  //   ],
-  //   [vocabularyTagList]
-  // )
-
   return (
     <Modal
       animationType="slide"
@@ -96,13 +69,33 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <View className="flex-1 justify-center items-center bg-black/40">
+          <View
+            className="flex-1 justify-center items-center bg-black/40"
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.4)',
+            }}
+          >
             <KeyboardAvoidingView
               behavior="padding"
               style={{ flex: 1, width: '100%' }}
               keyboardVerticalOffset={64}
             >
-              <View className="bg-white rounded-2xl shadow-lg items-center relative p-5 w-full overflow-x-hidden">
+              <View
+                className="bg-white rounded-2xl shadow-lg items-center relative p-5 w-full overflow-x-hidden"
+                style={{
+                  borderRadius: 10,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                  backgroundColor: 'white',
+                  padding: 16,
+                }}
+              >
                 <TouchableOpacity
                   onPress={() => handleClose(false)}
                   className="absolute top-1 right-1 p-2 z-10"
@@ -110,36 +103,55 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
                 >
                   <MaterialIcons name="close" size={22} color="#6B3789" />
                 </TouchableOpacity>
-                <Text className="text-[28px] font-bold text-muay-purple mb-2 mt-4">
+                <Text
+                  className="text-[28px] font-bold text-muay-purple mb-2 mt-4"
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: MUAY_PURPLE,
+                    marginBottom: 8,
+                    marginTop: 16,
+                    marginLeft: 16,
+                  }}
+                >
                   Filter Vocabulary
                 </Text>
-                <CustomDropDownPick
-                  zIndex={3000}
-                  items={vocabularyItems}
-                  handleValueChange={handleValueChange}
+                {/* <CustomMultiSelect
                   placeholder="Select Vocabulary"
-                  field="vocabulary"
-                />
+                  value={filterData.vocabulary.split(',')}
+                  onChange={(value) => handleValueChange(value.join(','), 'vocabulary')}
+                  item={vocabularyItems as { label: string; value: string }[]}
+                  title="Vocabulary"
+                /> */}
                 <Spacer height={20} />
-                <CustomDropDownPick
+
+                <CustomMultiSelect
+                  placeholder="Select Tag"
+                  value={[]}
+                  onChange={(value) => handleValueChange(value.join(','), 'tag')}
+                  item={[]}
+                  title="Tags"
+                />
+
+                <Spacer height={20} />
+                <CustomDatePicker
+                  label="Select Created Date"
+                  value={filterData.createdAt}
+                  onChange={handleValueChange}
+                />
+                {/* <CustomDropDownPick
                   zIndex={2000}
                   items={createdDateItems}
                   handleValueChange={handleValueChange}
                   placeholder="Select Created Date"
                   field="createdAt"
-                />
-                <Spacer height={20} />
-                <CustomDropDownPick
-                  zIndex={1000}
-                  items={tagItems}
-                  handleValueChange={handleValueChange}
-                  placeholder="Select Tag"
-                  field="tag"
-                />
+                /> */}
                 <Spacer height={30} />
                 <ModalFooter
                   handleClose={() => handleClose(false)}
                   handelConfirm={() => handleConfirm(filterData)}
+                  isEdit={false}
+                  handleDelete={() => {}}
                 />
               </View>
             </KeyboardAvoidingView>

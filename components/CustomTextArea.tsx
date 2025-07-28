@@ -15,7 +15,7 @@ const CustomTextArea: React.FC<CustomTextProps> = (props) => {
   const { title, placeholder, value, name, onChange, error } = props
   const [isFocused, setIsFocused] = useState(false)
   return (
-    <View className="w-full  px-5  mb-5">
+    <View style={{ width: '90%', margin: 12 }}>
       <TextInput
         label={isFocused || value ? title : ''}
         // className="border border-muay-purple/30 focus:border-muay-purple rounded-md px-2 py-2 w-full text-[16px] h-[60px] mb-5"

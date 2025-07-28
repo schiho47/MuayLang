@@ -7,7 +7,6 @@ import { CheckModalError, VocabularyFieldEnum } from './learning/type'
 type CustomInputProps = {
   title: string
   placeholder: string
-
   value: string
   name: keyof CheckModalError | string
   onChange: (value: string, name: VocabularyFieldEnum) => void
@@ -18,7 +17,7 @@ const CustomInput: React.FC<CustomInputProps> = (props) => {
   const { title, placeholder, value, name, onChange, error, errorMessage } = props
   const [isFocused, setIsFocused] = useState(false)
   return (
-    <View className="w-90 m-3 px-5">
+    <View style={{ width: '90%', margin: 12 }}>
       <TextInput
         label={isFocused || value ? title : ''}
         placeholder={placeholder}
@@ -43,7 +42,11 @@ const CustomInput: React.FC<CustomInputProps> = (props) => {
         }}
       />
 
-      {error && <Text className="text-red-500">{errorMessage}</Text>}
+      {error && (
+        <Text className="text-red-500" style={{ color: '#ef4444' }}>
+          {errorMessage}
+        </Text>
+      )}
     </View>
   )
 }

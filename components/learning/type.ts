@@ -6,10 +6,11 @@ export enum VocabularyFieldEnum {
   EnglishExample = 'exampleEN',
   Note = 'note',
   URL = 'url',
-  Tag = 'tag',
+  Tags = 'tags',
 }
 
 export type VocabularyDetailDataType = {
+  $id: string
   [VocabularyFieldEnum.Thai]: string
   [VocabularyFieldEnum.Romanization]: string
   [VocabularyFieldEnum.English]: string
@@ -17,7 +18,7 @@ export type VocabularyDetailDataType = {
   [VocabularyFieldEnum.EnglishExample]: string
   [VocabularyFieldEnum.Note]: string
   [VocabularyFieldEnum.URL]: string
-  [VocabularyFieldEnum.Tag]: string[]
+  [VocabularyFieldEnum.Tags]: string[]
 }
 
 export interface VocabularyDataType extends VocabularyDetailDataType {
@@ -31,6 +32,7 @@ export type CheckModalError = {
   [VocabularyFieldEnum.English]: { status: boolean; message: string }
   [VocabularyFieldEnum.ThaiExample]: { status: boolean; message: string }
   [VocabularyFieldEnum.EnglishExample]: { status: boolean; message: string }
+  [VocabularyFieldEnum.URL]: { status: boolean; message: string }
 }
 
 export type FilterDataType = {

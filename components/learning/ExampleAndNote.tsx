@@ -3,6 +3,7 @@ import React from 'react'
 import { VocabularyFieldEnum } from './type'
 import CustomTextArea from '../CustomTextArea'
 import CustomURL from '../CustomURL'
+import CustomMultiSelect from '../CustomMultiSelect'
 type ExampleAndNoteProps = {
   onChange: (value: string, name: VocabularyFieldEnum) => void
   value: {
@@ -44,13 +45,6 @@ const ExampleAndNote: React.FC<ExampleAndNoteProps> = (props) => {
         name={'note'}
         onChange={onChange}
         error={false}
-      />
-      <CustomURL
-        url={value[VocabularyFieldEnum.URL]}
-        value={value[VocabularyFieldEnum.URL]}
-        onChange={onChange}
-        error={false}
-        errorMessage={''}
       />
     </View>
   )

@@ -37,15 +37,19 @@ const CustomTextArea: React.FC<CustomTextProps> = (props) => {
           },
         }}
         style={{
-          height: 80,
+          minHeight: 100,
         }}
         contentStyle={{
-          height: 80,
+          minHeight: 100,
         }}
         onChangeText={(value) => onChange(value, name as VocabularyFieldEnum)}
       />
 
-      {error && <Text className="text-red-500"> *This is a required field</Text>}
+      {error && (
+        <Text className="text-red-500" style={{ color: '#ef4444' }}>
+          *This is a required field
+        </Text>
+      )}
     </View>
   )
 }

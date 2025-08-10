@@ -14,7 +14,7 @@ type CustomInputProps = {
   errorMessage: string
 }
 const CustomInput: React.FC<CustomInputProps> = (props) => {
-  const { title, placeholder, value, name, onChange, error, errorMessage } = props
+  const { title, placeholder, value, name, onChange, error, errorMessage, ...otherProps } = props
   const [isFocused, setIsFocused] = useState(false)
   return (
     <View style={{ width: '90%', margin: 12 }}>
@@ -28,6 +28,7 @@ const CustomInput: React.FC<CustomInputProps> = (props) => {
         mode="outlined"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        {...otherProps}
         theme={{
           colors: {
             primary: isFocused ? MUAY_PURPLE : MUAY_PURPLE_30,

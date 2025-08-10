@@ -1,24 +1,10 @@
-import {
-  ScrollView,
-  KeyboardAvoidingView,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-  TouchableOpacity,
-  Keyboard,
-} from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
-import ModalFooter from '../../components/ModalFooter'
-import { MaterialIcons } from '@expo/vector-icons'
-import CustomInput from '../../components/CustomInputOld'
+
 import { VocabularyDetailDataType, VocabularyFieldEnum } from '../../components/learning/type'
-import Spacer from '../../components/Spacer'
+
 import { useAddVocabulary } from '../../lib/learningAPI'
-import { validators } from '../../utils/validators'
-import Accordion from '../../components/Accordion'
-import ExampleAndNote from '../../components/learning/ExampleAndNote'
+
 import { Appbar } from 'react-native-paper'
 import { router } from 'expo-router'
 import VocabularySetting from '../../components/learning/VocabularySetting'
@@ -36,7 +22,6 @@ const initialModalDataType = {
 }
 
 const AddVocabulary = (props: AddVocabularyModalProps) => {
-  const { mutate: addVocabulary } = useAddVocabulary()
   const [pageData, setPageData] = useState<VocabularyDetailDataType>(initialModalDataType)
   const handleChangePageData = (value: string, name: VocabularyFieldEnum) => {
     setPageData((prev) => ({ ...prev, [name]: value }))

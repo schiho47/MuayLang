@@ -1,61 +1,54 @@
 import React, { useState } from 'react'
 import { View, TouchableWithoutFeedback } from 'react-native'
-import { TextInput } from 'react-native-paper'
+
 import { DatePickerModal } from 'react-native-paper-dates'
-import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors' // 你原本的顏色
+import CustomInput from './CustomInput'
+import { formatLocalDate } from '@/utils/dateUtils'
 
 type Props = {
   label: string
-  startDate?: Date
-  endDate?: Date
-  onConfirm: (range: [startDate: Date, endDate: Date], field: string) => void
-}
+  date?: Date | null
+  onConfirm: (date: Date, field: string) => void
+  error: boolean
+  errorMessage: string
+} & Omit<
+  React.ComponentProps<typeof CustomInput>,
+  'title' | 'value' | 'onChange' | 'name' | 'placeholder' | 'error' | 'errorMessage'
+>
 
-const CustomDateRangeInput = (props: Props) => {
-  const { label, startDate, endDate, onConfirm } = props
+const CustomDatePicker = (props: Props) => {
+  const { label, date, onConfirm, error, errorMessage, ...otherProps } = props
   const [open, setOpen] = useState(false)
 
   return (
-    <View style={{ marginBottom: 20, width: '90%', margin: 12 }}>
+    <View>
       <TouchableWithoutFeedback onPress={() => setOpen(true)}>
         <View pointerEvents="box-only">
-          <TextInput
-            label={label}
-            value={
-              startDate && endDate
-                ? `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
-                : ''
-            }
-            editable={false}
-            showSoftInputOnFocus={false}
-            onFocus={() => setOpen(true)}
-            mode="outlined"
-            outlineColor={MUAY_PURPLE} // 👈 default border
-            activeOutlineColor={MUAY_PURPLE} // 👈 focused border
-            placeholder="Select Created Date"
-            placeholderTextColor="#aaa" // 👈 placeholder color
-            theme={{
-              colors: {
-                placeholder: '#aaa', // 替代方案
-                primary: MUAY_PURPLE, // label 顏色
-              },
-            }}
+          <CustomInput
+            title={label}
+            value={date ? formatLocalDate(date) : ''}
+            placeholder="Select Date"
+            name="date"
+            onChange={() => {}} // Required by CustomInput but not used for date picker
+            error={error}
+            errorMessage={errorMessage}
+            {...otherProps}
           />
         </View>
       </TouchableWithoutFeedback>
 
       <DatePickerModal
-        mode="range"
-        locale="en"
+        mode="single"
+        locale="zh-TW"
         visible={open}
-        startDate={startDate}
-        endDate={endDate}
+        startDate={date || undefined}
+        endDate={date || undefined}
         onDismiss={() => setOpen(false)}
-        onConfirm={({ startDate, endDate }) => {
+        onConfirm={({ date }) => {
           setOpen(false)
-          if (startDate && endDate) {
-            console.log({ startDate, endDate })
-            onConfirm([startDate, endDate], 'createdAt')
+          if (date) {
+            console.log({ date })
+            onConfirm(date, 'createdAt')
           }
         }}
       />
@@ -63,4 +56,4 @@ const CustomDateRangeInput = (props: Props) => {
   )
 }
 
-export default CustomDateRangeInput
+export default CustomDatePicker

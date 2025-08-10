@@ -22,7 +22,7 @@ import { useGetVocabularyTagList } from '../../lib/learningAPI'
 import CustomDropDownPick from '../CustomDropDownPick'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import useGetTagList from '@/hooks/useGetTagList'
-import CustomDatePicker from '../CustomDatePicker'
+import CustomDatePicker from '../CustomDateRangeInput.'
 import CustomMultiSelect from '../CustomMultiSelect'
 
 type FilterVocabularyModalProps = {

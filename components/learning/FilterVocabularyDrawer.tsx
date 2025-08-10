@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react'
 import ModalFooter from '../ModalFooter'
 import CustomAccordion from '../CustomAccordion'
 import CustomMultiSelect from '../CustomMultiSelect'
-import CustomDatePicker from '../CustomDatePicker'
+import CustomDateRangeInput from '../CustomDateRangeInput.'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import useGetTagList from '@/hooks/useGetTagList'
@@ -88,7 +88,7 @@ const FilterVocabularyDrawer = (props: FilterVocabularyDrawerProps) => {
             leftIcon={<Ionicons name="calendar-outline" size={24} color={MUAY_PURPLE} />}
             containerStyle={styles.accordion}
           >
-            <CustomDatePicker
+            <CustomDateRangeInput
               label="Select Created Date"
               value={filterData.createdAt}
               onConfirm={(value) => handleValueChange(value, 'createdAt')}

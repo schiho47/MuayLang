@@ -6,7 +6,7 @@ import GuestOnly from '../components/auth/GuestOnly'
 import '../global.css'
 
 const Home = () => {
-  return <Redirect href="/(dashboard)/learning" />
+  return <Redirect href="/(dashboard)/training" />
   return (
     <View></View>
     // <GuestOnly>

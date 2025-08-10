@@ -29,6 +29,8 @@ export default function RootLayout() {
               <Stack.Screen name="(dashboard)" options={{ headerShown: false }} />
               <Stack.Screen name="vocabulary/add" options={{ headerShown: false }} />
               <Stack.Screen name="vocabulary/edit/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="section/add" options={{ headerShown: false }} />
+              <Stack.Screen name="section/edit/[id]" options={{ headerShown: false }} />
               Individual Screens
               <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
             </Stack>

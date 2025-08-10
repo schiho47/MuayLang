@@ -3,7 +3,7 @@ import React from 'react'
 import { Redirect } from 'expo-router'
 
 const Dashboard = () => {
-  return <Redirect href="/(dashboard)/learning" />
+  return <Redirect href="/(dashboard)/training" />
   return (
     <View>
       <Text>Dashboard</Text>

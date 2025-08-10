@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { View } from 'react-native'
 import React from 'react'
-import IconButtonWithHaptic from './IconButtonWithHaptic'
-import { MUAY_WHITE, MUAY_PURPLE } from '@/constants/Colors'
+import { Button } from 'react-native-paper'
+import { MUAY_PURPLE } from '@/constants/Colors'
 
 type ModalFooterProps = {
   handleBack?: () => void
@@ -9,6 +9,7 @@ type ModalFooterProps = {
   handleDelete?: () => void
   isEdit?: boolean
   confirmText?: string
+  loading?: boolean
 }
 const ModalFooter: React.FC<ModalFooterProps> = (props) => {
   const {
@@ -17,90 +18,80 @@ const ModalFooter: React.FC<ModalFooterProps> = (props) => {
     isEdit,
     handleDelete = () => {},
     confirmText,
+    loading,
   } = props
+
   return (
     <View
-      className="flex-row justify-center gap-10 w-full items-center"
       style={{
-        display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 40,
         width: '100%',
         alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
       }}
     >
       {isEdit && (
-        <IconButtonWithHaptic onPress={handleBack || (() => {})} singleContent={true}>
-          <Text
-            className="trounded-lg px-7 py-2 bg-red-800 shadow w-[150px] text-center text-white"
-            style={{
-              borderRadius: 8,
-              padding: 14,
-              backgroundColor: '#ef4444',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
-              width: 150,
-              textAlign: 'center',
-              color: '#fff',
-            }}
-            onPress={handleDelete}
-          >
-            Delete
-          </Text>
-        </IconButtonWithHaptic>
-      )}
-      {!isEdit && (
-        <IconButtonWithHaptic onPress={handleBack || (() => {})} singleContent={true}>
-          <Text
-            className="trounded-lg px-7 py-2 bg-muay-white shadow w-[150px] text-center"
-            style={{
-              borderRadius: 8,
-              padding: 14,
-              backgroundColor: MUAY_WHITE,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
-              width: 150,
-              textAlign: 'center',
-            }}
-          >
-            Back
-          </Text>
-        </IconButtonWithHaptic>
+        <Button
+          mode="contained"
+          onPress={handleDelete}
+          disabled={loading}
+          buttonColor="#ef4444"
+          textColor="white"
+          style={{
+            minWidth: 150,
+            borderRadius: 8,
+          }}
+          contentStyle={{
+            paddingVertical: 4,
+          }}
+          loading={loading}
+        >
+          Delete
+        </Button>
       )}
 
-      <IconButtonWithHaptic onPress={handelConfirm} singleContent={true}>
-        <Text
-          className="trounded-lg px-8 py-2 font-700 text-[16px] bg-muay-purple text-muay-white shadow w-[150px] text-center shadow-black/60 shadowRadius"
+      {!isEdit && (
+        <Button
+          mode="outlined"
+          onPress={handleBack || (() => {})}
+          disabled={loading}
+          textColor={MUAY_PURPLE}
           style={{
+            minWidth: 150,
             borderRadius: 8,
-            padding: 16,
-            fontWeight: '700',
-            fontSize: 16,
-            backgroundColor: MUAY_PURPLE,
-            color: MUAY_WHITE,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-            width: 150,
-            textAlign: 'center',
+            borderColor: MUAY_PURPLE,
           }}
+          contentStyle={{
+            paddingVertical: 4,
+          }}
+          loading={loading}
         >
-          {confirmText || (isEdit ? 'Edit' : 'Add')}
-        </Text>
-      </IconButtonWithHaptic>
+          Back
+        </Button>
+      )}
+
+      <Button
+        mode="contained"
+        onPress={handelConfirm}
+        disabled={loading}
+        buttonColor={MUAY_PURPLE}
+        textColor="white"
+        style={{
+          minWidth: 150,
+          borderRadius: 8,
+        }}
+        contentStyle={{
+          paddingVertical: 4,
+        }}
+        loading={loading}
+      >
+        {confirmText || (isEdit ? 'Update' : 'Add')}
+      </Button>
     </View>
   )
 }
 
 export default ModalFooter
-
-const styles = StyleSheet.create({})

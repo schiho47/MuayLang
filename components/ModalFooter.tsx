@@ -1,7 +1,6 @@
-import { MUAY_PURPLE } from '@/constants/Colors'
+import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 import React from 'react'
-import { View } from 'react-native'
-import { Button } from 'react-native-paper'
+import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native'
 
 type ModalFooterProps = {
   handleBack?: () => void
@@ -22,74 +21,48 @@ const ModalFooter: React.FC<ModalFooterProps> = (props) => {
   } = props
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 40,
-        width: '100%',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-      }}
-    >
+    <View className="flex-row justify-center gap-10 w-full items-center p-4">
       {isEdit && (
-        <Button
-          mode="contained"
+        <TouchableOpacity
           onPress={handleDelete}
           disabled={loading}
-          buttonColor="#ef4444"
-          textColor="white"
-          style={{
-            minWidth: 150,
-            borderRadius: 8,
-          }}
-          contentStyle={{
-            paddingVertical: 4,
-          }}
-          loading={loading}
+          className={`min-w-[150px] rounded-lg bg-[#ef4444] p-4 items-center justify-center text-white font-bold text-lg ${loading ? 'opacity-60' : 'opacity-100'}`}
         >
-          Delete
-        </Button>
+          {loading ? (
+            <ActivityIndicator color={MUAY_WHITE} />
+          ) : (
+            <Text className="text-white font-bold text-lg">Delete</Text>
+          )}
+        </TouchableOpacity>
       )}
 
       {!isEdit && (
-        <Button
-          mode="outlined"
+        <TouchableOpacity
           onPress={handleBack || (() => {})}
           disabled={loading}
-          textColor={MUAY_PURPLE}
-          style={{
-            minWidth: 150,
-            borderRadius: 8,
-            borderColor: MUAY_PURPLE,
-          }}
-          contentStyle={{
-            paddingVertical: 4,
-          }}
-          loading={loading}
+          className={`min-w-[150px] rounded-lg bg-transparent border-2 border-muay-purple p-4 items-center justify-center text-muay-purple font-bold text-lg  ${loading ? 'opacity-60' : 'opacity-100'}`}
         >
-          Back
-        </Button>
+          {loading ? (
+            <ActivityIndicator color={MUAY_PURPLE} />
+          ) : (
+            <Text className="text-muay-purple font-bold text-lg">Back</Text>
+          )}
+        </TouchableOpacity>
       )}
 
-          {/* <Button
-            mode="contained"
-            onPress={handelConfirm}
-            disabled={loading}
-            buttonColor={MUAY_PURPLE}
-            textColor="white"
-            style={{
-              minWidth: 150,
-              borderRadius: 8,
-            }}
-            contentStyle={{
-              paddingVertical: 4,
-            }}
-            loading={loading}
-          >
+      <TouchableOpacity
+        onPress={handelConfirm}
+        disabled={loading}
+        className={`min-w-[150px] rounded-lg bg-muay-purple p-4 items-center justify-center text-white font-bold text-lg ${loading ? 'opacity-60' : 'opacity-100'}`}
+      >
+        {loading ? (
+          <ActivityIndicator color={MUAY_WHITE} />
+        ) : (
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
             {confirmText || (isEdit ? 'Update' : 'Add')}
-          </Button> */}
+          </Text>
+        )}
+      </TouchableOpacity>
     </View>
   )
 }

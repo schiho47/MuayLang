@@ -1,29 +1,35 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'
+import React from 'react'
+import { Alert, FlatList, StyleSheet, View } from 'react-native'
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors';
-import { Fonts } from '@/constants/theme';
+import ParallaxScrollView from '@/components/parallax-scroll-view'
+import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+import { IconSymbol } from '@/components/ui/icon-symbol'
+import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
+import { Fonts } from '@/constants/theme'
 
 // Learning components
-import Spacer from '../../components/Spacer';
 
 // Types and hooks
-import { VocabularyDataType } from '@/components/learning/type';
-import { useVocabularies } from '@/lib/learningAPI';
+import { VocabularyDataType } from '@/components/learning/type'
+import VocabularyCard from '@/components/learning/VocabularyCard'
+import { useVocabularies } from '@/lib/learningAPI'
+import { Divider, Spinner } from '@gluestack-ui/themed'
+import { router } from 'expo-router'
 
 export default function TabTwoScreen() {
-  const { data: vocabularies, isLoading } = useVocabularies();
+  const { data: vocabularies, isLoading } = useVocabularies()
 
   const handleAddingVocabulary = () => {
-    Alert.alert('Add Vocabulary', 'Add vocabulary functionality will be implemented');
-  };
+    router.push('/vocabulary/add')
+  }
+  console.log({ vocabularies })
 
-
+  const handleEditingVocabulary = (id: string) => {
+    router.push(`/vocabulary/edit/${id}`)
+    // Alert.alert('Edit Vocabulary', 'Edit vocabulary functionality will be implemented')
+  }
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: MUAY_PURPLE, dark: '#353636' }}
@@ -37,13 +43,12 @@ export default function TabTwoScreen() {
           </View>
           <IconSymbol name="book.fill" size={52} color={MUAY_WHITE} style={styles.bookIcon} />
         </View>
-      }>
-      
+      }
+    >
       {/* Learning Content */}
- 
 
       <ThemedView style={styles.vocabularyHeader}>
-        <ThemedText style={styles.vocabularyTitle}>Vocabulary</ThemedText>
+        {/* <ThemedText style={styles.vocabularyTitle}>Vocabulary</ThemedText> */}
         <View style={styles.actionButtons}>
           <Ionicons
             name="add-circle"
@@ -62,8 +67,8 @@ export default function TabTwoScreen() {
         </View>
       </ThemedView>
 
-      <Spacer />
-{/* 
+      <Divider mb={10} bgColor={MUAY_PURPLE} w="100%" h={1.5} />
+      {/* 
       {openFilterModal && (
         <FilterVocabularyDrawer
           visible={openFilterModal}
@@ -73,11 +78,11 @@ export default function TabTwoScreen() {
         />
       )} */}
 
-      {/* {isLoading && (
+      {isLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator animating={true} color={MUAY_PURPLE} size="large" />
+          <Spinner />
         </View>
-      )} */}
+      )}
 
       {!isLoading && (
         <FlatList
@@ -85,27 +90,29 @@ export default function TabTwoScreen() {
           horizontal
           showsHorizontalScrollIndicator={true}
           contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <ThemedText style={styles.emptyText}>No vocabulary data</ThemedText>
-          }
+          ListEmptyComponent={<ThemedText style={styles.emptyText}>No vocabulary data</ThemedText>}
           keyExtractor={(item: VocabularyDataType) => item.$id}
           renderItem={({ item }: { item: VocabularyDataType }) => (
-            <></>
-            // <VocabularyCard
-            //   id={item.$id}
-            //   thai={item[VocabularyFieldEnum.Thai]}
-            //   romanization={item[VocabularyFieldEnum.Romanization]}
-            //   english={item[VocabularyFieldEnum.English]}
-            //   tag={item[VocabularyFieldEnum.Tags]?.join(', ') || ''}
-            //   onPress={() => {
-            //     handleEditingVocabulary(item.$id);
-            //   }}
-            // />
+            <VocabularyCard
+              onPress={() => {
+                handleEditingVocabulary(item.$id)
+              }}
+              id={item.$id}
+              item={item}
+              // id={item.$id}
+              // thai={item[VocabularyFieldEnum.Thai]}
+              // romanization={item[VocabularyFieldEnum.Romanization]}
+              // english={item[VocabularyFieldEnum.English]}
+              // tag={item[VocabularyFieldEnum.Tags]?.join(', ') || ''}
+              // onPress={() => {
+              //   handleEditingVocabulary(item.$id);
+              // }}
+            />
           )}
         />
       )}
     </ParallaxScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -145,16 +152,15 @@ const styles = StyleSheet.create({
   },
   vocabularyHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 16,
   },
-  vocabularyTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#333',
-  },
+  // vocabularyTitle: {
+  //   fontSize: 24,
+  //   fontWeight: '600',
+  //   color: '#333',
+  // },
   actionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -179,4 +185,4 @@ const styles = StyleSheet.create({
     color: '#666',
     paddingVertical: 40,
   },
-});
+})

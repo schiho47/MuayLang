@@ -1,20 +1,20 @@
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { VocabularyDetailDataType, VocabularyFieldEnum, CheckModalError } from './type'
-import CustomURL from '../CustomURL'
-import Spacer from '../Spacer'
-
 import ExampleAndNote from './ExampleAndNote'
 import { router } from 'expo-router'
 import ModalFooter from '../ModalFooter'
-import { useAddVocabulary } from '../../lib/learningAPI'
+import { useAddVocabulary, useUpdateVocabulary } from '../../lib/learningAPI'
 import { validators } from '../../utils/validators'
-import DeleteDialog from '../DeleteDialog'
-import CustomInput from '../CustomInput'
-import CustomMultiSelect from '../CustomMultiSelect'
-import { updateVocabulary } from '@/lib/appwrite'
+
 import useGetTagList from '@/hooks/useGetTagList'
-import CustomAccordion from '../CustomAccordion'
+
+import FormInput from '../ui/input/FormInput'
+import URLReader from '../ui/URLReader'
+import { Divider } from '@gluestack-ui/themed'
+import MultiSelect from '../ui/select/MultiSelect'
+import FormAccordion from '../ui/accordion/FormAccordion'
+import DeleteModal from '../ui/modal/DeleteModal'
 
 type CheckErrorKey = keyof CheckModalError
 const isRequiredFields = [
@@ -32,12 +32,13 @@ type VocabularySettingProps = {
 }
 
 const VocabularySetting = (props: VocabularySettingProps) => {
-  const { handleBack, pageData, handleChangePageData, isEdit, handleDelete = () => {} } = props
+  const { handleBack, pageData, handleChangePageData, isEdit, handleDelete } = props
   const { tagsList } = useGetTagList()
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false)
 
   const { mutate: addVocabulary } = useAddVocabulary()
+  const { mutate: updateVocabularyMutation } = useUpdateVocabulary()
 
   const [checkError, setCheckError] = useState<CheckModalError>({
     [VocabularyFieldEnum.Thai]: { status: false, message: '' },
@@ -52,27 +53,33 @@ const VocabularySetting = (props: VocabularySettingProps) => {
     let isError = { status: false, message: '' }
 
     if (!value && isRequiredFields.includes(name)) {
-      isError = { status: true, message: '* This is a required field' }
+      isError = { status: true, message: 'This is a required field' }
     } else if (validators[name]) {
       const valid = validators[name].validate(value)
       isError = { status: !valid, message: valid ? '' : validators[name].message }
     }
 
     setCheckError((prev) => ({ ...prev, [name]: isError }))
-    handleChangePageData(value.toLowerCase(), name)
+    handleChangePageData(value, name)
   }
 
   const handleConfirm = () => {
     const newError = {} as CheckModalError
-    for (const key in pageData || {}) {
-      if (!pageData[key as keyof VocabularyDetailDataType]) {
-        newError[key as CheckErrorKey] = { status: true, message: '* This is a required field' }
+
+    // 只检查必填字段
+    isRequiredFields.forEach((field) => {
+      if (!pageData[field as keyof VocabularyDetailDataType]) {
+        newError[field as CheckErrorKey] = { status: true, message: 'This is a required field' }
       }
-    }
+    })
+
     setCheckError((prev) => ({ ...prev, ...newError }))
 
-    console.log({ pageData })
-    handleSaveData()
+    // 如果没有错误，保存数据
+    if (Object.keys(newError).length === 0) {
+      console.log({ pageData })
+      handleSaveData()
+    }
   }
 
   const handleSaveData = () => {
@@ -84,16 +91,38 @@ const VocabularySetting = (props: VocabularySettingProps) => {
       console.log('Updating vocabulary with ID:', pageData.$id)
       // 排除所有系統欄位（以 $ 開頭的欄位）
       const updateData = Object.fromEntries(
-        Object.entries(pageData).filter(([key]) => !key.startsWith('$'))
+        Object.entries(pageData)
+          .filter(([key]) => !key.startsWith('$'))
+          .filter(([key, value]) => {
+            // 如果是 URL 字段且为空字符串，过滤掉
+            if (key === 'url' && (!value || value === '')) {
+              return false
+            }
+            return true
+          }),
       )
-      updateVocabulary(pageData.$id, updateData, {
-        onSettled: () => handleBack(),
-      })
+      console.log('📝 Update data:', updateData)
+      updateVocabularyMutation(
+        { id: pageData.$id, data: updateData },
+        {
+          onSettled: () => handleBack(),
+        },
+      )
     } else {
-      // 新增時也要排除系統欄位
+      // 新增時也要排除系統欄位和空的 URL
       const createData = Object.fromEntries(
-        Object.entries(pageData).filter(([key]) => !key.startsWith('$'))
+        Object.entries(pageData)
+          .filter(([key]) => !key.startsWith('$'))
+          .filter(([key, value]) => {
+            // 如果是 URL 字段且为空字符串，过滤掉
+            if (key === 'url' && (!value || value === '')) {
+              return false
+            }
+            return true
+          }),
       )
+      console.log('📝 Create data to send:', createData)
+      console.log('📝 Full pageData:', pageData)
       addVocabulary(createData, {
         onSettled: () => handleBack(),
       })
@@ -102,19 +131,18 @@ const VocabularySetting = (props: VocabularySettingProps) => {
 
   const handleDeleteVocabulary = () => {
     setDeleteDialogVisible(true)
-    handleDelete()
+    handleDelete?.()
     handleBack()
   }
 
   return (
-    // <ScrollView className="flex-1 mt-5" style={{ marginTop: 20, width: '100%', marginLeft: 12 }}>
-    <KeyboardAvoidingView behavior="padding">
+    <>
       <ScrollView
         style={{ width: '100%', flexGrow: 1, marginTop: 20, marginLeft: 12 }}
         contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
       >
-        <CustomInput
+        <FormInput
           title={'Thai'}
           placeholder="Enter Thai"
           value={pageData?.thai}
@@ -124,7 +152,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
           errorMessage={checkError[VocabularyFieldEnum.Thai].message}
         />
 
-        <CustomInput
+        <FormInput
           title={'Romanization'}
           placeholder="Enter Romanization"
           value={pageData?.romanization}
@@ -134,7 +162,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
           errorMessage={checkError[VocabularyFieldEnum.Romanization].message}
         />
 
-        <CustomInput
+        <FormInput
           title={'English'}
           placeholder="Enter English"
           value={pageData?.english}
@@ -143,23 +171,27 @@ const VocabularySetting = (props: VocabularySettingProps) => {
           error={checkError[VocabularyFieldEnum.English].status}
           errorMessage={checkError[VocabularyFieldEnum.English].message}
         />
-        <CustomMultiSelect
+        <MultiSelect
           placeholder="Select or add tags (optional)"
           value={pageData?.tags}
           onChange={(value) => handleChangePageData(value, VocabularyFieldEnum.Tags)}
           item={tagsList || []}
           title="Tags"
         />
-        <CustomURL
+        <URLReader
           name={VocabularyFieldEnum.URL}
           value={pageData?.[VocabularyFieldEnum.URL]}
-          onChange={(value, name) => handleChange(value, name)}
+          onChange={(value, name) => handleChange(value, name as VocabularyFieldEnum)}
           error={checkError[VocabularyFieldEnum.URL].status}
           errorMessage={checkError[VocabularyFieldEnum.URL].message}
         />
-        <Spacer height={30} />
 
-        <CustomAccordion title={'Example Sentence And Note (optional)'}>
+        <Divider my={28} />
+
+        <FormAccordion
+          title={'Example Sentence And Note (optional)'}
+          defaultExpanded={!!(pageData?.exampleTH || pageData?.exampleEN || pageData?.note)}
+        >
           {
             <ExampleAndNote
               onChange={(value, name) => handleChange(value, name)}
@@ -171,36 +203,31 @@ const VocabularySetting = (props: VocabularySettingProps) => {
               }}
             />
           }
-        </CustomAccordion>
+        </FormAccordion>
 
-        <CustomAccordion title={'Push notification (optional)'}>
+        {/* <FormAccordion title={'Push notification (optional)'}>
           <View>
             <Text>Push notification settings will be implemented here</Text>
           </View>
-        </CustomAccordion>
+        </FormAccordion> */}
 
-        <Spacer height={20} />
-
-        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <ModalFooter
-            handleBack={() => {
-              router.back()
-            }}
-            handelConfirm={handleConfirm}
-            isEdit={isEdit}
-            handleDelete={() => {
-              console.log('delete')
-            }}
-          />
-        </View>
+        <ModalFooter
+          handleBack={() => {
+            router.back()
+          }}
+          handelConfirm={handleConfirm}
+          isEdit={isEdit}
+          handleDelete={() => {
+            handleDeleteVocabulary()
+          }}
+        />
       </ScrollView>
-      <DeleteDialog
+      <DeleteModal
         visible={deleteDialogVisible}
-        hideDialog={() => setDeleteDialogVisible(false)}
+        onClose={() => setDeleteDialogVisible(false)}
         handleDelete={handleDeleteVocabulary}
       />
-    </KeyboardAvoidingView>
-    // </ScrollView>
+    </>
   )
 }
 

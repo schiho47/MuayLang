@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { ToastAndroid } from 'react-native'
+import { Platform, ToastAndroid } from 'react-native'
 import { FilterDataType } from '../components/learning/type'
 import {
   createVocabulary,
@@ -9,6 +9,16 @@ import {
   getVocabularyById,
   updateVocabulary,
 } from './learningAppwrite'
+
+// 跨平台 Toast 函数
+const showToast = (message: string) => {
+  if (Platform.OS === 'android') {
+    ToastAndroid.show(message, ToastAndroid.SHORT)
+  } else {
+    // iOS 和 Web 使用 console.log 或 Alert
+    console.log(message)
+  }
+}
 
 export const useVocabularies = () => {
   return useQuery({
@@ -23,13 +33,13 @@ export const useAddVocabulary = (options?: { onSettled?: () => void }) => {
   return useMutation({
     mutationFn: createVocabulary,
     onSuccess: () => {
-      ToastAndroid.show('Saved successfully ✅', ToastAndroid.SHORT)
+      showToast('Saved successfully ✅')
       // 更新 vocabularies cache，讓列表自動刷新
       queryClient.invalidateQueries({ queryKey: ['vocabularies'] })
     },
     onError: (error) => {
       console.error('CreateVocabulary failed', error)
-      ToastAndroid.show('Failed to save ❌', ToastAndroid.SHORT)
+      showToast('Failed to save ❌')
     },
     onSettled: () => {
       options?.onSettled?.()
@@ -43,12 +53,12 @@ export const useUpdateVocabulary = (options?: { onSettled?: () => void }) => {
   return useMutation({
     mutationFn: updateVocabulary,
     onSuccess: () => {
-      ToastAndroid.show('Updated successfully ✅', ToastAndroid.SHORT)
+      showToast('Updated successfully ✅')
       queryClient.invalidateQueries({ queryKey: ['vocabularies'] })
     },
     onError: (error) => {
       console.error('UpdateVocabulary failed', error)
-      ToastAndroid.show('Failed to update ❌', ToastAndroid.SHORT)
+      showToast('Failed to update ❌')
     },
     onSettled: () => {
       options?.onSettled?.()
@@ -58,7 +68,7 @@ export const useUpdateVocabulary = (options?: { onSettled?: () => void }) => {
 
 export const useGetVocabularyById = (
   id: string,
-  options?: { enabled?: boolean; select?: (data: any) => any }
+  options?: { enabled?: boolean; select?: (data: any) => any },
 ) => {
   return useQuery({
     queryKey: ['vocabulary', id],
@@ -70,7 +80,7 @@ export const useGetVocabularyById = (
 // 這裡做到filter 回來會是空白tag沒辦法被過濾
 export const useGetVocabularyByFilter = (
   filter: FilterDataType,
-  options?: { onSettled?: () => void }
+  options?: { onSettled?: () => void },
 ) => {
   const query = useQuery({
     queryKey: ['vocabulary', filter],

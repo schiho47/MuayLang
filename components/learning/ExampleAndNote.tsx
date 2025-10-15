@@ -1,9 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { View } from 'react-native'
 import React from 'react'
 import { VocabularyFieldEnum } from './type'
-import CustomTextArea from '../CustomTextArea'
-import CustomURL from '../CustomURL'
-import CustomMultiSelect from '../CustomMultiSelect'
+import FormTextarea from '../ui/textarea/FormTextarea'
+
 type ExampleAndNoteProps = {
   onChange: (value: string, name: VocabularyFieldEnum) => void
   value: {
@@ -13,36 +12,35 @@ type ExampleAndNoteProps = {
     [VocabularyFieldEnum.URL]: string
   }
 }
+
 const ExampleAndNote: React.FC<ExampleAndNoteProps> = (props) => {
   const { onChange, value } = props
-  console.log({ value })
+
   return (
-    <View className="flex  justify-center items-center  h-[200px] mt-10 w-full">
-      <CustomTextArea
-        title={'Thai Sentence'}
+    <View style={{ width: '100%', alignItems: 'center' }}>
+      <FormTextarea
+        title="Thai Sentence"
         placeholder="Enter Thai Sentence"
-        // value={modalData.thai}
-        name={'exampleTH'}
+        name="exampleTH"
         value={value[VocabularyFieldEnum.ThaiExample]}
         onChange={onChange}
         error={false}
       />
 
-      <CustomTextArea
-        title={'English Sentence'}
+      <FormTextarea
+        title="English Sentence"
         placeholder="Enter English Sentence"
-        // value={modalData.thai}
-        name={'exampleEN'}
+        name="exampleEN"
         value={value[VocabularyFieldEnum.EnglishExample]}
         onChange={onChange}
         error={false}
       />
 
-      <CustomTextArea
-        title={'Note'}
-        placeholder={'Enter Note'}
+      <FormTextarea
+        title="Note"
+        placeholder="Enter Note"
+        name="note"
         value={value[VocabularyFieldEnum.Note]}
-        name={'note'}
         onChange={onChange}
         error={false}
       />
@@ -51,5 +49,3 @@ const ExampleAndNote: React.FC<ExampleAndNoteProps> = (props) => {
 }
 
 export default ExampleAndNote
-
-const styles = StyleSheet.create({})

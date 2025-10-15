@@ -1,112 +1,122 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import Overview from '@/components/training/Overview'
+import Session from '@/components/training/Session'
+import React from 'react'
+import { StyleSheet, View } from 'react-native'
+// @ts-ignore - types for components may not be bundled correctly
+import { Divider } from '@gluestack-ui/themed'
+import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
+import { Ionicons } from '@expo/vector-icons'
+import { useTraining } from '@/lib/trainingAPI'
+import { convertUTCToLocalString } from '@/utils/dateUtils'
+import { TrainingDataType } from '@/components/training/type'
+import ParallaxScrollView from '@/components/parallax-scroll-view'
+import { ThemedText } from '@/components/themed-text'
+import { ThemedView } from '@/components/themed-view'
+import { IconSymbol } from '@/components/ui/icon-symbol'
+import { router } from 'expo-router'
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function Training() {
+  const { data: training } = useTraining()
+  console.log({ training: training?.[0] })
 
-export default function TabTwoScreen() {
+  const handleAddingSection = () => {
+    router.push('/section/add')
+  }
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={{ light: MUAY_PURPLE, dark: '#353636' }}
+      headerOverflow="visible"
       headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+        <View style={styles.headerContainer}>
+          <View style={styles.textContainer}>
+            <ThemedText type="title" style={styles.headerIcon}>
+              มวยไทย
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
+          </View>
+          <IconSymbol name="figure.boxing" size={52} color={MUAY_WHITE} style={styles.boxingIcon} />
+        </View>
+      }
+    >
+      <ThemedView style={styles.trainingHeader}>
+        <View style={styles.actionButtons}>
+          <Ionicons
+            name="add-circle"
+            size={33}
+            color={MUAY_PURPLE}
+            onPress={handleAddingSection}
+            style={styles.actionIcon}
+          />
+        </View>
+      </ThemedView>
+      <Divider />
+      <Overview training={(training as unknown as TrainingDataType[]) || []} />
+      <Divider />
+      {training && training.length > 0 && (
+        <View>
+          {training.map((item: any) => (
+            <Session
+              key={item.$id}
+              sessionNumber={item.sessionNumber || 'Group'}
+              date={convertUTCToLocalString(item.date, 'yyyy-MM-dd')}
+              calories={String(item.calories)}
+              duration={String(item.duration)}
+              note={item.note}
+              photo={item.photos || []}
+              id={item.$id}
+            />
+          ))}
+        </View>
+      )}
+
+      {training && training.length === 0 && (
+        <ThemedView
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}
+        >
+          <ThemedText>No training sessions found</ThemedText>
+        </ThemedView>
+      )}
     </ParallaxScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
+  headerContainer: {
+    flex: 1,
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop: 40,
   },
-});
+  textContainer: {
+    flex: 1,
+  },
+  headerIcon: {
+    fontSize: 90,
+    lineHeight: 120,
+    fontWeight: 'bold',
+    color: MUAY_WHITE,
+    height: 100,
+    textAlign: 'center',
+  },
+  boxingIcon: {
+    position: 'absolute',
+    right: 24,
+    top: 50,
+  },
+  trainingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  actionIcon: {
+    padding: 4,
+  },
+})

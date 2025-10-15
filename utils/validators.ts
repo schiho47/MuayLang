@@ -1,4 +1,5 @@
 import { VocabularyFieldEnum } from '@/components/learning/type'
+import { TrainingFieldEnum } from '@/components/training/type'
 
 export function isAllThai(text: string): boolean {
   return /^[\u0E00-\u0E7F\s]+$/.test(text)
@@ -44,5 +45,19 @@ export const validators: Record<string, { validate: (v: string) => boolean; mess
   [VocabularyFieldEnum.URL]: {
     validate: isURL,
     message: 'Please enter a valid URL.',
+  },
+}
+
+export const trainingValidators: Record<
+  string,
+  { validate: (v: string) => boolean; message: string }
+> = {
+  [TrainingFieldEnum.Calories]: {
+    validate: isNumber,
+    message: 'Please enter a valid number.',
+  },
+  [TrainingFieldEnum.Duration]: {
+    validate: isNumber,
+    message: 'Please enter a valid number.',
   },
 }

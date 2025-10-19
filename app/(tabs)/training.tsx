@@ -64,6 +64,8 @@ export default function Training() {
               note={item.note}
               photo={item.photos || []}
               id={item.$id}
+              maxHeartRate={String(item.maxHeartRate || '-')}
+              avgHeartRate={String(item.avgHeartRate || '-')}
             />
           ))}
         </View>

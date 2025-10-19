@@ -60,4 +60,12 @@ export const trainingValidators: Record<
     validate: isNumber,
     message: 'Please enter a valid number.',
   },
+  [TrainingFieldEnum.MaxHeartRate]: {
+    validate: isNumber,
+    message: 'Please enter a valid number.',
+  },
+  [TrainingFieldEnum.AvgHeartRate]: {
+    validate: isNumber,
+    message: 'Please enter a valid number.',
+  },
 }

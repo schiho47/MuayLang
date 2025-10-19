@@ -8,16 +8,17 @@ type OverViewItemProps = {
   icon: string
   onPress?: () => void
   isClickable?: boolean
+  compact?: boolean
 }
 const OverViewItem = (props: OverViewItemProps) => {
-  const { title, description, icon, onPress, isClickable = false } = props
+  const { title, description, icon, onPress, isClickable = false, compact = false } = props
 
   const content = (
     <>
-      <Ionicons name={icon as any} color={MUAY_PURPLE} size={26} />
+      <Ionicons name={icon as any} color={MUAY_PURPLE} size={compact ? 18 : 26} />
       <Text
         className="text-muay-purple text-2xl font-bold"
-        style={{ fontSize: 24, textAlign: 'left', flex: 1 }}
+        style={{ fontSize: compact ? 12 : 24, textAlign: 'left', flex: 1 }}
       >
         {title}
       </Text>
@@ -25,10 +26,11 @@ const OverViewItem = (props: OverViewItemProps) => {
       <Text
         className="text-muay-purple text-2xl font-bold"
         style={{
-          fontSize: 24,
+          fontSize: compact ? 14 : 24,
           flex: 1,
           textAlign: 'right',
           opacity: isClickable ? 0.7 : 1,
+          fontWeight: 'bold',
         }}
       >
         {description}
@@ -41,14 +43,14 @@ const OverViewItem = (props: OverViewItemProps) => {
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
-        style={[styles.container, styles.clickable]}
+        style={[styles.container, styles.clickable, compact && { gap: 6, marginBottom: 6 }]}
       >
         {content}
       </TouchableOpacity>
     )
   }
 
-  return <View style={styles.container}>{content}</View>
+  return <View style={[styles.container, compact && { gap: 6, marginBottom: 6 }]}>{content}</View>
 }
 
 export default OverViewItem

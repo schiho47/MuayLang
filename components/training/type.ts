@@ -4,6 +4,8 @@ export enum TrainingFieldEnum {
   Calories = 'calories',
   Duration = 'duration',
   Note = 'note',
+  MaxHeartRate = 'maxHeartRate',
+  AvgHeartRate = 'avgHeartRate',
 }
 
 export type TrainingDataType = {
@@ -13,5 +15,7 @@ export type TrainingDataType = {
   note: string
   photos: string[]
   sessionNumber: string
+  maxHeartRate: number
+  avgHeartRate: number
   $id: string
 }

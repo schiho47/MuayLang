@@ -8,7 +8,7 @@ import {
 } from './traningAppwrite'
 import { Platform, ToastAndroid } from 'react-native'
 
-// 跨平台 Toast 函数
+// 跨平台 Toast 函數
 const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
@@ -18,10 +18,11 @@ const showToast = (message: string) => {
   }
 }
 
-export const useTraining = () => {
+export const useTraining = (userId?: string) => {
   return useQuery({
-    queryKey: ['training'],
-    queryFn: () => getTraining(),
+    queryKey: ['training', userId],
+    queryFn: () => getTraining(userId),
+    enabled: !!userId, // 只有在有 userId 時才執行查詢
   })
 }
 

@@ -17,28 +17,40 @@ type ChartType = 'calories' | 'maxHR' | 'avgHR'
 
 const Overview = (props: OverviewProps) => {
   const { training = [] } = props
-  const isPersonalTraining = training.filter((item) => item.sessionNumber)
+
+  const isPersonalTraining = training.filter((item) => +item.sessionNumber > 0)
+
+  const isExtraTraining = training.filter((item) => item.sessionNumber === 'Extra')
   const sessionTaken = isPersonalTraining.length
+  const extraSessionTaken = isExtraTraining.length
   const totalCalories = isPersonalTraining.reduce((acc, item) => +acc + +item.calories, 0)
   const totalDuration = isPersonalTraining.reduce((acc, item) => +acc + +item.duration, 0)
 
   const [isChartModalVisible, setIsChartModalVisible] = useState(false)
   const [chartType, setChartType] = useState<ChartType>('calories')
 
-  // 准备图表数据
-  const sortedTraining = [...isPersonalTraining].sort((a, b) => {
-    const sessionA = parseInt(String(a.sessionNumber)) || 0
-    const sessionB = parseInt(String(b.sessionNumber)) || 0
-    return sessionA - sessionB
+  // 合併所有訓練（PT + Extra）並按日期排序
+  const allTrainingSorted = [...training].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  )
+
+  // 為 Extra Session 添加編號
+  let extraCounter = 1
+  const trainingsWithLabels = allTrainingSorted.map((item) => {
+    if (+item.sessionNumber > 0) {
+      return { ...item, label: String(item.sessionNumber), isExtra: false }
+    } else {
+      return { ...item, label: `E${extraCounter++}`, isExtra: true }
+    }
   })
 
-  // 准备不同类型的图表数据
-  const caloriesData = sortedTraining.map((item) => Number(item.calories) || 0)
-  const maxHRData = sortedTraining.map((item) => Number(item.maxHeartRate) || 0)
-  const avgHRData = sortedTraining.map((item) => Number(item.avgHeartRate) || 0)
-  const sessionLabels = sortedTraining.map((item) => String(item.sessionNumber || '0'))
+  // 準備不同類型的圖表資料
+  const caloriesData = trainingsWithLabels.map((item) => Number(item.calories) || 0)
+  const maxHRData = trainingsWithLabels.map((item) => Number(item.maxHeartRate) || 0)
+  const avgHRData = trainingsWithLabels.map((item) => Number(item.avgHeartRate) || 0)
+  const sessionLabels = trainingsWithLabels.map((item) => item.label)
 
-  // 根据图表类型选择数据和配置
+  // 根據圖表類型選擇資料和配置
   const getChartConfig = () => {
     switch (chartType) {
       case 'calories':
@@ -68,10 +80,12 @@ const Overview = (props: OverviewProps) => {
   const config = getChartConfig()
   const currentData = config.data
 
-  // 添加边界点来控制 Y 轴，但不在 X 轴显示
+  // 添加邊界點來控制 Y 軸，但不在 X 軸顯示
   const allData =
-    sortedTraining.length > 0 ? [...currentData, config.boundaries[0], config.boundaries[1]] : [0]
-  const allLabels = sortedTraining.length > 0 ? [...sessionLabels, '', ''] : ['']
+    trainingsWithLabels.length > 0
+      ? [...currentData, config.boundaries[0], config.boundaries[1]]
+      : [0]
+  const allLabels = trainingsWithLabels.length > 0 ? [...sessionLabels, '', ''] : ['']
 
   const chartData = {
     labels: allLabels,
@@ -86,7 +100,7 @@ const Overview = (props: OverviewProps) => {
   }
 
   const screenWidth = Dimensions.get('window').width
-  // 计算图表宽度，如果数据点多则使用更宽的宽度支持横向滚动
+  // 計算圖表寬度，如果資料點多則使用更寬的寬度支援橫向滾動
   const chartWidth = Math.max(screenWidth - 70, currentData.length * 80)
 
   return (
@@ -104,10 +118,10 @@ const Overview = (props: OverviewProps) => {
           elevation: 3,
         }}
       >
-        {/* 曲线图 */}
-        {sortedTraining.length > 0 ? (
+        {/* 曲線圖 */}
+        {trainingsWithLabels.length > 0 ? (
           <View style={{ marginBottom: 16, marginTop: 16 }}>
-            {/* 图表切换按钮 */}
+            {/* 圖表切換按鈕 */}
             <View
               style={{
                 flexDirection: 'row',
@@ -186,12 +200,46 @@ const Overview = (props: OverviewProps) => {
                 fontSize: 16,
                 fontWeight: 'bold',
                 color: MUAY_PURPLE,
-                marginBottom: 8,
+                marginBottom: 4,
                 textAlign: 'center',
               }}
             >
               {config.title}
             </Text>
+
+            {/* 圖例 */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 16,
+                marginBottom: 12,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: MUAY_PURPLE,
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: '#666' }}>PT Session</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: '#f97316',
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: '#666' }}>Extra Session</Text>
+              </View>
+            </View>
+
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <TouchableOpacity onPress={() => setIsChartModalVisible(true)} activeOpacity={0.8}>
                 <LineChart
@@ -204,7 +252,7 @@ const Overview = (props: OverviewProps) => {
                   fromZero={false}
                   segments={5}
                   formatXLabel={(value) => {
-                    // 只显示非空的标签
+                    // 只顯示非空的標籤
                     return value || ''
                   }}
                   chartConfig={{
@@ -229,17 +277,21 @@ const Overview = (props: OverviewProps) => {
                     },
                   }}
                   getDotColor={(dataPoint, dataPointIndex) => {
-                    // 隐藏边界点
+                    // 隱藏邊界點
                     if (dataPointIndex >= currentData.length) {
                       return 'transparent'
                     }
-                    return MUAY_PURPLE
+                    // PT Session 紫色，Extra Session 橙色
+                    const item = trainingsWithLabels[dataPointIndex]
+                    return item?.isExtra ? '#f97316' : MUAY_PURPLE
                   }}
                   renderDotContent={({ x, y, index }) => {
-                    // 只显示实际数据点的数值，不显示边界点
+                    // 只顯示實際資料點的數值，不顯示邊界點
                     if (index >= currentData.length) {
                       return null
                     }
+                    const item = trainingsWithLabels[index]
+                    const dotColor = item?.isExtra ? '#f97316' : MUAY_PURPLE
                     return (
                       <Text
                         key={index}
@@ -249,7 +301,7 @@ const Overview = (props: OverviewProps) => {
                           top: y - 20,
                           fontSize: 10,
                           fontWeight: 'bold',
-                          color: MUAY_PURPLE,
+                          color: dotColor,
                           backgroundColor: 'rgba(255, 255, 255, 0.8)',
                           paddingHorizontal: 4,
                           paddingVertical: 2,
@@ -275,7 +327,7 @@ const Overview = (props: OverviewProps) => {
           </Text>
         )}
 
-        {/* 统计数据 - 缩小版 */}
+        {/* 統計資料 - 縮小版 */}
         <View
           style={{
             flexDirection: 'row',
@@ -312,22 +364,23 @@ const Overview = (props: OverviewProps) => {
           </View>
           <View style={{ width: '48%' }}>
             <OverViewItem
-              title="Next Session"
-              description={'2025-08-12'}
-              icon="calendar-outline"
+              title="Extra Session"
+              description={`${extraSessionTaken}`}
+              icon="add-circle-outline"
               compact={true}
             />
           </View>
         </View>
       </Box>
 
-      {/* 图表放大弹窗 */}
+      {/* 圖表放大彈窗 */}
       <ChartModal
         visible={isChartModalVisible}
         onClose={() => setIsChartModalVisible(false)}
         chartData={chartData}
         currentData={currentData}
         chartTitle={config.title}
+        trainingsWithLabels={trainingsWithLabels}
       />
     </View>
   )

@@ -10,7 +10,7 @@ import {
   updateVocabulary,
 } from './learningAppwrite'
 
-// 跨平台 Toast 函数
+// 跨平台 Toast 函數
 const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
@@ -20,10 +20,11 @@ const showToast = (message: string) => {
   }
 }
 
-export const useVocabularies = () => {
+export const useVocabularies = (userId?: string) => {
   return useQuery({
-    queryKey: ['vocabularies'],
-    queryFn: getAllVocabularies,
+    queryKey: ['vocabularies', userId],
+    queryFn: () => getAllVocabularies(userId),
+    enabled: !!userId, // 只有在有 userId 時才執行查詢
   })
 }
 
@@ -34,7 +35,7 @@ export const useAddVocabulary = (options?: { onSettled?: () => void }) => {
     mutationFn: createVocabulary,
     onSuccess: () => {
       showToast('Saved successfully ✅')
-      // 更新 vocabularies cache，讓列表自動刷新
+      // 更新 vocabularies cache，讓列表自動重新整理
       queryClient.invalidateQueries({ queryKey: ['vocabularies'] })
     },
     onError: (error) => {
@@ -80,11 +81,12 @@ export const useGetVocabularyById = (
 // 這裡做到filter 回來會是空白tag沒辦法被過濾
 export const useGetVocabularyByFilter = (
   filter: FilterDataType,
+  userId?: string,
   options?: { onSettled?: () => void },
 ) => {
   const query = useQuery({
-    queryKey: ['vocabulary', filter],
-    queryFn: () => getVocabularyByFilter(filter),
+    queryKey: ['vocabulary', filter, userId],
+    queryFn: () => getVocabularyByFilter(filter, userId),
     enabled: false,
   })
 

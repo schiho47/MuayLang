@@ -28,7 +28,7 @@ const MultiSelect = (props: MultiSelectProps) => {
   const [open, setOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
 
-  // 本地狀態管理選項，支持動態添加
+  // 本地狀態管理選項，支援動態添加
   const [localItems, setLocalItems] = useState<{ label: string; value: string }[]>(
     originalItem || [],
   )
@@ -44,10 +44,10 @@ const MultiSelect = (props: MultiSelectProps) => {
     )
   }, [localItems, searchText])
 
-  // 當父組件的 item 變化時，更新本地 items（但保留新添加的選項）
+  // 當父元件的 item 變化時，更新本地 items（但保留新添加的選項）
   useEffect(() => {
     if (originalItem && originalItem.length > 0) {
-      // 合併父組件的選項和本地新添加的選項
+      // 合併父元件的選項和本地新添加的選項
       const existingValues = new Set(originalItem.map((item) => item.value))
       const newItems = localItems.filter((item) => !existingValues.has(item.value))
       setLocalItems([...originalItem, ...newItems])
@@ -55,7 +55,7 @@ const MultiSelect = (props: MultiSelectProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalItem])
 
-  // 當父組件的 value 變化時，更新本地 value
+  // 當父元件的 value 變化時，更新本地 value
   useEffect(() => {
     if (originalValue && JSON.stringify(originalValue) !== JSON.stringify(localValue)) {
       setLocalValue(originalValue)

@@ -8,6 +8,7 @@ import { useAddVocabulary, useUpdateVocabulary } from '../../lib/learningAPI'
 import { validators } from '../../utils/validators'
 
 import useGetTagList from '@/hooks/useGetTagList'
+import { useUser } from '@/hooks/useUser'
 
 import FormInput from '../ui/input/FormInput'
 import URLReader from '../ui/URLReader'
@@ -15,6 +16,7 @@ import { Divider } from '@gluestack-ui/themed'
 import MultiSelect from '../ui/select/MultiSelect'
 import FormAccordion from '../ui/accordion/FormAccordion'
 import DeleteModal from '../ui/modal/DeleteModal'
+import LoadingOverlay from '../ui/LoadingOverlay'
 
 type CheckErrorKey = keyof CheckModalError
 const isRequiredFields = [
@@ -34,8 +36,10 @@ type VocabularySettingProps = {
 const VocabularySetting = (props: VocabularySettingProps) => {
   const { handleBack, pageData, handleChangePageData, isEdit, handleDelete } = props
   const { tagsList } = useGetTagList()
+  const { user } = useUser()
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const { mutate: addVocabulary } = useAddVocabulary()
   const { mutate: updateVocabularyMutation } = useUpdateVocabulary()
@@ -66,7 +70,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
   const handleConfirm = () => {
     const newError = {} as CheckModalError
 
-    // 只检查必填字段
+    // 只檢查必填欄位
     isRequiredFields.forEach((field) => {
       if (!pageData[field as keyof VocabularyDetailDataType]) {
         newError[field as CheckErrorKey] = { status: true, message: 'This is a required field' }
@@ -75,7 +79,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
 
     setCheckError((prev) => ({ ...prev, ...newError }))
 
-    // 如果没有错误，保存数据
+    // 如果沒有錯誤，儲存資料
     if (Object.keys(newError).length === 0) {
       console.log({ pageData })
       handleSaveData()
@@ -83,9 +87,12 @@ const VocabularySetting = (props: VocabularySettingProps) => {
   }
 
   const handleSaveData = () => {
+    setIsSaving(true)
+
     if (isEdit) {
       if (!pageData.$id) {
         console.error('No vocabulary ID provided for update')
+        setIsSaving(false)
         return
       }
       console.log('Updating vocabulary with ID:', pageData.$id)
@@ -94,7 +101,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         Object.entries(pageData)
           .filter(([key]) => !key.startsWith('$'))
           .filter(([key, value]) => {
-            // 如果是 URL 字段且为空字符串，过滤掉
+            // 如果是 URL 欄位且為空字串，過濾掉
             if (key === 'url' && (!value || value === '')) {
               return false
             }
@@ -105,26 +112,39 @@ const VocabularySetting = (props: VocabularySettingProps) => {
       updateVocabularyMutation(
         { id: pageData.$id, data: updateData },
         {
-          onSettled: () => handleBack(),
+          onSettled: () => {
+            setIsSaving(false)
+            handleBack()
+          },
         },
       )
     } else {
-      // 新增時也要排除系統欄位和空的 URL
+      // 新增時也要排除系統欄位和空的 URL，並添加 userId
       const createData = Object.fromEntries(
         Object.entries(pageData)
           .filter(([key]) => !key.startsWith('$'))
           .filter(([key, value]) => {
-            // 如果是 URL 字段且为空字符串，过滤掉
+            // 如果是 URL 欄位且為空字串，過濾掉
             if (key === 'url' && (!value || value === '')) {
               return false
             }
             return true
           }),
       )
-      console.log('📝 Create data to send:', createData)
+
+      // 新增 userId
+      const dataWithUserId = {
+        ...createData,
+        userId: user?.$id,
+      }
+
+      console.log('📝 Create data to send:', dataWithUserId)
       console.log('📝 Full pageData:', pageData)
-      addVocabulary(createData, {
-        onSettled: () => handleBack(),
+      addVocabulary(dataWithUserId, {
+        onSettled: () => {
+          setIsSaving(false)
+          handleBack()
+        },
       })
     }
   }
@@ -226,6 +246,11 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         visible={deleteDialogVisible}
         onClose={() => setDeleteDialogVisible(false)}
         handleDelete={handleDeleteVocabulary}
+      />
+
+      <LoadingOverlay
+        visible={isSaving}
+        message={isEdit ? 'Updating vocabulary...' : 'Creating vocabulary...'}
       />
     </>
   )

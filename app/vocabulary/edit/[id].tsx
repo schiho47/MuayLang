@@ -23,7 +23,7 @@ const EditVocabulary = () => {
     select: (data: any) => {
       // 明確提取我們需要的欄位，包括 $id 用於更新操作
       return {
-        $id: data.$id, // 保留 $id 用於更新時的文檔識別
+        $id: data.$id, // 保留 $id 用於更新時的文件識別
         thai: data.thai || '',
         romanization: data.romanization || '',
         english: data.english || '',

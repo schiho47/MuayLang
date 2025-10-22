@@ -32,7 +32,7 @@ const Session = (props: SessionProps) => {
     avgHeartRate = '-',
   } = props
 
-  // 确保 photo 是数组
+  // 確保 photo 是陣列
   const photoArray = Array.isArray(photo) ? photo : photo ? [photo] : []
 
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)

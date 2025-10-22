@@ -81,7 +81,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
   }
 
   const handleTextChange = (text: string) => {
-    // 只允许输入数字
+    // 只允許輸入數字
     const numericText = text.replace(/[^0-9]/g, '')
     onChange(numericText, name)
   }
@@ -145,7 +145,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
             </Text>
           )}
 
-          {/* 上下箭头按钮组 - 共享边框，像 iOS 原生 */}
+          {/* 上下箭頭按鈕組 - 共享邊框，像 iOS 原生 */}
           <View
             style={{
               borderWidth: 1,

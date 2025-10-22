@@ -1,12 +1,13 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 // @ts-ignore - types for components may not be bundled correctly
 import { Box, Divider } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
-import { VocabularyDataType } from './type'
+import { VocabularyDataType, VocabularyFieldEnum } from './type'
 import useSpeech from './useSpeech'
+import { useUpdateVocabulary } from '@/lib/learningAPI'
 
 type VocabularyCardPropsType = {
   item: VocabularyDataType
@@ -19,10 +20,30 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
   const { item, onPress = () => {}, id = 'id', isLoading = false } = props
   const { thai, romanization, english, exampleTH, exampleEN } = item
   const { speak } = useSpeech()
+  const { mutate: updateVocabulary } = useUpdateVocabulary()
+
+  const [isFavorite, setIsFavorite] = useState(item[VocabularyFieldEnum.Favorite] || false)
+
+  // 同步 favorite 狀態
+  useEffect(() => {
+    setIsFavorite(item[VocabularyFieldEnum.Favorite] || false)
+  }, [item])
 
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text)
     console.log('Copied to clipboard:', text)
+  }
+
+  const toggleFavorite = (e: any) => {
+    e.stopPropagation() // 防止觸發卡片的 onPress
+    const newFavoriteState = !isFavorite
+    setIsFavorite(newFavoriteState)
+
+    // 更新資料庫
+    updateVocabulary({
+      id: item.$id,
+      data: { favorite: newFavoriteState },
+    })
   }
 
   return (
@@ -39,10 +60,29 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
         elevation: 5,
         padding: 16,
         marginBottom: 24,
-        // justifyContent: 'center',
-        // alignItems: 'center',
+        position: 'relative',
       }}
     >
+      {/* 收藏按钮 - 右上角 */}
+      {!isLoading && (
+        <TouchableOpacity
+          onPress={toggleFavorite}
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 10,
+            padding: 4,
+          }}
+        >
+          <Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={28}
+            color={isFavorite ? '#ef4444' : MUAY_PURPLE}
+          />
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity onPress={() => onPress(id)} style={{ width: '100%' }}>
         <View style={{ width: '100%' }}>
           {isLoading ? (

@@ -28,7 +28,7 @@ const BigImageModal = (props: BigImageModalProps) => {
   useEffect(() => {
     if (visible && initialIndex !== undefined) {
       setCurrentIndex(initialIndex)
-      // 延迟滚动，确保 Modal 已完全显示
+      // 延遲滾動，確保 Modal 已完全顯示
       setTimeout(() => {
         flatListRef.current?.scrollToIndex({ index: initialIndex, animated: false })
       }, 100)

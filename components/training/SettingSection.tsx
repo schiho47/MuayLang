@@ -7,6 +7,7 @@ import FormTextarea from '../ui/textarea/FormTextarea'
 import FormDatePicker from '../ui/datepicker/FormDatePicker'
 import PhotoUploader from '../PhotoUploader'
 import ModalFooter from '../ModalFooter'
+import LoadingOverlay from '../ui/LoadingOverlay'
 import { router } from 'expo-router'
 import { uploadPhoto } from '@/utils/photos'
 import { TrainingFieldEnum } from './type'
@@ -14,6 +15,7 @@ import { CheckModalError } from '../learning/type'
 import { trainingValidators } from '@/utils/validators'
 import { useDeleteTraining } from '@/lib/trainingAPI'
 import { MUAY_PURPLE } from '@/constants/Colors'
+import { useUser } from '@/hooks/useUser'
 
 type SettingSectionProps = {
   handleConfirmApi: (pageData: any) => void
@@ -42,10 +44,12 @@ const isRequiredFields = [
 
 const SettingSection = (props: SettingSectionProps) => {
   const { handleConfirmApi, isEdit = false, pageData: originalPageData, isPending } = props
+  const { user } = useUser()
 
   const [pageData, setPageData] = useState(initialPageData)
+  const [isSaving, setIsSaving] = useState(false)
   const { mutateAsync: deleteTraining, isPending: isDeleting } = useDeleteTraining()
-  // 清理 Appwrite 文檔數據，移除內部屬性
+  // 清理 Appwrite 文件資料，移除內部屬性
   const cleanAppwriteData = (data: any) => {
     if (!data) return initialPageData
 
@@ -84,7 +88,7 @@ const SettingSection = (props: SettingSectionProps) => {
     const updatedPageData = { ...pageData, [name]: value }
     setPageData(updatedPageData)
 
-    // 检查平均心率不能大于最大心率
+    // 檢查平均心率不能大於最大心率
     if (name === TrainingFieldEnum.AvgHeartRate || name === TrainingFieldEnum.MaxHeartRate) {
       const avgHR =
         name === TrainingFieldEnum.AvgHeartRate
@@ -104,7 +108,7 @@ const SettingSection = (props: SettingSectionProps) => {
           },
         }))
       } else {
-        // 清除平均心率的错误（如果之前有）
+        // 清除平均心率的錯誤（如果之前有）
         if (
           error[TrainingFieldEnum.AvgHeartRate].message === 'Avg HR cannot be greater than Max HR'
         ) {
@@ -127,7 +131,7 @@ const SettingSection = (props: SettingSectionProps) => {
       }
     }
 
-    // 检查平均心率不能大于最大心率
+    // 檢查平均心率不能大於最大心率
     const avgHR = parseInt(pageData.avgHeartRate) || 0
     const maxHR = parseInt(pageData.maxHeartRate) || 0
     if (avgHR > 0 && maxHR > 0 && avgHR > maxHR) {
@@ -149,29 +153,40 @@ const SettingSection = (props: SettingSectionProps) => {
   }
 
   const handleSaveData = async () => {
-    if (pageData.photos.length > 0) {
-      // 分離新上傳的照片（本地 URI）和已存在的照片（Appwrite 文件 ID）
-      const newPhotos = pageData.photos.filter(
-        (photo: string) => photo.startsWith('file://') || photo.startsWith('content://'),
-      )
-      const existingPhotos = pageData.photos.filter(
-        (photo: string) => !photo.startsWith('file://') && !photo.startsWith('content://'),
-      )
+    setIsSaving(true)
 
-      // 只上傳新的照片
-      const newFileIds =
-        newPhotos.length > 0
-          ? await Promise.all(newPhotos.map((photo: string) => uploadPhoto(photo)))
-          : []
+    try {
+      // 準備數據並添加 userId（僅在創建時）
+      const dataToSave = isEdit ? pageData : { ...pageData, userId: user?.$id }
 
-      // 合併已存在的照片 ID 和新上傳的照片 ID
-      const allFileIds = [...existingPhotos, ...newFileIds]
+      if (pageData.photos.length > 0) {
+        // 分離新上傳的照片（本地 URI）和已存在的照片（Appwrite 檔案 ID）
+        const newPhotos = pageData.photos.filter(
+          (photo: string) => photo.startsWith('file://') || photo.startsWith('content://'),
+        )
+        const existingPhotos = pageData.photos.filter(
+          (photo: string) => !photo.startsWith('file://') && !photo.startsWith('content://'),
+        )
 
-      await handleConfirmApi({ ...pageData, photos: allFileIds })
+        // 只上傳新的照片
+        const newFileIds =
+          newPhotos.length > 0
+            ? await Promise.all(newPhotos.map((photo: string) => uploadPhoto(photo)))
+            : []
+
+        // 合併已存在的照片 ID 和新上傳的照片 ID
+        const allFileIds = [...existingPhotos, ...newFileIds]
+
+        await handleConfirmApi({ ...dataToSave, photos: allFileIds })
+      } else {
+        await handleConfirmApi(dataToSave)
+      }
+
       router.back()
-    } else {
-      await handleConfirmApi(pageData)
-      router.back()
+    } catch (error) {
+      console.error('Save failed:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -246,7 +261,7 @@ const SettingSection = (props: SettingSectionProps) => {
               suffix="min"
             />
 
-            {/* 心率字段 - 并排显示 */}
+            {/* 心率欄位 - 並排顯示 */}
             <View
               style={{
                 flexDirection: 'row',
@@ -318,6 +333,11 @@ const SettingSection = (props: SettingSectionProps) => {
           </View>
         </KeyboardAvoidingView>
       )}
+
+      <LoadingOverlay
+        visible={isSaving}
+        message={isEdit ? 'Updating training...' : 'Creating training...'}
+      />
     </View>
   )
 }

@@ -7,6 +7,7 @@ export enum VocabularyFieldEnum {
   Note = 'note',
   URL = 'url',
   Tags = 'tags',
+  Favorite = 'favorite',
 }
 
 export type VocabularyDetailDataType = {
@@ -19,6 +20,7 @@ export type VocabularyDetailDataType = {
   [VocabularyFieldEnum.Note]: string
   [VocabularyFieldEnum.URL]: string
   [VocabularyFieldEnum.Tags]: string[]
+  [VocabularyFieldEnum.Favorite]?: boolean
 }
 
 export interface VocabularyDataType extends VocabularyDetailDataType {
@@ -36,7 +38,8 @@ export type CheckModalError = {
 }
 
 export type FilterDataType = {
-  vocabulary: string
-  createdAt: string
-  tag: string
+  vocabulary: string | string[]
+  createdAt: string[]
+  tags: string[]
+  favorite?: boolean
 }

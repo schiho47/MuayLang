@@ -26,6 +26,7 @@ type ChartModalProps = {
   }
   currentData: number[]
   chartTitle: string
+  trainingsWithLabels?: any[]
 }
 
 const ChartModal: React.FC<ChartModalProps> = ({
@@ -34,13 +35,14 @@ const ChartModal: React.FC<ChartModalProps> = ({
   chartData,
   currentData,
   chartTitle,
+  trainingsWithLabels = [],
 }) => {
   const { width, height } = useWindowDimensions()
 
-  // 判断是否横屏
+  // 判斷是否橫屏
   const isLandscape = width > height
 
-  // 根据屏幕方向调整图表尺寸
+  // 根據螢幕方向調整圖表尺寸
   const chartWidth = isLandscape
     ? Math.max(width - 100, currentData.length * 120)
     : Math.max(width - 40, currentData.length * 100)
@@ -76,12 +78,46 @@ const ChartModal: React.FC<ChartModalProps> = ({
                 fontSize: isLandscape ? 16 : 20,
                 fontWeight: 'bold',
                 color: MUAY_WHITE,
-                marginBottom: isLandscape ? 10 : 20,
+                marginBottom: 8,
                 textAlign: 'center',
               }}
             >
               {chartTitle}
             </Text>
+
+            {/* 图例 */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 16,
+                marginBottom: isLandscape ? 10 : 20,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: MUAY_PURPLE,
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: MUAY_WHITE }}>PT</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: '#f97316',
+                  }}
+                />
+                <Text style={{ fontSize: 11, color: MUAY_WHITE }}>Extra</Text>
+              </View>
+            </View>
+
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={true}
@@ -122,17 +158,21 @@ const ChartModal: React.FC<ChartModalProps> = ({
                     },
                   }}
                   getDotColor={(dataPoint, dataPointIndex) => {
-                    // 隐藏边界点
+                    // 隱藏邊界點
                     if (dataPointIndex >= currentData.length) {
                       return 'transparent'
                     }
-                    return MUAY_PURPLE
+                    // PT Session 紫色，Extra Session 橙色
+                    const item = trainingsWithLabels[dataPointIndex]
+                    return item?.isExtra ? '#f97316' : MUAY_PURPLE
                   }}
                   renderDotContent={({ x, y, index }) => {
-                    // 只显示实际数据点的数值，不显示边界点
+                    // 只顯示實際資料點的數值，不顯示邊界點
                     if (index >= currentData.length) {
                       return null
                     }
+                    const item = trainingsWithLabels[index]
+                    const dotColor = item?.isExtra ? '#f97316' : MUAY_PURPLE
                     return (
                       <Text
                         key={index}
@@ -143,7 +183,9 @@ const ChartModal: React.FC<ChartModalProps> = ({
                           fontSize: 14,
                           fontWeight: 'bold',
                           color: MUAY_WHITE,
-                          backgroundColor: 'rgba(107, 55, 137, 0.8)',
+                          backgroundColor: item?.isExtra
+                            ? 'rgba(249, 115, 22, 0.8)'
+                            : 'rgba(107, 55, 137, 0.8)',
                           paddingHorizontal: 6,
                           paddingVertical: 3,
                           borderRadius: 4,

@@ -14,9 +14,11 @@ import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { IconSymbol } from '@/components/ui/icon-symbol'
 import { router } from 'expo-router'
+import { useUser } from '@/hooks/useUser'
 
 export default function Training() {
-  const { data: training } = useTraining()
+  const { user } = useUser()
+  const { data: training } = useTraining(user?.$id)
   console.log({ training: training?.[0] })
 
   const handleAddingSection = () => {

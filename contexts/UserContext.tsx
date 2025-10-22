@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react'
 import { account } from '../lib/appwrite'
 import { router } from 'expo-router'
+import { Platform } from 'react-native'
 
 type User = {
   $id: string
@@ -50,7 +51,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       await account.createEmailPasswordSession(email, password)
       const currentUser = await account.get()
       setUser(currentUser as any)
-      router.replace('/(tabs)/')
+      router.replace('/(tabs)/' as any)
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -70,14 +71,19 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       try {
         // Appwrite 的驗證郵件會發送到用戶的 email
         // 需要配置驗證成功後的重定向 URL
-        await account.createVerification('exp://localhost:8081')
+        const verificationUrl =
+          Platform.OS === 'web'
+            ? `${typeof window !== 'undefined' ? window.location.origin : 'https://muaylang.vercel.app'}/verify`
+            : 'exp://localhost:8081'
+
+        await account.createVerification(verificationUrl)
         console.log('✅ Verification email sent')
       } catch (verifyError) {
         console.error('❌ Failed to send verification email:', verifyError)
         // 不阻止註冊流程，只是記錄錯誤
       }
 
-      router.replace('/(tabs)/')
+      router.replace('/(tabs)/' as any)
     } catch (error) {
       console.error('Register error:', error)
       throw error
@@ -88,7 +94,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     try {
       await account.deleteSession('current')
       setUser(null)
-      router.replace('/(auth)/')
+      router.replace('/(auth)/' as any)
     } catch (error) {
       console.error('Logout error:', error)
       throw error
@@ -97,7 +103,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const resendVerification = async () => {
     try {
-      await account.createVerification('exp://localhost:8081')
+      const verificationUrl =
+        Platform.OS === 'web'
+          ? `${typeof window !== 'undefined' ? window.location.origin : 'https://muaylang.vercel.app'}/verify`
+          : 'exp://localhost:8081'
+
+      await account.createVerification(verificationUrl)
       console.log('✅ Verification email resent')
     } catch (error) {
       console.error('❌ Failed to resend verification email:', error)

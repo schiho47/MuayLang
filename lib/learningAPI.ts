@@ -25,6 +25,7 @@ export const useVocabularies = (userId?: string) => {
     queryKey: ['vocabularies', userId],
     queryFn: () => getAllVocabularies(userId),
     enabled: !!userId, // 只有在有 userId 時才執行查詢
+    retry: false, // 不要自動重試，避免多次失敗請求
   })
 }
 

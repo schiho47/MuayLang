@@ -2,9 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useVocabularies } from '@/lib/learningAPI'
 import { useMemo } from 'react'
+import { useUser } from './useUser'
 
 const useGetTagList = (includeAll = false) => {
-  const { data: vocabularies, isLoading, refetch } = useVocabularies()
+  const { user } = useUser()
+  const { data: vocabularies, isLoading, refetch } = useVocabularies(user?.$id)
 
   const tagsList = useMemo(() => {
     if (!vocabularies) return []

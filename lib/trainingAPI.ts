@@ -23,6 +23,7 @@ export const useTraining = (userId?: string) => {
     queryKey: ['training', userId],
     queryFn: () => getTraining(userId),
     enabled: !!userId, // 只有在有 userId 時才執行查詢
+    retry: false, // 不要自動重試，避免多次失敗請求
   })
 }
 
@@ -67,6 +68,8 @@ export const useGetTrainingById = (id: string) => {
   return useQuery({
     queryKey: ['training', id],
     queryFn: () => getTrainingById(id),
+    enabled: !!id, // 只有在有 id 時才執行查詢
+    retry: false, // 不要自動重試，避免多次失敗請求
   })
 }
 

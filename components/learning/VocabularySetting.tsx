@@ -35,7 +35,7 @@ type VocabularySettingProps = {
 
 const VocabularySetting = (props: VocabularySettingProps) => {
   const { handleBack, pageData, handleChangePageData, isEdit, handleDelete } = props
-  const { tagsList } = useGetTagList()
+  const { tagsList, refetch: refetchTags, addLocalTag, clearLocalTags } = useGetTagList()
   const { user } = useUser()
 
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false)
@@ -114,6 +114,10 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         {
           onSettled: () => {
             setIsSaving(false)
+            // 清除本地 tag，因为已经保存到数据库了
+            clearLocalTags()
+            // 重新获取 tag 列表，确保新添加的 tag 会显示
+            refetchTags()
             handleBack()
           },
         },
@@ -143,6 +147,10 @@ const VocabularySetting = (props: VocabularySettingProps) => {
       addVocabulary(dataWithUserId, {
         onSettled: () => {
           setIsSaving(false)
+          // 清除本地 tag，因为已经保存到数据库了
+          clearLocalTags()
+          // 重新获取 tag 列表，确保新添加的 tag 会显示
+          refetchTags()
           handleBack()
         },
       })
@@ -197,6 +205,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
           onChange={(value) => handleChangePageData(value, VocabularyFieldEnum.Tags)}
           item={tagsList || []}
           title="Tags"
+          onAddNewTag={addLocalTag}
         />
         <URLReader
           name={VocabularyFieldEnum.URL}

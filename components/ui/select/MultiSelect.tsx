@@ -13,6 +13,7 @@ type MultiSelectProps = {
   title?: string
   error?: boolean
   errorMessage?: string
+  onAddNewTag?: (tag: string) => void
 }
 
 const MultiSelect = (props: MultiSelectProps) => {
@@ -24,6 +25,7 @@ const MultiSelect = (props: MultiSelectProps) => {
     title,
     error = false,
     errorMessage,
+    onAddNewTag,
   } = props
   const [open, setOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
@@ -51,6 +53,11 @@ const MultiSelect = (props: MultiSelectProps) => {
       const existingValues = new Set(originalItem.map((item) => item.value))
       const newItems = localItems.filter((item) => !existingValues.has(item.value))
       setLocalItems([...originalItem, ...newItems])
+    } else if (originalItem && originalItem.length === 0) {
+      // 如果父元件傳入空陣列，也要保留本地新添加的選項
+      const existingValues = new Set(originalItem.map((item) => item.value))
+      const newItems = localItems.filter((item) => !existingValues.has(item.value))
+      setLocalItems([...originalItem, ...newItems])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalItem])
@@ -75,6 +82,27 @@ const MultiSelect = (props: MultiSelectProps) => {
     const newValue = localValue.filter((v) => v !== value)
     setLocalValue(newValue)
     onChange(newValue)
+  }
+
+  const addNewItem = () => {
+    if (
+      searchText.trim() &&
+      !localItems.some((item) => item.label.toLowerCase() === searchText.toLowerCase())
+    ) {
+      const newItem = {
+        label: searchText.trim(),
+        value: searchText.trim().toLowerCase().replace(/\s+/g, '-'), // 转换为 URL 友好的格式
+      }
+      setLocalItems((prev) => [...prev, newItem])
+      toggleSelection(newItem.value)
+
+      // 通知父组件添加了新 tag
+      if (onAddNewTag) {
+        onAddNewTag(searchText.trim())
+      }
+
+      setSearchText('')
+    }
   }
 
   const getSelectedLabels = () => {
@@ -194,9 +222,10 @@ const MultiSelect = (props: MultiSelectProps) => {
               >
                 <Ionicons name="search" size={20} color="#999" />
                 <TextInput
-                  placeholder="Search..."
+                  placeholder="Search or add new tag..."
                   value={searchText}
                   onChangeText={setSearchText}
+                  onSubmitEditing={addNewItem}
                   style={{
                     flex: 1,
                     padding: 8,
@@ -215,6 +244,33 @@ const MultiSelect = (props: MultiSelectProps) => {
 
             {/* 選項列表 */}
             <ScrollView style={{ maxHeight: 400 }}>
+              {/* 如果有搜索文本且没有匹配项，显示添加新选项 */}
+              {searchText.trim() && filteredItems.length === 0 && (
+                <TouchableOpacity
+                  onPress={addNewItem}
+                  style={{
+                    padding: 12,
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#f0f0f0',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#f8f9fa',
+                  }}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color={MUAY_PURPLE} />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: MUAY_PURPLE,
+                      fontWeight: '500',
+                      marginLeft: 8,
+                    }}
+                  >
+                    Add &ldquo;{searchText.trim()}&rdquo;
+                  </Text>
+                </TouchableOpacity>
+              )}
+
               {filteredItems.map((item) => (
                 <TouchableOpacity
                   key={item.value}

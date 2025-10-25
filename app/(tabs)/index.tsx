@@ -13,7 +13,7 @@ import { useTraining } from '@/lib/trainingAPI'
 import { VocabularyDataType, VocabularyFieldEnum } from '@/components/learning/type'
 import VocabularyCard from '@/components/learning/VocabularyCard'
 import { useUser } from '../../hooks/useUser'
-import EmailVerificationBanner from '@/components/auth/EmailVerificationBanner'
+import EmailVerificationBanner from '../../components/auth/EmailVerificationBanner'
 // @ts-ignore - types for components may not be bundled correctly
 import { Divider, Spinner, Box } from '@gluestack-ui/themed'
 

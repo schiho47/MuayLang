@@ -7,6 +7,7 @@ import { getPhotoUrl } from '@/utils/photos'
 import BigImageModal from './BigImageModal'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import { router } from 'expo-router'
+import { useUser } from '@/hooks/useUser'
 
 type SessionProps = {
   sessionNumber: string
@@ -32,7 +33,9 @@ const Session = (props: SessionProps) => {
     avgHeartRate = '-',
   } = props
 
-  // 確保 photo 是陣列
+  const { user } = useUser()
+
+  // Ensure photo is an array
   const photoArray = Array.isArray(photo) ? photo : photo ? [photo] : []
 
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
@@ -64,17 +67,19 @@ const Session = (props: SessionProps) => {
                 Max HR: {maxHeartRate} bpm | Avg HR: {avgHeartRate} bpm
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => {
-                router.push({
-                  pathname: '/section/edit/[id]' as any,
-                  params: { id },
-                })
-              }}
-              style={{ padding: 8 }}
-            >
-              <Ionicons name="pencil" size={24} color={MUAY_PURPLE} />
-            </TouchableOpacity>
+            {!user?.isGuest && (
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: '/section/edit/[id]' as any,
+                    params: { id },
+                  })
+                }}
+                style={{ padding: 8 }}
+              >
+                <Ionicons name="pencil" size={24} color={MUAY_PURPLE} />
+              </TouchableOpacity>
+            )}
           </View>
 
           <Divider style={{ marginVertical: 16 }} />

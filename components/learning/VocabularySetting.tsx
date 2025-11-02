@@ -70,7 +70,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
   const handleConfirm = () => {
     const newError = {} as CheckModalError
 
-    // 只檢查必填欄位
+    // Only check required fields
     isRequiredFields.forEach((field) => {
       if (!pageData[field as keyof VocabularyDetailDataType]) {
         newError[field as CheckErrorKey] = { status: true, message: 'This is a required field' }
@@ -79,7 +79,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
 
     setCheckError((prev) => ({ ...prev, ...newError }))
 
-    // 如果沒有錯誤，儲存資料
+    // Save data if no errors
     if (Object.keys(newError).length === 0) {
       console.log({ pageData })
       handleSaveData()
@@ -96,12 +96,12 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         return
       }
       console.log('Updating vocabulary with ID:', pageData.$id)
-      // 排除所有系統欄位（以 $ 開頭的欄位）
+      // Exclude all system fields (fields starting with $)
       const updateData = Object.fromEntries(
         Object.entries(pageData)
           .filter(([key]) => !key.startsWith('$'))
           .filter(([key, value]) => {
-            // 如果是 URL 欄位且為空字串，過濾掉
+            // Filter out URL field if empty
             if (key === 'url' && (!value || value === '')) {
               return false
             }
@@ -114,21 +114,21 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         {
           onSettled: () => {
             setIsSaving(false)
-            // 清除本地 tag，因为已经保存到数据库了
+            // Clear local tags as they're already saved to database
             clearLocalTags()
-            // 重新获取 tag 列表，确保新添加的 tag 会显示
+            // Refetch tag list to ensure newly added tags are displayed
             refetchTags()
             handleBack()
           },
         },
       )
     } else {
-      // 新增時也要排除系統欄位和空的 URL，並添加 userId
+      // For creation, also exclude system fields and empty URL, and add userId
       const createData = Object.fromEntries(
         Object.entries(pageData)
           .filter(([key]) => !key.startsWith('$'))
           .filter(([key, value]) => {
-            // 如果是 URL 欄位且為空字串，過濾掉
+            // Filter out URL field if empty
             if (key === 'url' && (!value || value === '')) {
               return false
             }
@@ -136,7 +136,7 @@ const VocabularySetting = (props: VocabularySettingProps) => {
           }),
       )
 
-      // 新增 userId
+      // Add userId
       const dataWithUserId = {
         ...createData,
         userId: user?.$id,
@@ -147,9 +147,9 @@ const VocabularySetting = (props: VocabularySettingProps) => {
       addVocabulary(dataWithUserId, {
         onSettled: () => {
           setIsSaving(false)
-          // 清除本地 tag，因为已经保存到数据库了
+          // Clear local tags as they're already saved to database
           clearLocalTags()
-          // 重新获取 tag 列表，确保新添加的 tag 会显示
+          // Refetch tag list to ensure newly added tags are displayed
           refetchTags()
           handleBack()
         },

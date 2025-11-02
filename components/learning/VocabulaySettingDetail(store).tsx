@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
 import {
   Modal,
-  StyleSheet,
   View,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  ToastAndroid,
   KeyboardAvoidingView,
   SafeAreaView,
 } from 'react-native'
@@ -203,7 +201,5 @@ const AddVocabularyModal: React.FC<AddVocabularyModalProps> = (props) => {
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({})
 
 export default AddVocabularyModal

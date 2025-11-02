@@ -49,7 +49,7 @@ const SettingSection = (props: SettingSectionProps) => {
   const [pageData, setPageData] = useState(initialPageData)
   const [isSaving, setIsSaving] = useState(false)
   const { mutateAsync: deleteTraining, isPending: isDeleting } = useDeleteTraining()
-  // 清理 Appwrite 文件資料，移除內部屬性
+  // Clean Appwrite document data, remove internal properties
   const cleanAppwriteData = (data: any) => {
     if (!data) return initialPageData
 
@@ -88,7 +88,7 @@ const SettingSection = (props: SettingSectionProps) => {
     const updatedPageData = { ...pageData, [name]: value }
     setPageData(updatedPageData)
 
-    // 檢查平均心率不能大於最大心率
+    // Check that average heart rate cannot exceed maximum heart rate
     if (name === TrainingFieldEnum.AvgHeartRate || name === TrainingFieldEnum.MaxHeartRate) {
       const avgHR =
         name === TrainingFieldEnum.AvgHeartRate
@@ -108,7 +108,7 @@ const SettingSection = (props: SettingSectionProps) => {
           },
         }))
       } else {
-        // 清除平均心率的錯誤（如果之前有）
+        // Clear average heart rate error (if previously set)
         if (
           error[TrainingFieldEnum.AvgHeartRate].message === 'Avg HR cannot be greater than Max HR'
         ) {
@@ -131,7 +131,7 @@ const SettingSection = (props: SettingSectionProps) => {
       }
     }
 
-    // 檢查平均心率不能大於最大心率
+    // Check that average heart rate cannot exceed maximum heart rate
     const avgHR = parseInt(pageData.avgHeartRate) || 0
     const maxHR = parseInt(pageData.maxHeartRate) || 0
     if (avgHR > 0 && maxHR > 0 && avgHR > maxHR) {
@@ -143,10 +143,10 @@ const SettingSection = (props: SettingSectionProps) => {
 
     setError((prev) => ({ ...prev, ...newError }))
 
-    // 檢查是否有任何錯誤
+    // Check if there are any errors
     const hasErrors = Object.values({ ...error, ...newError }).some((err) => err.status)
 
-    // 只有在沒有錯誤的情況下才執行 handleSaveData
+    // Only execute handleSaveData if there are no errors
     if (!hasErrors) {
       handleSaveData()
     }
@@ -156,11 +156,11 @@ const SettingSection = (props: SettingSectionProps) => {
     setIsSaving(true)
 
     try {
-      // 準備數據並添加 userId（僅在創建時）
+      // Prepare data and add userId (only when creating)
       const dataToSave = isEdit ? pageData : { ...pageData, userId: user?.$id }
 
       if (pageData.photos.length > 0) {
-        // 分離新上傳的照片（本地 URI）和已存在的照片（Appwrite 檔案 ID）
+        // Separate newly uploaded photos (local URI) and existing photos (Appwrite file IDs)
         const newPhotos = pageData.photos.filter(
           (photo: string) => photo.startsWith('file://') || photo.startsWith('content://'),
         )
@@ -168,13 +168,13 @@ const SettingSection = (props: SettingSectionProps) => {
           (photo: string) => !photo.startsWith('file://') && !photo.startsWith('content://'),
         )
 
-        // 只上傳新的照片
+        // Only upload new photos
         const newFileIds =
           newPhotos.length > 0
             ? await Promise.all(newPhotos.map((photo: string) => uploadPhoto(photo)))
             : []
 
-        // 合併已存在的照片 ID 和新上傳的照片 ID
+        // Merge existing photo IDs and newly uploaded photo IDs
         const allFileIds = [...existingPhotos, ...newFileIds]
 
         await handleConfirmApi({ ...dataToSave, photos: allFileIds })
@@ -261,7 +261,7 @@ const SettingSection = (props: SettingSectionProps) => {
               suffix="min"
             />
 
-            {/* 心率欄位 - 並排顯示 */}
+            {/* Heart rate fields - Side by side display */}
             <View
               style={{
                 flexDirection: 'row',

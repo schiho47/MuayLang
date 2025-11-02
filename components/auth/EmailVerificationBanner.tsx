@@ -5,10 +5,14 @@ import { useUser } from '../../hooks/useUser'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 
 export default function EmailVerificationBanner() {
+  // 🚧 Temporarily disabled - Email verification feature
+  return null
+
+  /* 
   const { user, resendVerification } = useUser()
   const [isResending, setIsResending] = useState(false)
 
-  // 如果用户已登录但邮箱未验证，显示横幅
+  // Show banner if user is logged in but email is not verified
   if (!user || user.emailVerification) {
     return null
   }
@@ -17,9 +21,9 @@ export default function EmailVerificationBanner() {
     setIsResending(true)
     try {
       await resendVerification()
-      Alert.alert('驗證郵件已發送', '請檢查您的郵箱並點擊驗證連結', [{ text: '確定' }])
+      Alert.alert('Verification Email Sent', 'Please check your inbox and click the verification link', [{ text: 'OK' }])
     } catch (error) {
-      Alert.alert('發送失敗', '無法發送驗證郵件，請稍後再試', [{ text: '確定' }])
+      Alert.alert('Failed to Send', 'Unable to send verification email. Please try again later', [{ text: 'OK' }])
     } finally {
       setIsResending(false)
     }
@@ -29,17 +33,18 @@ export default function EmailVerificationBanner() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Ionicons name="mail-unread-outline" size={20} color={MUAY_WHITE} />
-        <Text style={styles.text}>請驗證您的郵箱</Text>
+        <Text style={styles.text}>Please verify your email</Text>
         <TouchableOpacity
           onPress={handleResendVerification}
           disabled={isResending}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>{isResending ? '發送中...' : '重新發送'}</Text>
+          <Text style={styles.buttonText}>{isResending ? 'Sending...' : 'Resend'}</Text>
         </TouchableOpacity>
       </View>
     </View>
   )
+  */
 }
 
 const styles = {

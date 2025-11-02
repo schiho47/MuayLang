@@ -30,13 +30,13 @@ const MultiSelect = (props: MultiSelectProps) => {
   const [open, setOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
 
-  // 本地狀態管理選項，支援動態添加
+  // Local state for items, supports dynamic addition
   const [localItems, setLocalItems] = useState<{ label: string; value: string }[]>(
     originalItem || [],
   )
   const [localValue, setLocalValue] = useState<string[]>(originalValue || [])
 
-  // 過濾後的選項（基於搜索文本）
+  // Filtered items (based on search text)
   const filteredItems = useMemo(() => {
     if (!searchText.trim()) return localItems
     return localItems.filter(
@@ -46,15 +46,15 @@ const MultiSelect = (props: MultiSelectProps) => {
     )
   }, [localItems, searchText])
 
-  // 當父元件的 item 變化時，更新本地 items（但保留新添加的選項）
+  // When parent component's items change, update local items (but keep newly added options)
   useEffect(() => {
     if (originalItem && originalItem.length > 0) {
-      // 合併父元件的選項和本地新添加的選項
+      // Merge parent component's options and locally added options
       const existingValues = new Set(originalItem.map((item) => item.value))
       const newItems = localItems.filter((item) => !existingValues.has(item.value))
       setLocalItems([...originalItem, ...newItems])
     } else if (originalItem && originalItem.length === 0) {
-      // 如果父元件傳入空陣列，也要保留本地新添加的選項
+      // If parent passes empty array, also keep locally added options
       const existingValues = new Set(originalItem.map((item) => item.value))
       const newItems = localItems.filter((item) => !existingValues.has(item.value))
       setLocalItems([...originalItem, ...newItems])
@@ -62,7 +62,7 @@ const MultiSelect = (props: MultiSelectProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalItem])
 
-  // 當父元件的 value 變化時，更新本地 value
+  // When parent component's value changes, update local value
   useEffect(() => {
     if (originalValue && JSON.stringify(originalValue) !== JSON.stringify(localValue)) {
       setLocalValue(originalValue)
@@ -91,12 +91,12 @@ const MultiSelect = (props: MultiSelectProps) => {
     ) {
       const newItem = {
         label: searchText.trim(),
-        value: searchText.trim().toLowerCase().replace(/\s+/g, '-'), // 转换为 URL 友好的格式
+        value: searchText.trim().toLowerCase().replace(/\s+/g, '-'), // Convert to URL-friendly format
       }
       setLocalItems((prev) => [...prev, newItem])
       toggleSelection(newItem.value)
 
-      // 通知父组件添加了新 tag
+      // Notify parent component that a new tag was added
       if (onAddNewTag) {
         onAddNewTag(searchText.trim())
       }
@@ -124,7 +124,7 @@ const MultiSelect = (props: MultiSelectProps) => {
         </Text>
       )}
 
-      {/* 選擇器觸發按鈕 */}
+      {/* Selector trigger button */}
       <TouchableOpacity
         onPress={() => setOpen(true)}
         style={{
@@ -172,7 +172,7 @@ const MultiSelect = (props: MultiSelectProps) => {
         <Ionicons name="chevron-down" size={20} color={MUAY_PURPLE_30} />
       </TouchableOpacity>
 
-      {/* 錯誤訊息 */}
+      {/* Error message */}
       {error && errorMessage && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
           <Ionicons name="alert-circle" size={14} color="#ef4444" style={{ marginRight: 4 }} />
@@ -182,7 +182,7 @@ const MultiSelect = (props: MultiSelectProps) => {
         </View>
       )}
 
-      {/* 下拉選單 Modal */}
+      {/* Dropdown menu Modal */}
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable
           style={{
@@ -203,7 +203,7 @@ const MultiSelect = (props: MultiSelectProps) => {
             }}
             onPress={(e) => e.stopPropagation()}
           >
-            {/* 搜索框 */}
+            {/* Search box */}
             <View
               style={{
                 padding: 12,
@@ -242,9 +242,9 @@ const MultiSelect = (props: MultiSelectProps) => {
               </View>
             </View>
 
-            {/* 選項列表 */}
+            {/* Options list */}
             <ScrollView style={{ maxHeight: 400 }}>
-              {/* 如果有搜索文本且没有匹配项，显示添加新选项 */}
+              {/* Show add new option if search text exists but no matches */}
               {searchText.trim() && filteredItems.length === 0 && (
                 <TouchableOpacity
                   onPress={addNewItem}
@@ -300,7 +300,7 @@ const MultiSelect = (props: MultiSelectProps) => {
               ))}
             </ScrollView>
 
-            {/* 關閉按鈕 */}
+            {/* Close button */}
             <View
               style={{
                 padding: 12,

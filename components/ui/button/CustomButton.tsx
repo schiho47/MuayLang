@@ -1,15 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { Button, ButtonGroup, ButtonText, ButtonSpinner, ButtonIcon } from '@gluestack-ui/themed'
+
 type CustomButtonProps = {
   children: React.ReactNode
   onPress: () => void
-
   size: 'sm' | 'md' | 'lg'
-
   isSpinner: boolean
   isIcon: boolean
 }
+
 const CustomButton = (props: CustomButtonProps) => {
   const { children, onPress, size, isSpinner, isIcon } = props
   return (
@@ -25,5 +24,3 @@ const CustomButton = (props: CustomButtonProps) => {
 }
 
 export default CustomButton
-
-const styles = StyleSheet.create({})

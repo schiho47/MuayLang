@@ -4,7 +4,7 @@ const bucketId = '688a236a003d47152b16'
 const permission = [Permission.read(Role.any()), Permission.write(Role.any())]
 export async function uploadPhoto(uri: string): Promise<string> {
   try {
-    console.log('找uri', uri)
+    console.log('Found uri:', uri)
     const response = await fetch(uri)
     const blob = await response.blob()
     console.log({ response, blob })
@@ -14,16 +14,16 @@ export async function uploadPhoto(uri: string): Promise<string> {
     const fileData = {
       uri,
       name: fileName,
-      type: 'image/jpeg', // 或從 mime 庫判斷副檔名
-      size: 0, // Appwrite 不檢查 size，可以給 0
+      type: 'image/jpeg', // Or determine extension from mime library
+      size: 0, // Appwrite doesn't check size, can set to 0
     }
     const file = await storage.createFile(bucketId, fileId, fileData, permission)
-    console.log('✅ 找到 file:', file)
+    console.log('✅ Found file:', file)
 
     return file.$id
   } catch (error) {
-    console.error('❌ 上傳錯誤:', error)
-    throw error // 或 return ''
+    console.error('❌ Upload error:', error)
+    throw error // Or return ''
   }
 }
 

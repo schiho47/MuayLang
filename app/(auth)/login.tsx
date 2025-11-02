@@ -1,20 +1,17 @@
 import {
   Keyboard,
-  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
   TextInput,
   Pressable,
   ActivityIndicator,
-  ScrollView,
   TouchableOpacity,
 } from 'react-native'
 import { Link } from 'expo-router'
 import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useUser } from '@/hooks/useUser'
-import Spacer from '@/components/Spacer'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 
 const Login = () => {
@@ -45,7 +42,7 @@ const Login = () => {
   }
 
   const handleQuickLogin = async () => {
-    // 開發用快速登入
+    // Quick login for development
     setEmail('sukiho47@gmail.com')
     setPassword('sukiho471234567')
     setLoading(true)
@@ -82,19 +79,27 @@ const Login = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={handleQuickLogin} style={styles.iconContainer}>
+      <View
+        className="flex-1 justify-center items-center p-6"
+        style={{ backgroundColor: MUAY_PURPLE }}
+      >
+        <TouchableOpacity onPress={handleQuickLogin} className="mb-6">
           <Ionicons name="log-in" size={60} color={MUAY_WHITE} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Login to Your Account</Text>
+        <Text className="text-center text-[28px] font-bold mb-10" style={{ color: MUAY_WHITE }}>
+          Login to Your Account
+        </Text>
 
-        <View style={styles.inputWrapper}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={MUAY_PURPLE} style={styles.inputIcon} />
+        <View className="w-full mb-4">
+          <View
+            className="flex-row items-center w-full rounded-lg px-4"
+            style={{ backgroundColor: MUAY_WHITE }}
+          >
+            <Ionicons name="mail" size={20} color={MUAY_PURPLE} className="mr-3" />
             <TextInput
               placeholder="Email"
-              style={styles.input}
+              className="flex-1 py-3.5 text-base text-[#222]"
               keyboardType="email-address"
               onChangeText={handleEmailChange}
               value={email}
@@ -104,14 +109,17 @@ const Login = () => {
           </View>
 
           {showEmailSuggestions && (
-            <View style={styles.suggestionsContainer}>
+            <View
+              className="rounded-lg mt-1 overflow-hidden"
+              style={{ backgroundColor: MUAY_WHITE }}
+            >
               {emailDomains.map((domain) => (
                 <Pressable
                   key={domain}
-                  style={styles.suggestionItem}
+                  className="py-3 px-4 border-b border-[#f0f0f0]"
                   onPress={() => selectEmailDomain(domain)}
                 >
-                  <Text style={styles.suggestionText}>
+                  <Text className="text-sm text-[#666]">
                     {email}
                     {domain}
                   </Text>
@@ -121,46 +129,56 @@ const Login = () => {
           )}
         </View>
 
-        <View style={[styles.inputContainer, { marginBottom: 16 }]}>
-          <Ionicons name="lock-closed" size={20} color={MUAY_PURPLE} style={styles.inputIcon} />
+        <View
+          className="flex-row items-center w-full rounded-lg px-4 mb-4"
+          style={{ backgroundColor: MUAY_WHITE }}
+        >
+          <Ionicons name="lock-closed" size={20} color={MUAY_PURPLE} className="mr-3" />
           <TextInput
             placeholder="Password"
-            style={styles.input}
+            className="flex-1 py-3.5 text-base text-[#222]"
             onChangeText={setPassword}
             value={password}
             secureTextEntry={!showPassword}
             placeholderTextColor="#999"
           />
-          <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+          <Pressable onPress={() => setShowPassword(!showPassword)} className="p-2">
             <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color={MUAY_PURPLE} />
           </Pressable>
         </View>
 
         {error && (
-          <View style={styles.errorContainer}>
+          <View className="flex-row items-center bg-red-100 p-3 rounded-lg mb-4 w-full gap-2">
             <Ionicons name="alert-circle" size={16} color="#ef4444" />
-            <Text style={styles.errorText}>{error}</Text>
+            <Text className="text-red-500 text-sm flex-1">{error}</Text>
           </View>
         )}
 
         <Pressable
           onPress={handleSubmit}
           disabled={loading}
-          style={[styles.loginButton, loading && styles.buttonDisabled]}
+          className="w-full py-4 rounded-lg items-center"
+          style={[{ backgroundColor: 'rgb(218, 167, 48)' }, loading && { opacity: 0.6 }]}
         >
           {loading ? (
             <ActivityIndicator color={MUAY_WHITE} />
           ) : (
-            <Text style={styles.loginButtonText}>LOGIN</Text>
+            <Text className="text-base font-bold" style={{ color: MUAY_WHITE }}>
+              LOGIN
+            </Text>
           )}
         </Pressable>
 
-        <Spacer height={20} />
+        <View className="h-5" />
 
-        <View style={styles.registerPrompt}>
-          <Text style={styles.promptText}>Don't have an account? </Text>
+        <View className="flex-row items-center">
+          <Text className="text-sm" style={{ color: MUAY_WHITE }}>
+            Don't have an account?{' '}
+          </Text>
           <Link href={'/(auth)/register'}>
-            <Text style={styles.registerLink}>REGISTER</Text>
+            <Text className="text-sm font-bold" style={{ color: 'rgb(218, 167, 48)' }}>
+              REGISTER
+            </Text>
           </Link>
         </View>
       </View>
@@ -169,106 +187,3 @@ const Login = () => {
 }
 
 export default Login
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: MUAY_PURPLE,
-    padding: 24,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: MUAY_WHITE,
-    marginBottom: 40,
-  },
-  inputWrapper: {
-    width: '100%',
-    marginBottom: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    backgroundColor: MUAY_WHITE,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#222',
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  suggestionsContainer: {
-    backgroundColor: MUAY_WHITE,
-    borderRadius: 8,
-    marginTop: 4,
-    overflow: 'hidden',
-  },
-  suggestionItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fee2e2',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    width: '100%',
-    gap: 8,
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 14,
-    flex: 1,
-  },
-  loginButton: {
-    width: '100%',
-    backgroundColor: 'rgb(218, 167, 48)',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  loginButtonText: {
-    color: MUAY_WHITE,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  registerPrompt: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  promptText: {
-    color: MUAY_WHITE,
-    fontSize: 14,
-  },
-  registerLink: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: 'rgb(218, 167, 48)',
-  },
-})

@@ -8,6 +8,7 @@ import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 import { VocabularyDataType, VocabularyFieldEnum } from './type'
 import useSpeech from './useSpeech'
 import { useUpdateVocabulary } from '@/lib/learningAPI'
+import { useUser } from '@/hooks/useUser'
 
 type VocabularyCardPropsType = {
   item: VocabularyDataType
@@ -21,10 +22,11 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
   const { thai, romanization, english, exampleTH, exampleEN } = item
   const { speak } = useSpeech()
   const { mutate: updateVocabulary } = useUpdateVocabulary()
+  const { user } = useUser()
 
   const [isFavorite, setIsFavorite] = useState(item[VocabularyFieldEnum.Favorite] || false)
 
-  // 同步 favorite 狀態
+  // Sync favorite status
   useEffect(() => {
     setIsFavorite(item[VocabularyFieldEnum.Favorite] || false)
   }, [item])
@@ -35,11 +37,18 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
   }
 
   const toggleFavorite = (e: any) => {
-    e.stopPropagation() // 防止觸發卡片的 onPress
+    e.stopPropagation() // Prevent triggering card's onPress
+
+    // Prevent guests from updating favorites
+    if (user?.isGuest) {
+      console.log('Guest users cannot modify favorites')
+      return
+    }
+
     const newFavoriteState = !isFavorite
     setIsFavorite(newFavoriteState)
 
-    // 更新資料庫
+    // Update database
     updateVocabulary({
       id: item.$id,
       data: { favorite: newFavoriteState },
@@ -63,8 +72,8 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
         position: 'relative',
       }}
     >
-      {/* 收藏按钮 - 右上角 */}
-      {!isLoading && (
+      {/* Favorite button - Top right (hidden for guests) */}
+      {!isLoading && !user?.isGuest && (
         <TouchableOpacity
           onPress={toggleFavorite}
           style={{

@@ -27,15 +27,15 @@ export default function HomeScreen() {
   console.log('📚 HomeScreen - vocabularies count:', vocabularies?.length)
   console.log('🥊 HomeScreen - training count:', training?.length)
 
-  // 動畫值
+  // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(-50)).current
   const scaleAnim = useRef(new Animated.Value(0.8)).current
   const sectionFadeAnim = useRef(new Animated.Value(0)).current
 
-  // 啟動動畫
+  // Start animations
   useEffect(() => {
-    // 標題動畫
+    // Title animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -56,7 +56,7 @@ export default function HomeScreen() {
       }),
     ]).start()
 
-    // 延遲啟動內容區動畫
+    // Delayed start for content section animation
     setTimeout(() => {
       Animated.timing(sectionFadeAnim, {
         toValue: 1,
@@ -67,7 +67,7 @@ export default function HomeScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // 收藏的單字
+  // Favorite vocabularies
   const favoriteVocabularies = useMemo(() => {
     if (!vocabularies) return []
     return (vocabularies as unknown as VocabularyDataType[]).filter(
@@ -75,7 +75,7 @@ export default function HomeScreen() {
     )
   }, [vocabularies])
 
-  // 最近的訓練記錄（最新3條）
+  // Recent training records (latest 3)
   const recentTraining = useMemo(() => {
     if (!training) return []
     return [...training]
@@ -83,7 +83,7 @@ export default function HomeScreen() {
       .slice(0, 3)
   }, [training])
 
-  // 本週統計
+  // Weekly statistics
   const weekStats = useMemo(() => {
     if (!training) return { sessions: 0, calories: 0, duration: 0 }
 
@@ -115,9 +115,9 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: MUAY_PURPLE, dark: '#1D3D47' }}
       headerImage={<Image source={require('@/assets/images/logoBig.png')} style={styles.logo} />}
     >
-      {/* Logout 按钮 - 右上角 */}
+      {/* Logout/Exit button - Top right */}
       <View style={styles.logoutContainer}>
-        <Text style={styles.userEmail}>{user?.email}</Text>
+        <Text style={styles.userEmail}>{user?.isGuest ? 'Guest Mode' : user?.email}</Text>
         <TouchableOpacity
           onPress={handleLogout}
           disabled={isLoggingOut}
@@ -162,7 +162,7 @@ export default function HomeScreen() {
 
       <Divider my={16} bgColor={MUAY_PURPLE} w="100%" h={1.5} />
 
-      {/* Learning Section - 我的收藏 */}
+      {/* Learning Section - My Favorites */}
       <Animated.View style={{ opacity: sectionFadeAnim }}>
         <ThemedView style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
@@ -186,7 +186,11 @@ export default function HomeScreen() {
                   <VocabularyCard
                     item={vocab}
                     id={vocab.$id}
-                    onPress={(id) => router.push(`/vocabulary/edit/${id}`)}
+                    onPress={(id) => {
+                      if (!user?.isGuest) {
+                        router.push(`/vocabulary/edit/${id}`)
+                      }
+                    }}
                   />
                 </View>
               ))}
@@ -208,7 +212,7 @@ export default function HomeScreen() {
 
       <Divider my={16} bgColor={MUAY_PURPLE} w="100%" h={1.5} />
 
-      {/* Training Section - 本週統計 + 最近訓練 */}
+      {/* Training Section - Weekly Stats + Recent Training */}
       <Animated.View style={{ opacity: sectionFadeAnim }}>
         <ThemedView style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
@@ -227,7 +231,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <>
-              {/* 本週統計卡片 */}
+              {/* Weekly stats cards */}
               <View style={styles.statsGrid}>
                 <Box style={styles.statCard}>
                   <Ionicons name="calendar" size={32} color={MUAY_PURPLE} />
@@ -246,14 +250,18 @@ export default function HomeScreen() {
                 </Box>
               </View>
 
-              {/* 最近训练 */}
+              {/* Recent training */}
               {recentTraining.length > 0 && (
                 <View style={{ marginTop: 16 }}>
                   <Text style={styles.subsectionTitle}>Recent Sessions</Text>
                   {recentTraining.map((item: any) => (
                     <TouchableOpacity
                       key={item.$id}
-                      onPress={() => router.push(`/section/edit/${item.$id}`)}
+                      onPress={() => {
+                        if (!user?.isGuest) {
+                          router.push(`/section/edit/${item.$id}`)
+                        }
+                      }}
                       style={styles.trainingItem}
                     >
                       <View style={{ flex: 1 }}>
@@ -290,7 +298,6 @@ export default function HomeScreen() {
     </ParallaxScrollView>
   )
 }
-
 const styles = StyleSheet.create({
   titleContainer: {
     alignItems: 'center',

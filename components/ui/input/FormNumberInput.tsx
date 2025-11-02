@@ -56,7 +56,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
     onChange(String(newValue), name)
   }
 
-  // 长按连续增加
+  // Long press to continuously increment
   const handleLongPressIncrement = () => {
     handleIncrement()
     intervalRef.current = setInterval(() => {
@@ -64,7 +64,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
     }, 100) as any
   }
 
-  // 长按连续减少
+  // Long press to continuously decrement
   const handleLongPressDecrement = () => {
     handleDecrement()
     intervalRef.current = setInterval(() => {
@@ -72,7 +72,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
     }, 100) as any
   }
 
-  // 停止长按
+  // Stop long press
   const handlePressOut = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
@@ -81,7 +81,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
   }
 
   const handleTextChange = (text: string) => {
-    // 只允許輸入數字
+    // Only allow numeric input
     const numericText = text.replace(/[^0-9]/g, '')
     onChange(numericText, name)
   }
@@ -130,7 +130,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
           placeholderTextColor="#bbb"
         />
 
-        {/* Suffix 区域：单位文字 + 上下箭头按钮 */}
+        {/* Suffix area: Unit text + up/down arrow buttons */}
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
           {suffix && (
             <Text
@@ -145,7 +145,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = (props) => {
             </Text>
           )}
 
-          {/* 上下箭頭按鈕組 - 共享邊框，像 iOS 原生 */}
+          {/* Up/down arrow button group - Shared border, like iOS native */}
           <View
             style={{
               borderWidth: 1,

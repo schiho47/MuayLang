@@ -33,7 +33,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = (props) => {
         onConfirm(selectedDate)
       }
     } else {
-      // iOS: 更新暫時日期
+      // iOS: Update temporary date
       if (selectedDate) {
         setTempDate(selectedDate)
       }
@@ -111,7 +111,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = (props) => {
         </FormControlError>
       )}
 
-      {/* Android: 原生日期選擇器 */}
+      {/* Android: Native date picker */}
       {Platform.OS === 'android' && show && (
         <DateTimePicker
           testID="dateTimePicker"
@@ -122,7 +122,7 @@ const FormDatePicker: React.FC<FormDatePickerProps> = (props) => {
         />
       )}
 
-      {/* iOS: Modal 包裝的日期選擇器 */}
+      {/* iOS: Modal-wrapped date picker */}
       {Platform.OS === 'ios' && show && (
         <Modal transparent animationType="slide" visible={show} onRequestClose={handleCancel}>
           <View

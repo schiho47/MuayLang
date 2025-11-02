@@ -10,12 +10,12 @@ import {
   updateVocabulary,
 } from './learningAppwrite'
 
-// 跨平台 Toast 函數
+// Cross-platform Toast function
 const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
   } else {
-    // iOS 和 Web 使用 console.log 或 Alert
+    // iOS and Web use console.log or Alert
     console.log(message)
   }
 }
@@ -24,8 +24,8 @@ export const useVocabularies = (userId?: string) => {
   return useQuery({
     queryKey: ['vocabularies', userId],
     queryFn: () => getAllVocabularies(userId),
-    enabled: !!userId, // 只有在有 userId 時才執行查詢
-    retry: false, // 不要自動重試，避免多次失敗請求
+    enabled: !!userId, // Only execute query when userId exists
+    retry: false, // Don't auto-retry to avoid multiple failed requests
   })
 }
 
@@ -36,7 +36,7 @@ export const useAddVocabulary = (options?: { onSettled?: () => void }) => {
     mutationFn: createVocabulary,
     onSuccess: () => {
       showToast('Saved successfully ✅')
-      // 更新 vocabularies cache，讓列表自動重新整理
+      // Update vocabularies cache to auto-refresh list
       queryClient.invalidateQueries({ queryKey: ['vocabularies'] })
     },
     onError: (error) => {
@@ -79,7 +79,7 @@ export const useGetVocabularyById = (
     select: options?.select,
   })
 }
-// 這裡做到filter 回來會是空白tag沒辦法被過濾
+// Note: Filter may return empty tags that cannot be filtered
 export const useGetVocabularyByFilter = (
   filter: FilterDataType,
   userId?: string,
@@ -91,7 +91,7 @@ export const useGetVocabularyByFilter = (
     enabled: false,
   })
 
-  // 使用 useEffect 來處理 onSettled
+  // Use useEffect to handle onSettled
   React.useEffect(() => {
     if (query.isSuccess || query.isError) {
       options?.onSettled?.()

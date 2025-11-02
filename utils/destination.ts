@@ -7,10 +7,10 @@ export type PlaceLookupResult = {
 }
 
 /**
- * 用店名（可選地址）→ 取得 Google Maps 精準連結
- * 原理：打 Places Text Search 拿 place_id，再組 query_place_id 連結
+ * Get precise Google Maps link using place name (optional address)
+ * Method: Call Places Text Search to get place_id, then construct query_place_id link
  *
- * ⚠️ 注意：在純前端曝光 Google API Key 有風險，建議最終改走你自己的 proxy（serverless）。
+ * ⚠️ Warning: Exposing Google API Key in frontend has risks, recommend using your own proxy (serverless).
  */
 export async function getPlaceMapsUrl(
   name: string,
@@ -20,7 +20,7 @@ export async function getPlaceMapsUrl(
     language?: string // ex: 'th', 'en', 'zh-TW'
     region?: string // ex: 'th', 'jp', 'tw'
     timeoutMs?: number
-  }
+  },
 ): Promise<PlaceLookupResult> {
   if (!name?.trim()) {
     throw new Error('Place name is required')
@@ -29,7 +29,7 @@ export async function getPlaceMapsUrl(
 
   const query = address ? `${name}, ${address}` : name
 
-  // Timeout 控制（避免卡死）
+  // Timeout control (prevent hanging)
   const controller = new AbortController()
   const t = setTimeout(() => controller.abort(), timeoutMs)
 
@@ -44,7 +44,7 @@ export async function getPlaceMapsUrl(
     const data = await res.json()
 
     if (data.status !== 'OK' || !data.results?.length) {
-      // 拿不到 place_id，就回傳一般搜尋 URL（退而求其次）
+      // Can't get place_id, return general search URL as fallback
       return {
         mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
       }
@@ -65,12 +65,12 @@ export async function getPlaceMapsUrl(
       }
     }
 
-    // 精準：query + query_place_id（官方建議）
+    // Precise: query + query_place_id (official recommendation)
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${placeId}`
 
     return { placeId, mapsUrl, formattedAddress, lat, lng }
   } catch (e) {
-    // 發生錯誤就用一般搜尋 URL 當備援
+    // Use general search URL as fallback if error occurs
     return {
       mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
     }

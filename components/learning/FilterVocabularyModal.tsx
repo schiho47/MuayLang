@@ -15,7 +15,7 @@ type FilterVocabularyModalProps = {
   handleConfirmAction: (filterData: FilterDataType) => void
 }
 
-// 欄位名稱映射（元件外部常數）
+// Field name mapping (component external constant)
 const FIELD_MAP: Record<SearchField, VocabularyFieldEnum> = {
   thai: VocabularyFieldEnum.Thai,
   english: VocabularyFieldEnum.English,
@@ -32,7 +32,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
   const [tagSearchText, setTagSearchText] = useState('')
   const [showFavoriteOnly, setShowFavoriteOnly] = useState(false)
 
-  // 調試日誌
+  // Debug logs
   console.log('FilterVocabularyModal render:', {
     isOpen,
     vocabulariesCount: vocabularies?.length,
@@ -41,7 +41,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
     searchField,
   })
 
-  // 根據搜尋文本和欄位篩選單字
+  // Filter vocabularies based on search text and field
   const filteredVocabularies = useMemo(() => {
     if (!searchText.trim()) return []
 
@@ -53,7 +53,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
         const fieldValue = String(vocab[fieldKey] || '').toLowerCase()
         return fieldValue.includes(searchLower)
       })
-      .slice(0, 5) // 限制顯示前 5 個結果
+      .slice(0, 5) // Limit to show first 5 results
 
     console.log('Filtered vocabularies:', {
       searchText,
@@ -66,7 +66,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
     return filtered
   }, [searchText, searchField, vocabularies])
 
-  // 根據搜尋文本篩選標籤 - 只在有搜尋文本時篩選
+  // Filter tags based on search text - only filter when search text exists
   const filteredTags = useMemo(() => {
     if (!tagSearchText.trim()) return []
 
@@ -123,12 +123,12 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
             paddingTop: Platform.OS === 'ios' ? 44 : 24,
           }}
         >
-          {/* 拖拽指示器 */}
+          {/* Drag indicator */}
           <View style={{ alignItems: 'center', paddingVertical: 8 }}>
             <View style={{ width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2 }} />
           </View>
 
-          {/* 標題 */}
+          {/* Title */}
           <Text
             style={{
               fontSize: 20,
@@ -148,7 +148,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* 搜尋欄位選擇（Radio） */}
+            {/* Search field selection (Radio) */}
             <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
               {(['thai', 'english', 'romanization'] as SearchField[]).map((field) => (
                 <TouchableOpacity
@@ -202,7 +202,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               ))}
             </View>
 
-            {/* 搜尋輸入框 */}
+            {/* Search input box */}
             <View
               style={{
                 flexDirection: 'row',
@@ -236,7 +236,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               )}
             </View>
 
-            {/* 搜尋結果（即時顯示） */}
+            {/* Search results (real-time display) */}
             {searchText.trim() && filteredVocabularies.length > 0 && (
               <ScrollView
                 style={{
@@ -273,7 +273,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               </ScrollView>
             )}
 
-            {/* 我的最愛篩選 */}
+            {/* My Favorites filter */}
             <TouchableOpacity
               onPress={() => setShowFavoriteOnly(!showFavoriteOnly)}
               style={{
@@ -321,7 +321,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               </Text>
             </TouchableOpacity>
 
-            {/* Tag 搜尋標題 */}
+            {/* Tag search title */}
             <View
               style={{
                 flexDirection: 'row',
@@ -356,7 +356,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               )}
             </View>
 
-            {/* Tag 搜尋框 - 始終顯示 */}
+            {/* Tag search box - Always visible */}
             <View
               style={{
                 flexDirection: 'row',
@@ -390,7 +390,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               )}
             </View>
 
-            {/* Tag 搜尋結果 - 只在有搜尋文本時顯示 */}
+            {/* Tag search results - Only show when search text exists */}
             {tagSearchText.trim() && filteredTags.length > 0 && (
               <ScrollView
                 style={{
@@ -465,7 +465,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
               </View>
             )}
 
-            {/* 已選擇的標籤 */}
+            {/* Selected tags */}
             {selectedTags.length > 0 && (
               <View style={{ marginTop: 8 }}>
                 <Text
@@ -508,7 +508,7 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
             )}
           </ScrollView>
 
-          {/* Footer 按钮 */}
+          {/* Footer buttons */}
           <View
             style={{
               flexDirection: 'row',

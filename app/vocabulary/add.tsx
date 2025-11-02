@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import VocabularySetting from '../../components/learning/VocabularySetting'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
 const initialModalDataType: VocabularyDetailDataType = {
   $id: '',
@@ -27,56 +28,59 @@ const AddVocabulary = () => {
   const handleChangePageData = (value: string | string[], name: VocabularyFieldEnum) => {
     setPageData((prev) => ({ ...prev, [name]: value }))
   }
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <Box
-        style={{
-          backgroundColor: MUAY_WHITE,
-          paddingTop: 44,
-          paddingBottom: 8,
-          paddingHorizontal: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 3,
-        }}
+    <ReadOnlyGuard>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
-          <TouchableOpacity
-            onPress={() => {
-              router.back()
-            }}
-            style={{ padding: 8 }}
-          >
-            <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
-          </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              color: MUAY_PURPLE,
-              padding: 24,
-              paddingLeft: 40,
-            }}
-          >
-            Add Vocabulary
-          </Text>
-        </HStack>
-      </Box>
-      <VocabularySetting
-        handleBack={() => {
-          router.back()
-        }}
-        pageData={pageData || initialModalDataType}
-        handleChangePageData={handleChangePageData}
-        isEdit={false}
-      />
-    </KeyboardAvoidingView>
+        <Box
+          style={{
+            backgroundColor: MUAY_WHITE,
+            paddingTop: 44,
+            paddingBottom: 8,
+            paddingHorizontal: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+          }}
+        >
+          <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
+            <TouchableOpacity
+              onPress={() => {
+                router.back()
+              }}
+              style={{ padding: 8 }}
+            >
+              <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
+            </TouchableOpacity>
+            <Text
+              style={{
+                fontSize: 28,
+                fontWeight: 'bold',
+                color: MUAY_PURPLE,
+                padding: 24,
+                paddingLeft: 40,
+              }}
+            >
+              Add Vocabulary
+            </Text>
+          </HStack>
+        </Box>
+        <VocabularySetting
+          handleBack={() => {
+            router.back()
+          }}
+          pageData={pageData || initialModalDataType}
+          handleChangePageData={handleChangePageData}
+          isEdit={false}
+        />
+      </KeyboardAvoidingView>
+    </ReadOnlyGuard>
   )
 }
 

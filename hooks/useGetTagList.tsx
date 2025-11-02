@@ -6,16 +6,16 @@ const useGetTagList = (includeAll = false) => {
   const { user } = useUser()
   const { data: vocabularies, isLoading, refetch } = useVocabularies(user?.$id)
 
-  // 本地儲存新新增的 tag
+  // Local storage for newly added tags
   const [localTags, setLocalTags] = useState<string[]>([])
 
   const tagsList = useMemo(() => {
     if (!vocabularies) return []
 
-    // 從資料庫獲取的 tag
+    // Tags fetched from database
     const dbTags = Array.from(new Set(vocabularies?.flatMap((v) => v.tags) || [])).filter(Boolean)
 
-    // 合併資料庫 tag 和本地新新增的 tag
+    // Merge database tags and locally added tags
     const allTags = Array.from(new Set([...dbTags, ...localTags]))
 
     if (includeAll) {
@@ -27,7 +27,7 @@ const useGetTagList = (includeAll = false) => {
     return allTags.map((tag) => ({ label: tag, value: tag }))
   }, [vocabularies, localTags, includeAll])
 
-  // 新增新 tag 到本地列表的函數
+  // Function to add new tag to local list
   const addLocalTag = useCallback(
     (tag: string) => {
       if (tag && !localTags.includes(tag)) {
@@ -37,7 +37,7 @@ const useGetTagList = (includeAll = false) => {
     [localTags],
   )
 
-  // 清除本地 tag（在儲存成功後呼叫）
+  // Clear local tags (call after successful save)
   const clearLocalTags = useCallback(() => {
     setLocalTags([])
   }, [])

@@ -14,6 +14,7 @@ import { VocabularyDetailDataType, VocabularyFieldEnum } from '../../../componen
 import VocabularySetting from '../../../components/learning/VocabularySetting'
 import { MUAY_PURPLE, MUAY_WHITE } from '../../../constants/Colors'
 import { useGetVocabularyById } from '../../../lib/learningAPI'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
 const EditVocabulary = () => {
   const { id } = useLocalSearchParams()
@@ -21,9 +22,9 @@ const EditVocabulary = () => {
   const { data: vocabulary, isLoading } = useGetVocabularyById(id as string, {
     enabled: !!id,
     select: (data: any) => {
-      // 明確提取我們需要的欄位，包括 $id 用於更新操作
+      // Extract fields we need, including $id for update operation
       return {
-        $id: data.$id, // 保留 $id 用於更新時的文件識別
+        $id: data.$id, // Keep $id for document identification during update
         thai: data.thai || '',
         romanization: data.romanization || '',
         english: data.english || '',
@@ -49,65 +50,67 @@ const EditVocabulary = () => {
   }, [vocabulary])
 
   return (
-    <>
-      {(isLoading || !pageData) && (
-        <ActivityIndicator animating={true} color={MUAY_PURPLE} style={{ marginTop: 100 }} />
-      )}
-      {!isLoading && pageData && (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="flex-1"
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        >
-          <Box
-            style={{
-              backgroundColor: MUAY_WHITE,
-              paddingTop: 44,
-              paddingBottom: 8,
-              paddingHorizontal: 8,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 3,
-              elevation: 3,
-            }}
+    <ReadOnlyGuard>
+      <>
+        {(isLoading || !pageData) && (
+          <ActivityIndicator animating={true} color={MUAY_PURPLE} style={{ marginTop: 100 }} />
+        )}
+        {!isLoading && pageData && (
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            className="flex-1"
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
           >
-            <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  router.back()
-                }}
-                style={{ padding: 8 }}
-              >
-                <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
-              </TouchableOpacity>
-              <Text
-                style={{
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                  color: MUAY_PURPLE,
-                  padding: 24,
-                  paddingLeft: 40,
-                }}
-              >
-                Edit Vocabulary
-              </Text>
-            </HStack>
-          </Box>
-          <VocabularySetting
-            handleBack={() => {
-              router.back()
-            }}
-            handleDelete={() => {
-              console.log('delete')
-            }}
-            pageData={pageData}
-            handleChangePageData={handleChangePageData}
-            isEdit={true}
-          />
-        </KeyboardAvoidingView>
-      )}
-    </>
+            <Box
+              style={{
+                backgroundColor: MUAY_WHITE,
+                paddingTop: 44,
+                paddingBottom: 8,
+                paddingHorizontal: 8,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+                elevation: 3,
+              }}
+            >
+              <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.back()
+                  }}
+                  style={{ padding: 8 }}
+                >
+                  <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
+                </TouchableOpacity>
+                <Text
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: MUAY_PURPLE,
+                    padding: 24,
+                    paddingLeft: 40,
+                  }}
+                >
+                  Edit Vocabulary
+                </Text>
+              </HStack>
+            </Box>
+            <VocabularySetting
+              handleBack={() => {
+                router.back()
+              }}
+              handleDelete={() => {
+                console.log('delete')
+              }}
+              pageData={pageData}
+              handleChangePageData={handleChangePageData}
+              isEdit={true}
+            />
+          </KeyboardAvoidingView>
+        )}
+      </>
+    </ReadOnlyGuard>
   )
 }
 

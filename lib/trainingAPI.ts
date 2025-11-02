@@ -8,12 +8,12 @@ import {
 } from './traningAppwrite'
 import { Platform, ToastAndroid } from 'react-native'
 
-// 跨平台 Toast 函數
+// Cross-platform Toast function
 const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
   } else {
-    // iOS 和 Web 使用 console.log
+    // iOS and Web use console.log
     console.log(message)
   }
 }
@@ -22,8 +22,8 @@ export const useTraining = (userId?: string) => {
   return useQuery({
     queryKey: ['training', userId],
     queryFn: () => getTraining(userId),
-    enabled: !!userId, // 只有在有 userId 時才執行查詢
-    retry: false, // 不要自動重試，避免多次失敗請求
+    enabled: !!userId, // Only execute query when userId exists
+    retry: false, // Don't auto-retry to avoid multiple failed requests
   })
 }
 
@@ -34,7 +34,7 @@ export const useCreateTraining = () => {
     mutationFn: createTraining,
     onSuccess: () => {
       showToast('Saved successfully ✅')
-      // 重新獲取 training 資料
+      // Refetch training data
       queryClient.invalidateQueries({ queryKey: ['training'] })
     },
     onError: (error) => {
@@ -68,8 +68,8 @@ export const useGetTrainingById = (id: string) => {
   return useQuery({
     queryKey: ['training', id],
     queryFn: () => getTrainingById(id),
-    enabled: !!id, // 只有在有 id 時才執行查詢
-    retry: false, // 不要自動重試，避免多次失敗請求
+    enabled: !!id, // Only execute query when id exists
+    retry: false, // Don't auto-retry to avoid multiple failed requests
   })
 }
 

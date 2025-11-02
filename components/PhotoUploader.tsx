@@ -28,13 +28,13 @@ const PhotoUploader = ({ photos, setPhotos }: Props) => {
     setPhotos(photos.filter((p) => p !== uri))
   }
 
-  // 判斷是否為本地 URI 還是 Appwrite 檔案 ID
+  // Determine if it's a local URI or Appwrite file ID
   const getImageUri = (photo: string) => {
     if (photo.startsWith('file://') || photo.startsWith('content://')) {
-      // 本地檔案 URI
+      // Local file URI
       return photo
     } else {
-      // Appwrite 檔案 ID
+      // Appwrite file ID
       return getPhotoUrl(photo)
     }
   }

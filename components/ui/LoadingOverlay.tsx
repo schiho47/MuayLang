@@ -1,4 +1,4 @@
-import { View, ActivityIndicator, Text, StyleSheet, Modal } from 'react-native'
+import { View, ActivityIndicator, Text, Modal } from 'react-native'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 
 type LoadingOverlayProps = {
@@ -11,41 +11,19 @@ const LoadingOverlay = ({ visible, message = 'Loading...' }: LoadingOverlayProps
 
   return (
     <Modal transparent visible={visible} animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.container}>
+      <View className="flex-1 justify-center items-center bg-black/50">
+        <View
+          className="rounded-xl p-6 items-center min-w-[150px] shadow-lg"
+          style={{ backgroundColor: MUAY_WHITE }}
+        >
           <ActivityIndicator size="large" color={MUAY_PURPLE} />
-          <Text style={styles.message}>{message}</Text>
+          <Text className="mt-3 text-base font-semibold" style={{ color: MUAY_PURPLE }}>
+            {message}
+          </Text>
         </View>
       </View>
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    backgroundColor: MUAY_WHITE,
-    borderRadius: 12,
-    padding: 24,
-    alignItems: 'center',
-    minWidth: 150,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  message: {
-    marginTop: 12,
-    fontSize: 16,
-    color: MUAY_PURPLE,
-    fontWeight: '600',
-  },
-})
 
 export default LoadingOverlay

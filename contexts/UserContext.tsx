@@ -8,6 +8,7 @@ type User = {
   email: string
   name: string
   emailVerification: boolean
+  isGuest?: boolean // Flag to indicate guest user
 } | null
 
 type UserContextType = {
@@ -18,7 +19,12 @@ type UserContextType = {
   logout: () => Promise<void>
   resendVerification: () => Promise<void>
   verifyEmail: (userId: string, secret: string) => Promise<void>
+  loginAsGuest: () => Promise<void> // Guest login function (async)
 }
+
+// 🔐 Demo User ID - Must be set via environment variable
+// Without it, guest mode will display empty data
+const DEMO_USER_ID = process.env.EXPO_PUBLIC_DEMO_USER_ID || null
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
 
@@ -30,7 +36,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>(null)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // 檢查當前登入狀態
+  // Check current authentication status
   useEffect(() => {
     checkAuth()
   }, [])
@@ -38,8 +44,19 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const checkAuth = async () => {
     try {
       const currentUser = await account.get()
-      setUser(currentUser as any)
-    } catch (error) {
+
+      // Check if this is a guest session
+      const isGuestSession =
+        Platform.OS === 'web'
+          ? typeof window !== 'undefined' && localStorage.getItem('muaylang_guest_mode') === 'true'
+          : false // For native, we'll need AsyncStorage later
+
+      if (isGuestSession) {
+        setUser({ ...currentUser, isGuest: true } as any)
+      } else {
+        setUser(currentUser as any)
+      }
+    } catch (_error) {
       setUser(null)
     } finally {
       setAuthChecked(true)
@@ -48,6 +65,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
+      // Clear guest mode flag when doing normal login
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        localStorage.removeItem('muaylang_guest_mode')
+      }
+
       await account.createEmailPasswordSession(email, password)
       const currentUser = await account.get()
       setUser(currentUser as any)
@@ -60,17 +82,22 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const register = async (email: string, password: string) => {
     try {
-      // 建立帳戶
+      // Clear guest mode flag when registering
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        localStorage.removeItem('muaylang_guest_mode')
+      }
+
+      // Create account
       await account.create('unique()', email, password)
-      // 自動登入
+      // Auto login
       await account.createEmailPasswordSession(email, password)
       const currentUser = await account.get()
       setUser(currentUser as any)
 
-      // 發送驗證郵件
+      // Send verification email
       try {
-        // Appwrite 的驗證郵件會發送到用戶的 email
-        // 需要配置驗證成功後的重定向 URL
+        // Appwrite sends verification email to user's email
+        // Configure redirect URL for successful verification
         const verificationUrl =
           Platform.OS === 'web'
             ? `${typeof window !== 'undefined' ? window.location.origin : 'https://muaylang.vercel.app'}/verify`
@@ -80,7 +107,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         console.log('✅ Verification email sent')
       } catch (verifyError) {
         console.error('❌ Failed to send verification email:', verifyError)
-        // 不阻止註冊流程，只是記錄錯誤
+        // Don't block registration flow, just log the error
       }
 
       router.replace('/(tabs)/' as any)
@@ -92,6 +119,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const logout = async () => {
     try {
+      // Clear guest mode flag on logout
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        localStorage.removeItem('muaylang_guest_mode')
+      }
+
       await account.deleteSession('current')
       setUser(null)
       router.replace('/(auth)/' as any)
@@ -119,7 +151,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const verifyEmail = async (userId: string, secret: string) => {
     try {
       await account.updateVerification(userId, secret)
-      // 重新獲取用戶信息以更新驗證狀態
+      // Refresh user info to update verification status
       const currentUser = await account.get()
       setUser(currentUser as any)
       console.log('✅ Email verified successfully')
@@ -129,9 +161,58 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   }
 
+  // 🎭 Guest login - automatically login to demo account
+  const loginAsGuest = async () => {
+    try {
+      // Auto-login to demo account (read-only)
+      // Using sukiho47@gmail.com credentials
+      await account.createEmailPasswordSession('sukiho47@gmail.com', 'sukiho471234567')
+      const currentUser = await account.get()
+
+      // Mark this session as guest mode
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        localStorage.setItem('muaylang_guest_mode', 'true')
+      }
+
+      setUser({ ...currentUser, isGuest: true } as any)
+      setAuthChecked(true)
+      router.replace('/(tabs)/' as any)
+      console.log('👤 Logged in as guest - viewing demo content')
+    } catch (error) {
+      console.error('❌ Guest login failed:', error)
+
+      // Mark this session as guest mode (even in fallback)
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        localStorage.setItem('muaylang_guest_mode', 'true')
+      }
+
+      // Fallback: create fake user (won't be able to fetch data)
+      const guestUser: User = {
+        $id: DEMO_USER_ID || 'guest-no-data',
+        email: 'guest@muaylang.app',
+        name: 'Guest User',
+        emailVerification: false,
+        isGuest: true,
+      }
+      setUser(guestUser)
+      setAuthChecked(true)
+      router.replace('/(tabs)/' as any)
+      console.log('👤 Logged in as guest (fallback) - may not see data')
+    }
+  }
+
   return (
     <UserContext.Provider
-      value={{ user, authChecked, login, register, logout, resendVerification, verifyEmail }}
+      value={{
+        user,
+        authChecked,
+        login,
+        register,
+        logout,
+        resendVerification,
+        verifyEmail,
+        loginAsGuest,
+      }}
     >
       {children}
     </UserContext.Provider>

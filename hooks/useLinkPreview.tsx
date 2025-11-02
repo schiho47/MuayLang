@@ -10,8 +10,8 @@ const useLinkPreview = (url: string | null) => {
         headers: { 'User-Agent': 'ReactNative' },
       })
     },
-    enabled: !!url && /^https?:\/\//.test(url), // ✅ 只有合法網址才執行
-    staleTime: 1000 * 60 * 60, // 一小時內不 refetch
+    enabled: !!url && /^https?:\/\//.test(url), // ✅ Only execute for valid URLs
+    staleTime: 1000 * 60 * 60, // Don't refetch within one hour
   })
 }
 export default useLinkPreview

@@ -10,18 +10,19 @@ import '../global.css'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { UserProvider } from '../contexts/UserContext'
 
-// 建立 QueryClient 實例
+// Create QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 分鐘
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
     },
   },
 })
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  // 🔓 Dev mode: Go directly to main page
+  initialRouteName: '(tabs)',
 }
 
 export default function RootLayout() {

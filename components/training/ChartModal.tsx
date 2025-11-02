@@ -39,10 +39,10 @@ const ChartModal: React.FC<ChartModalProps> = ({
 }) => {
   const { width, height } = useWindowDimensions()
 
-  // 判斷是否橫屏
+  // Check if landscape mode
   const isLandscape = width > height
 
-  // 根據螢幕方向調整圖表尺寸
+  // Adjust chart size based on screen orientation
   const chartWidth = isLandscape
     ? Math.max(width - 100, currentData.length * 120)
     : Math.max(width - 40, currentData.length * 100)
@@ -85,7 +85,7 @@ const ChartModal: React.FC<ChartModalProps> = ({
               {chartTitle}
             </Text>
 
-            {/* 图例 */}
+            {/* Legend */}
             <View
               style={{
                 flexDirection: 'row',
@@ -158,16 +158,16 @@ const ChartModal: React.FC<ChartModalProps> = ({
                     },
                   }}
                   getDotColor={(dataPoint, dataPointIndex) => {
-                    // 隱藏邊界點
+                    // Hide boundary points
                     if (dataPointIndex >= currentData.length) {
                       return 'transparent'
                     }
-                    // PT Session 紫色，Extra Session 橙色
+                    // PT Session purple, Extra Session orange
                     const item = trainingsWithLabels[dataPointIndex]
                     return item?.isExtra ? '#f97316' : MUAY_PURPLE
                   }}
                   renderDotContent={({ x, y, index }) => {
-                    // 只顯示實際資料點的數值，不顯示邊界點
+                    // Only show values for actual data points, not boundary points
                     if (index >= currentData.length) {
                       return null
                     }

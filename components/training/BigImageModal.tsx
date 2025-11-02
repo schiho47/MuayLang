@@ -28,7 +28,7 @@ const BigImageModal = (props: BigImageModalProps) => {
   useEffect(() => {
     if (visible && initialIndex !== undefined) {
       setCurrentIndex(initialIndex)
-      // 延遲滾動，確保 Modal 已完全顯示
+      // Delayed scroll to ensure Modal is fully displayed
       setTimeout(() => {
         flatListRef.current?.scrollToIndex({ index: initialIndex, animated: false })
       }, 100)
@@ -60,7 +60,7 @@ const BigImageModal = (props: BigImageModalProps) => {
             <Ionicons name="close" size={24} color="white" />
           </TouchableOpacity>
 
-          {/* 照片索引指示器 */}
+          {/* Photo index indicator */}
           {photos.length > 1 && (
             <View
               style={{

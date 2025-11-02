@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 import { useGetTrainingById, useUpdateTraining } from '@/lib/trainingAPI'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
 const EditSection = () => {
   const { mutateAsync: updateTraining, isPending } = useUpdateTraining()
@@ -14,48 +15,50 @@ const EditSection = () => {
   const { data: training } = useGetTrainingById(id as string)
 
   return (
-    <View className="flex-1">
-      <Box
-        style={{
-          backgroundColor: MUAY_WHITE,
-          paddingTop: 44,
-          paddingBottom: 8,
-          paddingHorizontal: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 3,
-        }}
-      >
-        <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
-          <TouchableOpacity
-            onPress={() => {
-              router.back()
-            }}
-            style={{ padding: 8 }}
-          >
-            <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
-          </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              color: MUAY_PURPLE,
-              marginLeft: 16,
-            }}
-          >
-            Edit Training Section
-          </Text>
-        </HStack>
-      </Box>
-      <SettingSection
-        handleConfirmApi={(data) => updateTraining({ id: id as string, ...data })}
-        isEdit={true}
-        pageData={training}
-        isPending={isPending}
-      />
-    </View>
+    <ReadOnlyGuard>
+      <View className="flex-1">
+        <Box
+          style={{
+            backgroundColor: MUAY_WHITE,
+            paddingTop: 44,
+            paddingBottom: 8,
+            paddingHorizontal: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+          }}
+        >
+          <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
+            <TouchableOpacity
+              onPress={() => {
+                router.back()
+              }}
+              style={{ padding: 8 }}
+            >
+              <Ionicons name="arrow-back" size={24} color={MUAY_PURPLE} />
+            </TouchableOpacity>
+            <Text
+              style={{
+                fontSize: 28,
+                fontWeight: 'bold',
+                color: MUAY_PURPLE,
+                marginLeft: 16,
+              }}
+            >
+              Edit Training Section
+            </Text>
+          </HStack>
+        </Box>
+        <SettingSection
+          handleConfirmApi={(data) => updateTraining({ id: id as string, ...data })}
+          isEdit={true}
+          pageData={training}
+          isPending={isPending}
+        />
+      </View>
+    </ReadOnlyGuard>
   )
 }
 

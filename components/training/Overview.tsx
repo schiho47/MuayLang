@@ -29,12 +29,12 @@ const Overview = (props: OverviewProps) => {
   const [isChartModalVisible, setIsChartModalVisible] = useState(false)
   const [chartType, setChartType] = useState<ChartType>('calories')
 
-  // 合併所有訓練（PT + Extra）並按日期排序
+  // Merge all training (PT + Extra) and sort by date
   const allTrainingSorted = [...training].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   )
 
-  // 為 Extra Session 添加編號
+  // Add numbering for Extra Sessions
   let extraCounter = 1
   const trainingsWithLabels = allTrainingSorted.map((item) => {
     if (+item.sessionNumber > 0) {
@@ -44,13 +44,13 @@ const Overview = (props: OverviewProps) => {
     }
   })
 
-  // 準備不同類型的圖表資料
+  // Prepare chart data for different types
   const caloriesData = trainingsWithLabels.map((item) => Number(item.calories) || 0)
   const maxHRData = trainingsWithLabels.map((item) => Number(item.maxHeartRate) || 0)
   const avgHRData = trainingsWithLabels.map((item) => Number(item.avgHeartRate) || 0)
   const sessionLabels = trainingsWithLabels.map((item) => item.label)
 
-  // 根據圖表類型選擇資料和配置
+  // Select data and config based on chart type
   const getChartConfig = () => {
     switch (chartType) {
       case 'calories':
@@ -80,7 +80,7 @@ const Overview = (props: OverviewProps) => {
   const config = getChartConfig()
   const currentData = config.data
 
-  // 添加邊界點來控制 Y 軸，但不在 X 軸顯示
+  // Add boundary points to control Y-axis, but don't show on X-axis
   const allData =
     trainingsWithLabels.length > 0
       ? [...currentData, config.boundaries[0], config.boundaries[1]]
@@ -100,7 +100,7 @@ const Overview = (props: OverviewProps) => {
   }
 
   const screenWidth = Dimensions.get('window').width
-  // 計算圖表寬度，如果資料點多則使用更寬的寬度支援橫向滾動
+  // Calculate chart width, use wider width for horizontal scroll if many data points
   const chartWidth = Math.max(screenWidth - 70, currentData.length * 80)
 
   return (
@@ -118,10 +118,10 @@ const Overview = (props: OverviewProps) => {
           elevation: 3,
         }}
       >
-        {/* 曲線圖 */}
+        {/* Line Chart */}
         {trainingsWithLabels.length > 0 ? (
           <View style={{ marginBottom: 16, marginTop: 16 }}>
-            {/* 圖表切換按鈕 */}
+            {/* Chart toggle buttons */}
             <View
               style={{
                 flexDirection: 'row',
@@ -207,7 +207,7 @@ const Overview = (props: OverviewProps) => {
               {config.title}
             </Text>
 
-            {/* 圖例 */}
+            {/* Legend */}
             <View
               style={{
                 flexDirection: 'row',
@@ -252,7 +252,7 @@ const Overview = (props: OverviewProps) => {
                   fromZero={false}
                   segments={5}
                   formatXLabel={(value) => {
-                    // 只顯示非空的標籤
+                    // Only show non-empty labels
                     return value || ''
                   }}
                   chartConfig={{
@@ -277,16 +277,16 @@ const Overview = (props: OverviewProps) => {
                     },
                   }}
                   getDotColor={(dataPoint, dataPointIndex) => {
-                    // 隱藏邊界點
+                    // Hide boundary points
                     if (dataPointIndex >= currentData.length) {
                       return 'transparent'
                     }
-                    // PT Session 紫色，Extra Session 橙色
+                    // PT Session purple, Extra Session orange
                     const item = trainingsWithLabels[dataPointIndex]
                     return item?.isExtra ? '#f97316' : MUAY_PURPLE
                   }}
                   renderDotContent={({ x, y, index }) => {
-                    // 只顯示實際資料點的數值，不顯示邊界點
+                    // Only show values for actual data points, not boundary points
                     if (index >= currentData.length) {
                       return null
                     }
@@ -327,7 +327,7 @@ const Overview = (props: OverviewProps) => {
           </Text>
         )}
 
-        {/* 統計資料 - 縮小版 */}
+        {/* Statistics - Compact version */}
         <View
           style={{
             flexDirection: 'row',
@@ -373,7 +373,7 @@ const Overview = (props: OverviewProps) => {
         </View>
       </Box>
 
-      {/* 圖表放大彈窗 */}
+      {/* Chart zoom modal */}
       <ChartModal
         visible={isChartModalVisible}
         onClose={() => setIsChartModalVisible(false)}

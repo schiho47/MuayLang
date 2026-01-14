@@ -34,7 +34,7 @@ export default function Training() {
         <View className="flex-1 flex-row items-center justify-between px-6 pt-10">
           <View className="flex-1">
             <Text
-              className="text-[130px] leading-[120px] font-bold text-center h-[100px]"
+              className="text-[100px] leading-[120px] font-bold text-center h-[100px]"
               style={{ color: MUAY_WHITE }}
             >
               มวยไทย
@@ -44,7 +44,7 @@ export default function Training() {
             name="figure.boxing"
             size={52}
             color={MUAY_WHITE}
-            style={{ position: 'absolute', right: 0, top: 0 }}
+            style={{ position: 'absolute', right: 20, top: 50 }}
           />
         </View>
       }

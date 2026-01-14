@@ -1,5 +1,5 @@
 import { View, Dimensions, Text, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 // @ts-ignore - types for components may not be bundled correctly
 import { Box } from '@gluestack-ui/themed'
 import { LineChart } from 'react-native-chart-kit'
@@ -18,58 +18,72 @@ type ChartType = 'calories' | 'maxHR' | 'avgHR'
 const Overview = (props: OverviewProps) => {
   const { training = [] } = props
 
-  const isPersonalTraining = training.filter((item) => +item.sessionNumber > 0)
-
-  const isExtraTraining = training.filter((item) => item.sessionNumber === 'Extra')
-  const sessionTaken = isPersonalTraining.length
-  const extraSessionTaken = isExtraTraining.length
-  const totalCalories = isPersonalTraining.reduce((acc, item) => +acc + +item.calories, 0)
-  const totalDuration = isPersonalTraining.reduce((acc, item) => +acc + +item.duration, 0)
-
   const [isChartModalVisible, setIsChartModalVisible] = useState(false)
   const [chartType, setChartType] = useState<ChartType>('calories')
 
-  // Merge all training (PT + Extra) and sort by date
-  const allTrainingSorted = [...training].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  )
+  // Performance optimization: Memoize statistics calculations
+  // Only recalculate when training data changes, not when chartType or modal state changes
+  const statistics = useMemo(() => {
+    const isPersonalTraining = training.filter((item) => +item.sessionNumber > 0)
+    const isExtraTraining = training.filter((item) => item.sessionNumber === 'Extra')
 
-  // Add numbering for Extra Sessions
-  let extraCounter = 1
-  const trainingsWithLabels = allTrainingSorted.map((item) => {
-    if (+item.sessionNumber > 0) {
-      return { ...item, label: String(item.sessionNumber), isExtra: false }
-    } else {
-      return { ...item, label: `E${extraCounter++}`, isExtra: true }
+    return {
+      sessionTaken: isPersonalTraining.length,
+      extraSessionTaken: isExtraTraining.length,
+      totalCalories: isPersonalTraining.reduce((acc, item) => +acc + +item.calories, 0),
+      totalDuration: isPersonalTraining.reduce((acc, item) => +acc + +item.duration, 0),
     }
-  })
+  }, [training])
 
-  // Prepare chart data for different types
-  const caloriesData = trainingsWithLabels.map((item) => Number(item.calories) || 0)
-  const maxHRData = trainingsWithLabels.map((item) => Number(item.maxHeartRate) || 0)
-  const avgHRData = trainingsWithLabels.map((item) => Number(item.avgHeartRate) || 0)
-  const sessionLabels = trainingsWithLabels.map((item) => item.label)
+  // Performance optimization: Memoize sorted and labeled training data
+  // Sorting and mapping are expensive operations, cache them to avoid re-computation
+  const trainingsWithLabels = useMemo(() => {
+    const allTrainingSorted = [...training].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    )
+
+    let extraCounter = 1
+    return allTrainingSorted.map((item) => {
+      if (+item.sessionNumber > 0) {
+        return { ...item, label: String(item.sessionNumber), isExtra: false }
+      } else {
+        return { ...item, label: `E${extraCounter++}`, isExtra: true }
+      }
+    })
+  }, [training])
+
+  // Performance optimization: Memoize chart data arrays
+  // Extract all metrics at once and cache them, so switching chartType doesn't trigger re-mapping
+  const chartData = useMemo(
+    () => ({
+      caloriesData: trainingsWithLabels.map((item) => Number(item.calories) || 0),
+      maxHRData: trainingsWithLabels.map((item) => Number(item.maxHeartRate) || 0),
+      avgHRData: trainingsWithLabels.map((item) => Number(item.avgHeartRate) || 0),
+      sessionLabels: trainingsWithLabels.map((item) => item.label),
+    }),
+    [trainingsWithLabels],
+  )
 
   // Select data and config based on chart type
   const getChartConfig = () => {
     switch (chartType) {
       case 'calories':
         return {
-          data: caloriesData,
+          data: chartData.caloriesData,
           boundaries: [100, 600],
           title: 'Calories per Session',
           yAxisSuffix: ' kcal',
         }
       case 'maxHR':
         return {
-          data: maxHRData,
+          data: chartData.maxHRData,
           boundaries: [60, 220],
           title: 'Max Heart Rate per Session',
           yAxisSuffix: ' bpm',
         }
       case 'avgHR':
         return {
-          data: avgHRData,
+          data: chartData.avgHRData,
           boundaries: [60, 200],
           title: 'Avg Heart Rate per Session',
           yAxisSuffix: ' bpm',
@@ -85,9 +99,9 @@ const Overview = (props: OverviewProps) => {
     trainingsWithLabels.length > 0
       ? [...currentData, config.boundaries[0], config.boundaries[1]]
       : [0]
-  const allLabels = trainingsWithLabels.length > 0 ? [...sessionLabels, '', ''] : ['']
+  const allLabels = trainingsWithLabels.length > 0 ? [...chartData.sessionLabels, '', ''] : ['']
 
-  const chartData = {
+  const lineChartData = {
     labels: allLabels,
     datasets: [
       {
@@ -243,7 +257,7 @@ const Overview = (props: OverviewProps) => {
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <TouchableOpacity onPress={() => setIsChartModalVisible(true)} activeOpacity={0.8}>
                 <LineChart
-                  data={chartData}
+                  data={lineChartData}
                   width={chartWidth}
                   height={200}
                   yAxisLabel=""
@@ -341,7 +355,7 @@ const Overview = (props: OverviewProps) => {
           <View style={{ width: '48%' }}>
             <OverViewItem
               title="Session Taken"
-              description={`${sessionTaken}/20`}
+              description={`${statistics.sessionTaken}/20`}
               icon="checkmark-circle"
               compact={true}
             />
@@ -349,7 +363,7 @@ const Overview = (props: OverviewProps) => {
           <View style={{ width: '48%' }}>
             <OverViewItem
               title="Total Calories"
-              description={`${totalCalories} kcal`}
+              description={`${statistics.totalCalories} kcal`}
               icon="flame"
               compact={true}
             />
@@ -357,7 +371,7 @@ const Overview = (props: OverviewProps) => {
           <View style={{ width: '48%' }}>
             <OverViewItem
               title="Total Duration"
-              description={`${totalDuration} min`}
+              description={`${statistics.totalDuration} min`}
               icon="time"
               compact={true}
             />
@@ -365,7 +379,7 @@ const Overview = (props: OverviewProps) => {
           <View style={{ width: '48%' }}>
             <OverViewItem
               title="Extra Session"
-              description={`${extraSessionTaken}`}
+              description={`${statistics.extraSessionTaken}`}
               icon="add-circle-outline"
               compact={true}
             />
@@ -377,7 +391,7 @@ const Overview = (props: OverviewProps) => {
       <ChartModal
         visible={isChartModalVisible}
         onClose={() => setIsChartModalVisible(false)}
-        chartData={chartData}
+        chartData={lineChartData}
         currentData={currentData}
         chartTitle={config.title}
         trainingsWithLabels={trainingsWithLabels}

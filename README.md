@@ -78,6 +78,210 @@ A mobile application for learning Thai language while tracking your Muay Thai tr
 - **Expo Image** - Optimized image loading
 - **React Native Chart Kit** - Data visualization
 
+## 📐 System Architecture
+
+### Overall System Architecture
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#6B3789','primaryTextColor':'#fff','primaryBorderColor':'#7C0000','lineColor':'#F8B229','secondaryColor':'#006100','tertiaryColor':'#fff'}}}%%
+graph TB
+    subgraph Client["🖥️ Client Layer - Multi Platform"]
+        A[iOS App]
+        B[Android App]
+        C[Web App]
+    end
+
+    subgraph Present["🎨 Presentation Layer"]
+        D[Expo Router]
+        E[UI Components]
+    end
+
+    subgraph State["📦 State Management"]
+        F[React Context]
+        G[React Query]
+        H[Local State]
+    end
+
+    subgraph Logic["⚙️ Business Logic"]
+        I[Custom Hooks]
+        J[API Layer]
+        K[Utils]
+    end
+
+    subgraph Backend["☁️ Backend - Appwrite"]
+        L[Authentication]
+        M[Database]
+        N[Storage]
+    end
+
+    subgraph Data["💾 Data Storage"]
+        P[(Vocabulary)]
+        Q[(Training)]
+        R[File Storage]
+        S[Local Storage]
+    end
+
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    E --> F
+    E --> G
+    E --> H
+    F --> I
+    G --> I
+    H --> I
+    I --> J
+    J --> L
+    J --> M
+    J --> N
+    L --> P
+    L --> Q
+    M --> P
+    M --> Q
+    N --> R
+    C --> S
+```
+
+### Authentication Flow
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#6B3789','primaryTextColor':'#fff','primaryBorderColor':'#4B0082','lineColor':'#F8B229','secondaryColor':'#FF6B6B','tertiaryColor':'#4ECDC4'}}}%%
+graph TD
+    A[🚀 App Start] --> B{Auth Check}
+    B -->|No Session| C[🔐 Auth Landing]
+    B -->|Has Session| D{Guest Mode?}
+
+    C --> E[Login]
+    C --> F[Register]
+    C --> G[Guest]
+
+    D -->|Yes| H[👤 Guest User<br/>Read-only]
+    D -->|No| I[✅ Normal User<br/>Full Access]
+
+    E --> J[Appwrite Session]
+    F --> K[Create Account]
+    K --> J
+    G --> L[Demo Login]
+    L --> M[Set Guest Flag]
+    M --> H
+
+    J --> I
+    H --> N[📖 View Only]
+    I --> O[✏️ CRUD Operations]
+
+    N --> P{Try to Edit?}
+    P -->|Yes| Q[🚫 ReadOnlyGuard]
+    Q --> N
+```
+
+### Data Flow Architecture
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#6B3789','primaryTextColor':'#000','primaryBorderColor':'#7C0000','actorBkg':'#E8D5F2','actorBorder':'#6B3789','actorTextColor':'#000','signalColor':'#6B3789','signalTextColor':'#000','labelBoxBkgColor':'#F8B229','labelBoxBorderColor':'#6B3789','labelTextColor':'#000','noteBkgColor':'#FFE6E6','noteBorderColor':'#FF6B6B','noteTextColor':'#000'}}}%%
+sequenceDiagram
+    participant U as 👤 User
+    participant C as 🎨 Component
+    participant RQ as 📦 React Query
+    participant API as ⚙️ API Layer
+    participant AW as ☁️ Appwrite
+    participant DB as 💾 Database
+
+    U->>C: User Action
+    C->>RQ: Mutation
+    RQ->>API: API Call
+    API->>AW: HTTP Request
+    AW->>DB: CRUD
+    DB-->>AW: Response
+    AW-->>API: Data
+    API-->>RQ: Processed
+    RQ->>RQ: Update Cache
+    RQ-->>C: Re-render
+    C-->>U: Updated UI
+```
+
+### Component Hierarchy
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#6B3789','primaryTextColor':'#fff','primaryBorderColor':'#4B0082','lineColor':'#F8B229'}}}%%
+graph TD
+    A[📱 App Root] --> B[🔐 Auth Stack]
+    A --> C[📑 Tabs Stack]
+    A --> D[🔲 Modals]
+
+    B --> E[Landing Page]
+
+    C --> F[🏠 Home Tab]
+    C --> G[📚 Learning Tab]
+    C --> H[🥊 Training Tab]
+
+    F --> I[VocabularyCard]
+    F --> J[TrainingItem]
+
+    G --> K[FilterModal]
+    G --> L[VocabularySetting]
+    G --> I
+
+    H --> M[Overview]
+    H --> N[Session]
+
+    M --> O[LineChart]
+    M --> P[OverViewItem]
+
+    N --> Q[BigImageModal]
+    N --> R[PhotoUploader]
+```
+
+### Data Model
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#6B3789','primaryTextColor':'#000','primaryBorderColor':'#4B0082','lineColor':'#F8B229'}}}%%
+erDiagram
+    USER ||--o{ VOCABULARY : creates
+    USER ||--o{ TRAINING : records
+
+    USER {
+        string id PK
+        string email
+        string name
+        boolean emailVerification
+        boolean isGuest
+    }
+
+    VOCABULARY ||--|{ TAG : has
+    VOCABULARY {
+        string id PK
+        string userId FK
+        string thai
+        string romanization
+        string english
+        string exampleTH
+        string exampleEN
+        boolean favorite
+        array tags
+        datetime createdAt
+    }
+
+    TAG {
+        string name
+        string color
+    }
+
+    TRAINING {
+        string id PK
+        string userId FK
+        string sessionNumber
+        date date
+        int calories
+        int duration
+        int maxHeartRate
+        int avgHeartRate
+        string note
+        array photos
+        datetime createdAt
+    }
+```
+
 ## 📦 Installation
 
 ### Prerequisites

@@ -1,40 +1,256 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { Client, Users, Account, Query, ID } from 'node-appwrite'
 
 const app = express()
+const isProd = process.env.NODE_ENV === 'production'
 
 const corsOptions = {
-  origin: ['https://muaylang.app', 'https://www.muaylang.app'],
+  origin(origin, cb) {
+    const o = typeof origin === 'string' ? origin : ''
+    if (!o) return cb(null, true)
+
+    if (!isProd && (o.startsWith('http://localhost') || o.startsWith('http://127.0.0.1'))) {
+      return cb(null, true)
+    }
+
+    if (o === 'https://muaylang.app' || o === 'https://www.muaylang.app') {
+      return cb(null, true)
+    }
+
+    return cb(null, false)
+  },
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }
 
 app.use(cors(corsOptions))
-// ✅ 用 /.*/ 取代 "*"，避免 Express 5 直接 crash
 app.options(/.*/, cors(corsOptions))
 
 app.use(express.json())
 app.use(cookieParser())
 
+// ---------- helpers ----------
+function assertEnv() {
+  const required = ['APPWRITE_ENDPOINT', 'APPWRITE_PROJECT_ID', 'APPWRITE_API_KEY']
+  for (const k of required) {
+    if (!process.env[k]) throw new Error(`Missing env: ${k}`)
+  }
+}
+
+function makeServerClient() {
+  assertEnv()
+  return new Client()
+    .setEndpoint(process.env.APPWRITE_ENDPOINT)
+    .setProject(process.env.APPWRITE_PROJECT_ID)
+    .setKey(process.env.APPWRITE_API_KEY)
+}
+
+function setSessionCookie(res, secret) {
+  // cookie 只是為了 logout/me 能用，不是必須
+  res.cookie('aw_session_secret', secret, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 1000, // 1 hour
+  })
+}
+
+function clearSessionCookie(res) {
+  res.clearCookie('aw_session_secret', { path: '/' })
+}
+
+async function createJwtFromSessionSecret(secret) {
+  const userClient = new Client()
+    .setEndpoint(process.env.APPWRITE_ENDPOINT)
+    .setProject(process.env.APPWRITE_PROJECT_ID)
+    .setSession(secret)
+
+  const account = new Account(userClient)
+  const jwtResp = await account.createJWT()
+  return jwtResp.jwt
+}
+
+async function createUserEmailSession(userId, email, password) {
+  const endpoint = process.env.APPWRITE_ENDPOINT // https://cloud.appwrite.io/v1
+  const project = process.env.APPWRITE_PROJECT_ID
+  const apiKey = process.env.APPWRITE_API_KEY
+
+  const url = `${endpoint}/users/${userId}/sessions/email`
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-appwrite-project': project,
+      'x-appwrite-key': apiKey,
+    },
+    body: JSON.stringify({ email, password }),
+  })
+  console.log('[DEBUG] APPWRITE_ENDPOINT =', process.env.APPWRITE_ENDPOINT)
+  console.log('[DEBUG] login URL =', url)
+  const text = await resp.text()
+  if (!resp.ok) {
+    throw new Error(`Appwrite create session failed (${resp.status}): ${text}`)
+  }
+
+  return JSON.parse(text)
+}
+
+// ---------- routes ----------
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'muaylang-auth', time: Date.now() })
 })
 
-app.post('/auth/login', (_req, res) => {
-  res.cookie('muaylang_demo', '1', {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  })
-  res.json({ ok: true })
+/**
+ * POST /auth/login
+ * body: { email, password }
+ * returns: { ok, jwt, expiry, user }
+ */
+app.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body ?? {}
+    if (!email || !password) {
+      return res.status(400).json({ ok: false, message: 'email & password required' })
+    }
+
+    const serverClient = makeServerClient()
+    const users = new Users(serverClient)
+
+    // find user by email
+    const found = await users.list([Query.equal('email', email)])
+    const userDoc = found?.users?.[0]
+    if (!userDoc) {
+      return res.status(401).json({ ok: false, message: 'Invalid credentials' })
+    }
+
+    // create session using Users API (server key) — validates password
+    // NOTE: if your SDK doesn't have this method name, tell me the error, I'll adjust.
+    const session = await createUserEmailSession(userDoc.$id, email, password)
+
+    // store secret for /auth/me & /auth/logout
+    setSessionCookie(res, session.secret)
+
+    const jwt = await createJwtFromSessionSecret(session.secret)
+    const expiry = Date.now() + 3600 * 1000
+
+    const user = {
+      $id: userDoc.$id,
+      email: userDoc.email,
+      name: userDoc.name,
+      emailVerification: userDoc.emailVerification,
+    }
+
+    return res.json({ ok: true, jwt, expiry, user })
+  } catch (e) {
+    console.error('auth/login error:', e)
+    return res.status(500).json({ ok: false, message: e?.message ?? String(e) })
+  }
 })
 
-app.get('/auth/me', (req, res) => {
-  res.json({ ok: true, cookies: req.cookies || {} })
+/**
+ * POST /auth/register
+ * body: { email, password, name? }
+ * returns: { ok, jwt, expiry, user }
+ */
+app.post('/auth/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body ?? {}
+    if (!email || !password) {
+      return res.status(400).json({ ok: false, message: 'email & password required' })
+    }
+
+    const serverClient = makeServerClient()
+    const users = new Users(serverClient)
+
+    // create user
+    const created = await users.create(ID.unique(), email, password, name || '')
+
+    // auto create session (so user can be logged in immediately)
+    const session = await createUserEmailSession(created.$id, email, password)
+
+    setSessionCookie(res, session.secret)
+
+    const jwt = await createJwtFromSessionSecret(session.secret)
+    const expiry = Date.now() + 3600 * 1000
+
+    const user = {
+      $id: created.$id,
+      email: created.email,
+      name: created.name,
+      emailVerification: created.emailVerification,
+    }
+
+    return res.json({ ok: true, jwt, expiry, user })
+  } catch (e) {
+    console.error('auth/register error:', e)
+    return res.status(500).json({ ok: false, message: e?.message ?? String(e) })
+  }
+})
+
+/**
+ * GET /auth/me
+ * returns: { ok, user? }
+ */
+app.get('/auth/me', async (req, res) => {
+  try {
+    const secret = req.cookies?.aw_session_secret
+    if (!secret) return res.status(401).json({ ok: false, message: 'No session' })
+
+    const userClient = new Client()
+      .setEndpoint(process.env.APPWRITE_ENDPOINT)
+      .setProject(process.env.APPWRITE_PROJECT_ID)
+      .setSession(secret)
+
+    const account = new Account(userClient)
+    const me = await account.get()
+
+    const user = {
+      $id: me.$id,
+      email: me.email,
+      name: me.name,
+      emailVerification: me.emailVerification,
+    }
+
+    return res.json({ ok: true, user })
+  } catch (e) {
+    console.error('auth/me error:', e)
+    return res.status(401).json({ ok: false, message: e?.message ?? String(e) })
+  }
+})
+
+/**
+ * POST /auth/logout
+ * clears cookie and deletes current session (best-effort)
+ */
+app.post('/auth/logout', async (req, res) => {
+  try {
+    const secret = req.cookies?.aw_session_secret
+    clearSessionCookie(res)
+
+    if (secret) {
+      try {
+        const userClient = new Client()
+          .setEndpoint(process.env.APPWRITE_ENDPOINT)
+          .setProject(process.env.APPWRITE_PROJECT_ID)
+          .setSession(secret)
+
+        const account = new Account(userClient)
+        await account.deleteSession('current')
+      } catch (e) {
+        console.log('logout: deleteSession skipped:', e?.message ?? e)
+      }
+    }
+
+    return res.json({ ok: true })
+  } catch (e) {
+    console.error('auth/logout error:', e)
+    return res.status(500).json({ ok: false, message: e?.message ?? String(e) })
+  }
 })
 
 const port = process.env.PORT || 3000

@@ -7,14 +7,20 @@ const GUEST_MODE_KEY = 'muaylang_guest_mode'
 
 /**
  * Cross-platform storage interface
- * Web: localStorage
+ * Web: localStorage (fallback to in-memory if unavailable)
  * Native: AsyncStorage
  */
+const memoryStore = new Map<string, string>()
+
 const storage = {
   getItem: async (key: string): Promise<string | null> => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
-        return localStorage.getItem(key)
+        try {
+          return localStorage.getItem(key)
+        } catch {
+          return memoryStore.get(key) ?? null
+        }
       }
       return null
     }
@@ -23,7 +29,11 @@ const storage = {
   setItem: async (key: string, value: string): Promise<void> => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
-        localStorage.setItem(key, value)
+        try {
+          localStorage.setItem(key, value)
+        } catch {
+          memoryStore.set(key, value)
+        }
       }
       return
     }
@@ -32,7 +42,11 @@ const storage = {
   removeItem: async (key: string): Promise<void> => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem(key)
+        try {
+          localStorage.removeItem(key)
+        } catch {
+          memoryStore.delete(key)
+        }
       }
       return
     }

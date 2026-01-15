@@ -23,8 +23,8 @@ type UserContextType = {
   loginAsGuest: () => Promise<void> // Guest login function (async)
 }
 
-// 🔐 Demo User ID - Must be set via environment variable
-// Without it, guest mode will display empty data
+// 🔐 Demo User ID - Optional for guest mode data filtering
+// Without it, guest mode may display empty data depending on DB rules
 const DEMO_USER_ID = process.env.EXPO_PUBLIC_DEMO_USER_ID || null
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -42,11 +42,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     try {
       // Clear guest mode flag on logout
       await guestStorage.clearGuestMode()
-      
+
       // Clear JWT token
       await jwtStorage.removeToken()
       clearJWTToken()
-      
+
       // Delete session
       try {
         await account.deleteSession('current')
@@ -54,7 +54,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         // Session might already be deleted, ignore error
         console.log('Session deletion skipped:', sessionError)
       }
-      
+
       setUser(null)
       router.replace('/(auth)/' as any)
       console.log('✅ Logout successful, JWT token cleared')
@@ -70,9 +70,26 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const checkAuth = async () => {
     try {
+      // Guest mode: no session/JWT required
+      const isGuestSession = await guestStorage.isGuestMode()
+      if (isGuestSession) {
+        await jwtStorage.removeToken()
+        clearJWTToken()
+        const guestUser: User = {
+          $id: DEMO_USER_ID || 'guest-public',
+          email: 'guest@muaylang.app',
+          name: 'Guest User',
+          emailVerification: false,
+          isGuest: true,
+        }
+        setUser(guestUser)
+        setAuthChecked(true)
+        return
+      }
+
       // Initialize JWT token from storage
       const hasValidToken = await initializeJWT()
-      
+
       if (!hasValidToken) {
         setUser(null)
         setAuthChecked(true)
@@ -81,16 +98,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
       // Get current user using JWT token
       const currentUser = await account.get()
-
-      // Check if this is a guest session
-      const isGuestSession = await guestStorage.isGuestMode()
-
-      if (isGuestSession) {
-        setUser({ ...currentUser, isGuest: true } as any)
-      } else {
-        setUser(currentUser as any)
-      }
-    } catch (_error) {
+      setUser(currentUser as any)
+    } catch (error) {
+      console.error('❌ Auth check failed:', error)
       // If JWT is invalid, clear it
       await jwtStorage.removeToken()
       clearJWTToken()
@@ -109,25 +119,28 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   useEffect(() => {
     if (!user || user.isGuest) return
 
-    const refreshInterval = setInterval(async () => {
-      try {
-        const isExpired = await jwtStorage.isTokenExpired()
-        if (isExpired) {
-          console.log('🔄 JWT token expired, refreshing...')
-          // Create new JWT token with account scope
-          const jwtResponse = await account.createJWT({ scopes: ['account'] })
-          const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000
-          await jwtStorage.saveToken(jwtToken, expiry)
-          setJWTToken(jwtToken)
-          console.log('✅ JWT token refreshed')
+    const refreshInterval = setInterval(
+      async () => {
+        try {
+          const isExpired = await jwtStorage.isTokenExpired()
+          if (isExpired) {
+            console.log('🔄 JWT token expired, refreshing...')
+            // Create new JWT token
+            const jwtResponse = await account.createJWT()
+            const jwtToken = jwtResponse.jwt
+            const expiry = Date.now() + 3600 * 1000
+            await jwtStorage.saveToken(jwtToken, expiry)
+            setJWTToken(jwtToken)
+            console.log('✅ JWT token refreshed')
+          }
+        } catch (error) {
+          console.error('❌ Failed to refresh JWT token:', error)
+          // If refresh fails, logout user
+          await logout()
         }
-      } catch (error) {
-        console.error('❌ Failed to refresh JWT token:', error)
-        // If refresh fails, logout user
-        await logout()
-      }
-    }, 5 * 60 * 1000) // Check every 5 minutes
+      },
+      5 * 60 * 1000,
+    ) // Check every 5 minutes
 
     return () => clearInterval(refreshInterval)
   }, [user, logout])
@@ -147,24 +160,24 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
       // Create session first (required for JWT generation)
       await account.createEmailPasswordSession(email, password)
-      
-      // Get JWT token (valid for 1 hour by default) with account scope
-      const jwtResponse = await account.createJWT({ scopes: ['account'] })
+
+      // Get JWT token (valid for 1 hour by default)
+      const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
-      
+
       // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)
       const expiry = Date.now() + 3600 * 1000
-      
+
       // Store JWT token
       await jwtStorage.saveToken(jwtToken, expiry)
-      
+
       // Set JWT token in client
       setJWTToken(jwtToken)
-      
+
       // Get current user
       const currentUser = await account.get()
       setUser(currentUser as any)
-      
+
       router.replace('/(tabs)/' as any)
       console.log('✅ Login successful, JWT token stored')
     } catch (error) {
@@ -192,20 +205,20 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       await account.create('unique()', email, password)
       // Auto login
       await account.createEmailPasswordSession(email, password)
-      
-      // Get JWT token with account scope
-      const jwtResponse = await account.createJWT({ scopes: ['account'] })
+
+      // Get JWT token
+      const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
-      
+
       // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)
       const expiry = Date.now() + 3600 * 1000
-      
+
       // Store JWT token
       await jwtStorage.saveToken(jwtToken, expiry)
-      
+
       // Set JWT token in client
       setJWTToken(jwtToken)
-      
+
       const currentUser = await account.get()
       setUser(currentUser as any)
 
@@ -263,42 +276,33 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   }
 
-  // 🎭 Guest login - automatically login to demo account
+  // 🎭 Guest login - public read-only access (no session)
   const loginAsGuest = async () => {
     try {
-      // Delete existing session if any (to avoid "session is active" error)
+      // Clear any existing session/token before entering guest mode
       try {
         await account.deleteSession('current')
       } catch (sessionError) {
         // Session might not exist, ignore error
         console.log('No existing session to delete:', sessionError)
       }
+      await jwtStorage.removeToken()
+      clearJWTToken()
 
-      // Auto-login to demo account (read-only)
-      // Using sukiho47@gmail.com credentials
-      await account.createEmailPasswordSession('sukiho47@gmail.com', 'sukiho471234567')
-      
-      // Get JWT token for guest session with account scope
-      const jwtResponse = await account.createJWT({ scopes: ['account'] })
-      const jwtToken = jwtResponse.jwt
-      
-      // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)
-      const expiry = Date.now() + 3600 * 1000
-      
-      // Store JWT token
-      await jwtStorage.saveToken(jwtToken, expiry)
-      
-      // Set JWT token in client
-      setJWTToken(jwtToken)
-      
       // Mark this session as guest mode
       await guestStorage.setGuestMode(true)
-      
-      const currentUser = await account.get()
-      setUser({ ...currentUser, isGuest: true } as any)
+
+      const guestUser: User = {
+        $id: DEMO_USER_ID || 'guest-public',
+        email: 'guest@muaylang.app',
+        name: 'Guest User',
+        emailVerification: false,
+        isGuest: true,
+      }
+      setUser(guestUser)
       setAuthChecked(true)
       router.replace('/(tabs)/' as any)
-      console.log('👤 Logged in as guest - viewing demo content with JWT')
+      console.log('👤 Logged in as guest - viewing public demo content')
     } catch (error) {
       console.error('❌ Guest login failed:', error)
 

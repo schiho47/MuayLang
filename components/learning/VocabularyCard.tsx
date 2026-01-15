@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View, Platform } from 'react-native'
 // @ts-ignore - types for components may not be bundled correctly
 import { Box, Divider } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
@@ -60,7 +60,7 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
       style={{
         borderRadius: 16,
         width: 300,
-        height: 400,
+        height: 440,
         backgroundColor: MUAY_WHITE,
         shadowColor: MUAY_PURPLE,
         shadowOffset: { width: 0, height: 2 },
@@ -70,6 +70,8 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
         padding: 16,
         marginBottom: 24,
         position: 'relative',
+        // Web needs 'auto' for scrolling, native needs 'hidden'
+        overflow: (Platform.OS === 'web' ? 'auto' : 'hidden') as any,
       }}
     >
       {/* Favorite button - Top right (hidden for guests) */}
@@ -118,6 +120,7 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
                   textAlign: 'center',
                   color: MUAY_PURPLE,
                   marginBottom: 8,
+                  marginTop: 24,
                 }}
               >
                 {thai}

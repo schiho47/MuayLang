@@ -114,8 +114,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         const isExpired = await jwtStorage.isTokenExpired()
         if (isExpired) {
           console.log('🔄 JWT token expired, refreshing...')
-          // Create new JWT token
-          const jwtResponse = await account.createJWT()
+          // Create new JWT token with account scope
+          const jwtResponse = await account.createJWT({ scopes: ['account'] })
           const jwtToken = jwtResponse.jwt
           const expiry = Date.now() + 3600 * 1000
           await jwtStorage.saveToken(jwtToken, expiry)
@@ -148,8 +148,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       // Create session first (required for JWT generation)
       await account.createEmailPasswordSession(email, password)
       
-      // Get JWT token (valid for 1 hour by default)
-      const jwtResponse = await account.createJWT()
+      // Get JWT token (valid for 1 hour by default) with account scope
+      const jwtResponse = await account.createJWT({ scopes: ['account'] })
       const jwtToken = jwtResponse.jwt
       
       // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)
@@ -193,8 +193,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       // Auto login
       await account.createEmailPasswordSession(email, password)
       
-      // Get JWT token
-      const jwtResponse = await account.createJWT()
+      // Get JWT token with account scope
+      const jwtResponse = await account.createJWT({ scopes: ['account'] })
       const jwtToken = jwtResponse.jwt
       
       // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)
@@ -278,8 +278,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       // Using sukiho47@gmail.com credentials
       await account.createEmailPasswordSession('sukiho47@gmail.com', 'sukiho471234567')
       
-      // Get JWT token for guest session
-      const jwtResponse = await account.createJWT()
+      // Get JWT token for guest session with account scope
+      const jwtResponse = await account.createJWT({ scopes: ['account'] })
       const jwtToken = jwtResponse.jwt
       
       // Calculate expiry (JWT is valid for 1 hour = 3600 seconds)

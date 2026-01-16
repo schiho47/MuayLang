@@ -49,19 +49,19 @@ function makeServerClient() {
     .setKey(process.env.APPWRITE_API_KEY)
 }
 
-function setSessionCookie(res, secret) {
+function setSessionCookie(res, cookie) {
   // cookie 只是為了 logout/me 能用，不是必須
-  res.cookie('aw_session_secret', secret, {
+  res.cookie('aw_session_cookie', cookie, {
     httpOnly: true,
     secure: isProd,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 1000, // 1 hour
+    maxAge: 60 * 60 * 1000,
   })
 }
 
 function clearSessionCookie(res) {
-  res.clearCookie('aw_session_secret', { path: '/' })
+  res.clearCookie('aw_session_cookie', { path: '/' })
 }
 
 async function createJwtFromSessionSecret(secret) {
@@ -75,30 +75,58 @@ async function createJwtFromSessionSecret(secret) {
   return jwtResp.jwt
 }
 
-async function createUserEmailSession(userId, email, password) {
-  const endpoint = process.env.APPWRITE_ENDPOINT // https://cloud.appwrite.io/v1
+async function createJwtFromCookie(cookie) {
+  const endpoint = (process.env.APPWRITE_ENDPOINT || '').replace(/\/+$/, '')
   const project = process.env.APPWRITE_PROJECT_ID
-  const apiKey = process.env.APPWRITE_API_KEY
 
-  const url = `${endpoint}/users/${userId}/sessions/email`
+  const url = `${endpoint}/account/jwt`
 
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-appwrite-project': project,
-      'x-appwrite-key': apiKey,
+      // ✅ 关键：把 appwrite 的 session cookie 带进去
+      cookie,
+    },
+  })
+
+  const text = await resp.text()
+  if (!resp.ok) throw new Error(`Appwrite createJWT failed (${resp.status}): ${text}`)
+
+  const data = JSON.parse(text) // { jwt }
+  return data.jwt
+}
+
+async function createEmailSession(email, password) {
+  const endpoint = (process.env.APPWRITE_ENDPOINT || '').replace(/\/+$/, '')
+  const project = process.env.APPWRITE_PROJECT_ID
+
+  const url = `${endpoint}/account/sessions/email`
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-appwrite-project': project,
     },
     body: JSON.stringify({ email, password }),
   })
-  console.log('[DEBUG] APPWRITE_ENDPOINT =', process.env.APPWRITE_ENDPOINT)
-  console.log('[DEBUG] login URL =', url)
-  const text = await resp.text()
-  if (!resp.ok) {
-    throw new Error(`Appwrite create session failed (${resp.status}): ${text}`)
-  }
 
-  return JSON.parse(text)
+  const text = await resp.text()
+  if (!resp.ok) throw new Error(`Appwrite create session failed (${resp.status}): ${text}`)
+
+  const session = JSON.parse(text)
+
+  // ✅ 关键：Appwrite 不回 secret，但会在 Set-Cookie 里给 session cookie
+  const setCookie = resp.headers.get('set-cookie') || ''
+  // 取第一段 name=value
+  const cookie = setCookie.split(';')[0]
+
+  console.log('[DEBUG] set-cookie =', setCookie)
+  console.log('[DEBUG] cookie(name=value) =', cookie)
+
+  return { session, cookie }
 }
 
 // ---------- routes ----------
@@ -118,34 +146,24 @@ app.post('/auth/login', async (req, res) => {
       return res.status(400).json({ ok: false, message: 'email & password required' })
     }
 
-    const serverClient = makeServerClient()
-    const users = new Users(serverClient)
+    const { session, cookie } = await createEmailSession(email, password)
 
-    // find user by email
-    const found = await users.list([Query.equal('email', email)])
-    const userDoc = found?.users?.[0]
-    if (!userDoc) {
-      return res.status(401).json({ ok: false, message: 'Invalid credentials' })
-    }
+    setSessionCookie(res, cookie)
 
-    // create session using Users API (server key) — validates password
-    // NOTE: if your SDK doesn't have this method name, tell me the error, I'll adjust.
-    const session = await createUserEmailSession(userDoc.$id, email, password)
-
-    // store secret for /auth/me & /auth/logout
-    setSessionCookie(res, session.secret)
-
-    const jwt = await createJwtFromSessionSecret(session.secret)
+    const jwt = await createJwtFromCookie(cookie)
     const expiry = Date.now() + 3600 * 1000
 
-    const user = {
-      $id: userDoc.$id,
-      email: userDoc.email,
-      name: userDoc.name,
-      emailVerification: userDoc.emailVerification,
-    }
-
-    return res.json({ ok: true, jwt, expiry, user })
+    return res.json({
+      ok: true,
+      jwt,
+      expiry,
+      user: {
+        $id: session.userId,
+        email, // 或用你自己的 email
+        name: '', // 先空，前端用 jwt 再 account.get 補全
+        emailVerification: false,
+      },
+    })
   } catch (e) {
     console.error('auth/login error:', e)
     return res.status(500).json({ ok: false, message: e?.message ?? String(e) })
@@ -171,7 +189,7 @@ app.post('/auth/register', async (req, res) => {
     const created = await users.create(ID.unique(), email, password, name || '')
 
     // auto create session (so user can be logged in immediately)
-    const session = await createUserEmailSession(created.$id, email, password)
+    const session = await createEmailSession(email, password)
 
     setSessionCookie(res, session.secret)
 

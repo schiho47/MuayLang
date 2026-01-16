@@ -137,5 +137,3 @@ export const guestStorage = {
     await storage.removeItem(GUEST_MODE_KEY)
   },
 }
-
-

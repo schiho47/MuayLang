@@ -2,7 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { Client, Users, Account, Query, ID } from 'node-appwrite'
+import { Client, Users, Account, ID } from 'node-appwrite'
 
 const app = express()
 const isProd = process.env.NODE_ENV === 'production'
@@ -62,17 +62,6 @@ function setSessionCookie(res, cookie) {
 
 function clearSessionCookie(res) {
   res.clearCookie('aw_session_cookie', { path: '/' })
-}
-
-async function createJwtFromSessionSecret(secret) {
-  const userClient = new Client()
-    .setEndpoint(process.env.APPWRITE_ENDPOINT)
-    .setProject(process.env.APPWRITE_PROJECT_ID)
-    .setSession(secret)
-
-  const account = new Account(userClient)
-  const jwtResp = await account.createJWT()
-  return jwtResp.jwt
 }
 
 async function createJwtFromCookie(cookie) {
@@ -186,14 +175,14 @@ app.post('/auth/register', async (req, res) => {
     const users = new Users(serverClient)
 
     // create user
-    const created = await users.create(ID.unique(), email, password, name || '')
+    const created = await users.create(ID.unique(), email, undefined, password, name || '')
 
     // auto create session (so user can be logged in immediately)
-    const session = await createEmailSession(email, password)
+    const { cookie } = await createEmailSession(email, password)
 
-    setSessionCookie(res, session.secret)
+    setSessionCookie(res, cookie)
 
-    const jwt = await createJwtFromSessionSecret(session.secret)
+    const jwt = await createJwtFromCookie(cookie)
     const expiry = Date.now() + 3600 * 1000
 
     const user = {

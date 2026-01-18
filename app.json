@@ -4,7 +4,7 @@
     "slug": "MuayLang",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon_square.png",
     "scheme": "muaylang",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

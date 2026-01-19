@@ -19,6 +19,7 @@ const GuestOnlyPage = () => {
           className="w-full h-[400px] mb-[60px]"
           resizeMode="contain"
         />
+        <Text className="text-center text-white text-base font-bold mb-4">v.20260120 01:13</Text>
         <View className="flex-row justify-between gap-5 w-full px-6">
           <Pressable
             onPress={() => router.replace('/register')}

@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 300,
     alignSelf: 'center',
+    objectFit: 'contain',
   },
   logoutContainer: {
     flexDirection: 'row',

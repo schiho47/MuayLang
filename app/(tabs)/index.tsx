@@ -335,11 +335,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     height: 178,
-    width: 300,
-    bottom: 0,
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -150,
+    width: '80%',
+    maxWidth: 300,
+    alignSelf: 'center',
   },
   logoutContainer: {
     flexDirection: 'row',

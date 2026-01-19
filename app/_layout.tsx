@@ -3,6 +3,7 @@ import { GluestackUIProvider } from '@gluestack-ui/themed'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
+import Head from 'expo-router/head'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 import '../global.css'
@@ -33,6 +34,10 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <UserProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Head>
+              <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+              <link rel="manifest" href="/manifest.json" />
+            </Head>
             <Stack>
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

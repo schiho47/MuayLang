@@ -40,7 +40,7 @@ const WelcomePage = () => {
         {/* Main buttons: Register and Login */}
         <View className="flex-row justify-between gap-5 w-full px-6 mb-4">
           <Pressable
-            onPress={() => router.replace('/(auth)/register')}
+            onPress={() => router.replace('/register')}
             className="bg-white py-3.5 px-6 rounded-lg flex-1 items-center"
           >
             <Text className="text-base font-bold" style={{ color: MUAY_PURPLE }}>
@@ -48,7 +48,7 @@ const WelcomePage = () => {
             </Text>
           </Pressable>
           <Pressable
-            onPress={() => router.replace('/(auth)/login')}
+            onPress={() => router.replace('/login')}
             className="py-3.5 px-6 rounded-lg flex-1 items-center"
             style={{ backgroundColor: 'rgb(218, 167, 48)' }}
           >

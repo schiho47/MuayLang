@@ -75,8 +75,8 @@ const Register = () => {
       className="flex-1 justify-center items-center p-6"
       style={{ backgroundColor: MUAY_PURPLE }}
     >
-      <Pressable
-        onPress={() => router.replace('/(auth)/')}
+        <Pressable
+          onPress={() => router.replace('/')}
         style={{ position: 'absolute', top: 48, left: 16, zIndex: 10 }}
         hitSlop={10}
       >
@@ -178,7 +178,7 @@ const Register = () => {
         <Text className="text-sm" style={{ color: MUAY_WHITE }}>
           Already have an account?{' '}
         </Text>
-        <Link href={'/(auth)/login'}>
+          <Link href={'/login'}>
           <Text className="text-sm font-bold" style={{ color: 'rgb(218, 167, 48)' }}>
             LOGIN
           </Text>

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react'
-import { account, initializeJWT, setJWTToken, clearJWTToken, AUTH_API_BASE } from '../lib/appwrite'
+import { account, initializeJWT, setJWTToken, clearJWTToken } from '../lib/appwrite'
 import { router } from 'expo-router'
 import { Platform } from 'react-native'
 import { jwtStorage, guestStorage } from '../utils/jwtStorage'
@@ -35,26 +35,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>(null)
   const [authChecked, setAuthChecked] = useState(false)
 
-  const isWeb = Platform.OS === 'web'
-
-  const apiFetch = async (path: string, init?: RequestInit) => {
-    const r = await fetch(`${AUTH_API_BASE}${path}`, {
-      credentials: 'include',
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(init?.headers || {}),
-      },
-    })
-
-    if (!r.ok) {
-      const text = await r.text().catch(() => '')
-      throw new Error(`API ${path} failed (${r.status}): ${text}`)
-    }
-
-    return r
-  }
-
   const logout = useCallback(async () => {
     try {
       await guestStorage.clearGuestMode()
@@ -62,20 +42,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       await jwtStorage.removeToken()
       clearJWTToken()
 
-      if (isWeb) {
-        try {
-          await apiFetch('/auth/logout', { method: 'POST' })
-        } catch (e) {
-          console.log('Web logout: server cleanup skipped:', e)
-        }
-
-        setUser(null)
-        router.replace('/(auth)/' as any)
-        console.log('✅ Web logout successful')
-        return
-      }
-
-      // Native logout
       try {
         await account.deleteSession('current')
       } catch (sessionError) {
@@ -83,8 +49,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       }
 
       setUser(null)
-      router.replace('/(auth)/' as any)
-      console.log('✅ Native logout successful')
+      router.replace('/' as any)
+      console.log('✅ Logout successful')
     } catch (error) {
       console.error('Logout error:', error)
       await jwtStorage.removeToken()
@@ -92,9 +58,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       setUser(null)
       throw error
     }
-  }, [isWeb])
+  }, [])
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()
       if (isGuestSession) {
@@ -119,22 +85,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         return
       }
 
-      if (isWeb) {
-        // ✅ Web：用 Node 取 user（避免直接打 Appwrite）
-        try {
-          const r = await apiFetch('/auth/me', { method: 'GET' })
-          const data = await r.json()
-          if (data?.ok && data?.user) setUser(data.user as any)
-          else setUser(null)
-        } catch (_e) {
-          setUser(null)
-        } finally {
-          setAuthChecked(true)
-        }
-        return
-      }
-
-      // Native: can call Appwrite directly
       const currentUser = await account.get()
       setUser(currentUser as any)
     } catch (error) {
@@ -145,79 +95,25 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     } finally {
       setAuthChecked(true)
     }
-  }
-
-  useEffect(() => {
-    checkAuth()
   }, [])
 
   useEffect(() => {
-    if (!user || user.isGuest) return
+    checkAuth()
+  }, [checkAuth])
 
-    const refreshInterval = setInterval(
-      async () => {
-        try {
-          const isExpired = await jwtStorage.isTokenExpired()
-          if (!isExpired) return
-
-          console.log('🔄 JWT token expired, refreshing...')
-
-          if (isWeb) {
-            // ✅ Web：重新走 /auth/me（或之後加 /auth/refresh）
-            const r = await apiFetch('/auth/me', { method: 'GET' })
-            const data = await r.json()
-            if (!data?.ok) throw new Error('Web refresh failed')
-            // 這裡不刷新 jwt 也行（因為你資料拿 Appwrite 是靠 jwt）
-            // 想刷新 jwt：你可以之後加 /auth/refresh 回 jwt
-            console.log('✅ Web session still valid')
-            return
-          }
-
-          // Native：用 Appwrite JWT
-          const jwtResponse = await account.createJWT()
-          const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000
-          await jwtStorage.saveToken(jwtToken, expiry)
-          setJWTToken(jwtToken)
-          console.log('✅ JWT token refreshed')
-        } catch (error) {
-          console.error('❌ Failed to refresh JWT token:', error)
-          await logout()
-        }
-      },
-      5 * 60 * 1000,
-    )
-
-    return () => clearInterval(refreshInterval)
-  }, [user, logout, isWeb])
+  // JWT refresh now happens on-demand when API returns 401
 
   const login = async (email: string, password: string) => {
     try {
       await guestStorage.clearGuestMode()
 
-      if (isWeb) {
-        const r = await apiFetch('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password }),
-        })
-
-        const { jwt, expiry, user: userFromServer } = await r.json()
-
-        await jwtStorage.saveToken(jwt, expiry)
-        setJWTToken(jwt)
-        setUser(userFromServer as any)
-
-        router.replace('/(tabs)/' as any)
-        console.log('✅ Web login via Node successful, JWT stored')
-        return
-      }
-
-      // Native login (keep your original)
       try {
         await account.deleteSession('current')
+        await jwtStorage.removeToken()
+        clearJWTToken()
       } catch {}
 
-      await account.createEmailPasswordSession(email, password)
+      await account.createEmailPasswordSession({ email, password })
 
       const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
@@ -230,7 +126,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)
-      console.log('✅ Native login successful, JWT token stored')
+      console.log('✅ Login successful, JWT token stored')
     } catch (error) {
       console.error('Login error:', error)
       await jwtStorage.removeToken()
@@ -243,30 +139,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     try {
       await guestStorage.clearGuestMode()
 
-      if (isWeb) {
-        const r = await apiFetch('/auth/register', {
-          method: 'POST',
-          body: JSON.stringify({ email, password }),
-        })
-
-        const { jwt, expiry, user: userFromServer } = await r.json()
-
-        await jwtStorage.saveToken(jwt, expiry)
-        setJWTToken(jwt)
-        setUser(userFromServer as any)
-
-        router.replace('/(tabs)/' as any)
-        console.log('✅ Web register via Node successful, JWT stored')
-        return
-      }
-
-      // Native register (keep your original)
       try {
         await account.deleteSession('current')
       } catch {}
 
       await account.create('unique()', email, password)
-      await account.createEmailPasswordSession(email, password)
+      await account.createEmailPasswordSession({ email, password })
 
       const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
@@ -279,7 +157,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)
-      console.log('✅ Native registration successful, JWT token stored')
+      console.log('✅ Registration successful, JWT token stored')
     } catch (error) {
       console.error('Register error:', error)
       await jwtStorage.removeToken()
@@ -317,32 +195,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const loginAsGuest = async () => {
     try {
-      if (isWeb) {
-        // Web guest: no Appwrite session, no jwt
-        await jwtStorage.removeToken()
-        clearJWTToken()
-        await guestStorage.setGuestMode(true)
-
-        const guestUser: User = {
-          $id: DEMO_USER_ID || 'guest-public',
-          email: 'guest@muaylang.app',
-          name: 'Guest User',
-          emailVerification: false,
-          isGuest: true,
-        }
-        setUser(guestUser)
-        setAuthChecked(true)
-        router.replace('/(tabs)/' as any)
-        return
-      }
-
-      // Native guest: keep your original public guest mode
       try {
         await account.deleteSession('current')
       } catch {}
       await jwtStorage.removeToken()
       clearJWTToken()
-
       await guestStorage.setGuestMode(true)
 
       const guestUser: User = {

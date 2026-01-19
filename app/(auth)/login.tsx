@@ -65,7 +65,14 @@ const Login = () => {
       setError('Please fill in all fields')
       return
     }
-
+    console.log('--- Debugging Login Function ---');
+    console.log('Login implementation:', login.toString()); 
+    
+    if (login.toString().includes('fetch') || login.toString().includes('auth/login')) {
+      console.error('❌ 抓到了！這個 login 函式是舊的 Node 版本！');
+    } else {
+      console.log('✅ 這個 login 函式看起來是 Appwrite SDK。');
+    }
     setLoading(true)
     setError(null)
 

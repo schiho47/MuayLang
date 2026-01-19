@@ -36,7 +36,7 @@ const WelcomePage = () => {
           className="w-full h-[400px] mb-[60px]"
           resizeMode="contain"
         />
-
+        <Text className="text-center text-white text-base font-bold mb-4">v.20260120 02:16</Text>
         {/* Main buttons: Register and Login */}
         <View className="flex-row justify-between gap-5 w-full px-6 mb-4">
           <Pressable

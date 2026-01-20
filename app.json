@@ -4,7 +4,7 @@
     "slug": "MuayLang",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/images/icon_square.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "muaylang",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/icon_square.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Text, Pressable, HStack } from '@gluestack-ui/themed'
+import { Box, Text, Pressable, HStack, VStack } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import useSpeech from './useSpeech'
@@ -50,12 +50,12 @@ const AlphabetCard = (props: AlphabetCardProps) => {
           </Text>
           <Ionicons name="volume-high" size={24} color={MUAY_PURPLE} />
         </HStack>
-        <HStack width="100%" justifyContent="space-between">
+        <VStack width="100%" space="xs">
           <Text
             size="sm"
             color={MUAY_PURPLE}
             numberOfLines={2}
-            style={{ fontSize: 18, fontWeight: 'bold', flex: 1, marginRight: 6 }}
+            style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center',lineHeight: 32 }}
           >
             {vocabulary || ''}
           </Text>
@@ -63,11 +63,11 @@ const AlphabetCard = (props: AlphabetCardProps) => {
             size="sm"
             color={MUAY_PURPLE}
             numberOfLines={2}
-            style={{ fontSize: 18, flex: 1, textAlign: 'right' }}
+            style={{ fontSize: 16, textAlign: 'center' }}
           >
             {meaning || ''}
           </Text>
-        </HStack>
+        </VStack>
       </Box>
     </Pressable>
   )

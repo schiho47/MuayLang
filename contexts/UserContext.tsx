@@ -81,9 +81,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
       const hasValidToken = await initializeJWT()
       if (!hasValidToken) {
-        setUser(null)
-        setAuthChecked(true)
-        return
+        try {
+          // Fall back to Appwrite session cookie and refresh JWT
+          const currentUser = await account.get()
+          const jwtResponse = await account.createJWT()
+          const jwtToken = jwtResponse.jwt
+          const expiry = Date.now() + 3600 * 1000
+
+          await jwtStorage.saveToken(jwtToken, expiry)
+          setJWTToken(jwtToken)
+          await saveUserSession(currentUser)
+          setUser(currentUser as any)
+          return
+        } catch (sessionError) {
+          setUser(null)
+          setAuthChecked(true)
+          return
+        }
       }
 
       const currentUser = await account.get()
@@ -125,6 +139,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       setJWTToken(jwtToken)
 
       const currentUser = await account.get()
+      await saveUserSession(currentUser)
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)

@@ -1,0 +1,94 @@
+import { Pressable, Text } from 'react-native'
+import React from 'react'
+import { Box, Center, HStack } from '@gluestack-ui/themed';
+import { MUAY_PURPLE } from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons'
+import useSpeech from './useSpeech'
+type VowelItem = {
+    char: string;
+    closed: string;
+    roman: string;
+  }
+  
+  type VowelPairProps = {
+    pair: { short: VowelItem; long: VowelItem };
+    isClosedMode: boolean;
+  }
+const VowelPairRow = (props: VowelPairProps) => {
+    const { pair, isClosedMode } = props
+    const { speak } = useSpeech()
+  return (
+<HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
+      {/* 短音卡片 - 使用 VStack 處理內部層級 */}
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => speak(isClosedMode ? pair.short.closed : pair.short.char)}
+      >
+        <Box
+          bg="$secondary50"
+          p="$4"
+          rounded="$xl"
+          borderWidth={1}   
+          borderColor="$secondary200"
+          alignItems="center"
+          position="relative"
+        >
+          <Text style={{ fontSize: 12, fontWeight: 'bold', color: MUAY_PURPLE, position: 'absolute', top: 8, left: 8 }}>
+            SHORT
+          </Text>
+          <Ionicons
+            name="volume-high"
+            size={18}
+            color={MUAY_PURPLE}
+            style={{ position: 'absolute', top: 8, right: 8 }}
+          />
+          <Center h="$20">
+            <Text style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}>
+              {isClosedMode ? pair.short.closed : pair.short.char}
+            </Text>
+          </Center>
+          <Text style={{ fontSize: 14, color: '$textLight500' }}>
+            {pair.short.roman}
+          </Text>
+        </Box>
+      </Pressable>
+
+      {/* 長音卡片 */}
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => speak(isClosedMode ? pair.long.closed : pair.long.char)}
+      >
+        <Box
+          bg="$secondary50"
+          p="$4"
+          rounded="$xl"
+          borderWidth={1}
+          borderColor="$secondary200"
+          alignItems="center"
+          position="relative"
+        >
+          <Text style={{ fontSize: 12, fontWeight: 'bold', color: MUAY_PURPLE, position: 'absolute', top: 8, left: 8 }}>
+            LONG
+          </Text>
+          <Ionicons
+            name="volume-high"
+            size={24}
+            color={MUAY_PURPLE}
+            style={{ position: 'absolute', top: 8, right: 16 }}
+          />
+          <Center h="$20">
+            <Text style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}>
+              {isClosedMode ? pair.long.closed : pair.long.char}
+            </Text>
+          </Center>
+          <Text style={{ fontSize: 14, color: '$textLight500' }}>
+            {pair.long.roman}
+          </Text>       
+        </Box>
+      </Pressable>
+    </HStack>
+  )
+}
+
+export default VowelPairRow
+

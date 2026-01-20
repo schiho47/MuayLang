@@ -13,6 +13,9 @@ import { useVocabularies } from '@/lib/learningAPI'
 import { Spinner } from '@/components/ui/spinner'
 import { router } from 'expo-router'
 import { useUser } from '@/hooks/useUser'
+import AlphabetSection from '@/components/learning/AlphabetSection'
+import { HStack } from '@gluestack-ui/themed'
+import VowelLearningScreen from '@/components/learning/VowelLearningScreen'
 
 export default function TabTwoScreen() {
   const { user } = useUser()
@@ -212,6 +215,12 @@ export default function TabTwoScreen() {
             )}
           />
         )}
+        <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
+          <AlphabetSection />
+        </HStack>
+        <HStack style={{ alignItems: 'center', paddingHorizontal: 8 }}>
+          <VowelLearningScreen />
+        </HStack>
       </ParallaxScrollView>
 
       <FilterVocabularyModal

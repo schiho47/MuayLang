@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Linking, Platform } from 'react-native';
+import { Image, Linking, Platform, useWindowDimensions } from 'react-native';
 import { 
   Box, 
   Heading, 
@@ -38,6 +38,8 @@ const Discovery = () => {
   const discovery = (Array.isArray(discoveryData) ? discoveryData[0] : discoveryData) as
     | DiscoveryItem
     | undefined
+  const { width } = useWindowDimensions()
+  const isMobileWeb = Platform.OS === 'web' && width < 768
 
   if (isLoading) {
     return (
@@ -77,7 +79,7 @@ const Discovery = () => {
           </Text>
         </HStack>
 
-        {Platform.OS === 'web' ? (
+        {Platform.OS === 'web' && !isMobileWeb ? (
           <HStack space="md" alignItems="flex-start">
             <VStack space="xs" flex={1}>
               <Heading size="md" color="$textLight900" marginVertical={4}>

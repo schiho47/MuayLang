@@ -15,7 +15,7 @@ import { useUser } from '@/hooks/useUser'
 export default function Training() {
   const { user } = useUser()
   const { data: training } = useTraining(user?.$id)
-  console.log({ training: training?.[0] })
+
 
   const handleAddingSection = () => {
     // Prevent guests from adding

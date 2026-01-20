@@ -16,16 +16,15 @@ import { useUser } from '../../hooks/useUser'
 import EmailVerificationBanner from '../../components/auth/EmailVerificationBanner'
 // @ts-ignore - types for components may not be bundled correctly
 import { Divider, Spinner, Box } from '@gluestack-ui/themed'
-
+import Discovery from '@/components/Discovery'
 export default function HomeScreen() {
   const { user, logout } = useUser()
-  console.log('👤 HomeScreen - Current user ID:', user?.$id)
+
   const { data: vocabularies, isLoading: vocabLoading } = useVocabularies(user?.$id)
   const { data: training, isLoading: trainingLoading } = useTraining(user?.$id)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  console.log('📚 HomeScreen - vocabularies count:', vocabularies?.length)
-  console.log('🥊 HomeScreen - training count:', training?.length)
+
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -113,7 +112,11 @@ export default function HomeScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: MUAY_PURPLE, dark: '#1D3D47' }}
-      headerImage={<Image source={require('@/assets/images/logoBig.png')} style={styles.logo} />}
+      headerImage={
+        <View style={styles.logoContainer}>
+          <Image source={require('@/assets/images/logoBig.png')} style={styles.logo} />
+        </View>
+      }
     >
       {/* Logout/Exit button - Top right */}
       <View style={styles.logoutContainer}>
@@ -134,31 +137,7 @@ export default function HomeScreen() {
       {/* Email Verification Banner */}
       <EmailVerificationBanner />
 
-      <ThemedView style={styles.titleContainer}>
-        <Animated.View
-          style={[
-            styles.thaiTitleWrapper,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-            },
-          ]}
-        >
-          <Animated.Text style={styles.thaiTitleShadow}>สวัสดี</Animated.Text>
-          <Animated.Text style={styles.thaiTitle}>สวัสดี</Animated.Text>
-        </Animated.View>
-      </ThemedView>
-      <Animated.Text
-        style={[
-          styles.subtitle,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
-      >
-        Welcome to MuayLang
-      </Animated.Text>
+   <Discovery />
 
       <Divider my={16} bgColor={MUAY_PURPLE} w="100%" h={1.5} />
 
@@ -299,44 +278,15 @@ export default function HomeScreen() {
   )
 }
 const styles = StyleSheet.create({
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  thaiTitleWrapper: {
-    position: 'relative',
+  logoContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  thaiTitleShadow: {
-    position: 'absolute',
-    fontSize: 52,
-    fontWeight: 'bold',
-    color: MUAY_PURPLE,
-    lineHeight: 76,
-    textAlign: 'center',
-    opacity: 0.2,
-    transform: [{ translateY: 2 }, { translateX: 2 }],
-  },
-  thaiTitle: {
-    fontSize: 52,
-    fontWeight: 'bold',
-    color: MUAY_PURPLE,
-    lineHeight: 76,
-    textAlign: 'center',
-    textShadowColor: 'rgba(107, 55, 137, 0.3)',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 8,
-  },
-  subtitle: {
-    fontSize: 30,
-    color: '#666',
-    textAlign: 'center',
-  },
   logo: {
-    height: 178,
+    minHeight: 200,
     width: '80%',
-    maxWidth: 300,
+    maxWidth: 400,
     alignSelf: 'center',
     objectFit: 'contain',
   },

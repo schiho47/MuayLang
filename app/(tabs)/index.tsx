@@ -137,7 +137,7 @@ export default function HomeScreen() {
       {/* Email Verification Banner */}
       <EmailVerificationBanner />
 
-   <Discovery />
+      <Discovery />
 
       <Divider my={16} bgColor={MUAY_PURPLE} w="100%" h={1.5} />
 

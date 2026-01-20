@@ -20,8 +20,8 @@ export default function TabLayout() {
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarStyle: {
-            paddingBottom: insets.bottom,
-            height: 56 + insets.bottom,
+            paddingBottom: Math.max(insets.bottom, 8),
+            height: 56 + Math.max(insets.bottom, 8),
           },
         }}
       >

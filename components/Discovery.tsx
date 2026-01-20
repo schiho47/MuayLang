@@ -61,7 +61,7 @@ const Discovery = () => {
       borderRadius="$2xl" 
       borderWidth={1} 
       borderColor={MUAY_PURPLE_30}
-      m="$4"
+      m="$2"
     >
       <VStack space="md">
         <HStack justifyContent="space-between" alignItems="center">

@@ -43,7 +43,10 @@ const VowelPairRow = (props: VowelPairProps) => {
             style={{ position: 'absolute', top: 8, right: 8 }}
           />
           <Center h="$20">
-            <Text style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}>
+            <Text
+              style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}
+              numberOfLines={1}
+            >
               {isClosedMode ? pair.short.closed : pair.short.char}
             </Text>
           </Center>
@@ -77,7 +80,10 @@ const VowelPairRow = (props: VowelPairProps) => {
             style={{ position: 'absolute', top: 8, right: 16 }}
           />
           <Center h="$20">
-            <Text style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}>
+            <Text
+              style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}
+              numberOfLines={1}
+            >
               {isClosedMode ? pair.long.closed : pair.long.char}
             </Text>
           </Center>

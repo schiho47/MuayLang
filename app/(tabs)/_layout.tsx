@@ -6,9 +6,11 @@ import { Colors } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import UserOnly from '../../components/auth/UserOnly'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function TabLayout() {
   const colorScheme = useColorScheme()
+  const insets = useSafeAreaInsets()
 
   return (
     <UserOnly>
@@ -17,6 +19,10 @@ export default function TabLayout() {
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           headerShown: false,
           tabBarButton: HapticTab,
+          tabBarStyle: {
+            paddingBottom: insets.bottom,
+            height: 56 + insets.bottom,
+          },
         }}
       >
         <Tabs.Screen

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { useUser } from '../../hooks/useUser'
 import { MUAY_PURPLE } from '@/constants/Colors'
@@ -7,10 +7,15 @@ import { MUAY_PURPLE } from '@/constants/Colors'
 const GuestOnly = ({ children }: { children: React.ReactNode }) => {
   const { user, authChecked } = useUser()
   const router = useRouter()
+  const redirectingRef = useRef(false)
 
   useEffect(() => {
-    if (authChecked && user !== null) {
+    if (authChecked && user !== null && !redirectingRef.current) {
+      redirectingRef.current = true
       router.replace('/(tabs)/' as any)
+    }
+    if (!authChecked || user === null) {
+      redirectingRef.current = false
     }
   }, [user, authChecked, router])
 

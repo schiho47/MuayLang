@@ -76,7 +76,7 @@ const Register = () => {
       style={{ backgroundColor: MUAY_PURPLE }}
     >
         <Pressable
-          onPress={() => router.replace('/')}
+          onPress={() => router.replace('/(auth)')}
         style={{ position: 'absolute', top: 48, left: 16, zIndex: 10 }}
         hitSlop={10}
       >

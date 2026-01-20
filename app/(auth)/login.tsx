@@ -65,14 +65,9 @@ const Login = () => {
       setError('Please fill in all fields')
       return
     }
-    console.log('--- Debugging Login Function ---');
-    console.log('Login implementation:', login.toString()); 
+
     
-    if (login.toString().includes('fetch') || login.toString().includes('auth/login')) {
-      console.error('❌ 抓到了！這個 login 函式是舊的 Node 版本！');
-    } else {
-      console.log('✅ 這個 login 函式看起來是 Appwrite SDK。');
-    }
+
     setLoading(true)
     setError(null)
 
@@ -92,7 +87,7 @@ const Login = () => {
       style={{ backgroundColor: MUAY_PURPLE }}
     >
       <Pressable
-        onPress={() => router.replace('/')}
+        onPress={() => router.replace('/(auth)')}
         style={{ position: 'absolute', top: 48, left: 16, zIndex: 10 }}
         hitSlop={10}
       >
@@ -185,7 +180,7 @@ const Login = () => {
 
       <View className="flex-row items-center">
         <Text className="text-sm" style={{ color: MUAY_WHITE }}>
-          Don't have an account?{' '}
+          {"Don't have an account? "}
         </Text>
         <Link href={'/register'}>
           <Text className="text-sm font-bold" style={{ color: 'rgb(218, 167, 48)' }}>

@@ -10,8 +10,9 @@ import { useUser } from '@/hooks/useUser'
 
 const WelcomePage = () => {
   const router = useRouter()
-  const { loginAsGuest } = useUser()
+  const { loginAsGuest, } = useUser()
   const [isLoading, setIsLoading] = useState(false)
+
 
   const handleGuestLogin = async () => {
     setIsLoading(true)

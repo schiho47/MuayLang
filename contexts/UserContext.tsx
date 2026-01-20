@@ -3,6 +3,7 @@ import { account, initializeJWT, setJWTToken, clearJWTToken } from '../lib/appwr
 import { router } from 'expo-router'
 import { Platform } from 'react-native'
 import { jwtStorage, guestStorage } from '../utils/jwtStorage'
+import { clearUserSession, saveUserSession } from '../lib/storage'
 
 type User = {
   $id: string
@@ -21,6 +22,7 @@ type UserContextType = {
   resendVerification: () => Promise<void>
   verifyEmail: (userId: string, secret: string) => Promise<void>
   loginAsGuest: () => Promise<void>
+
 }
 
 const DEMO_USER_ID = process.env.EXPO_PUBLIC_DEMO_USER_ID || null
@@ -39,27 +41,26 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     try {
       await guestStorage.clearGuestMode()
 
-      await jwtStorage.removeToken()
-      clearJWTToken()
-
       try {
         await account.deleteSession('current')
       } catch (sessionError) {
         console.log('Session deletion skipped:', sessionError)
       }
 
-      setUser(null)
-      router.replace('/' as any)
       console.log('✅ Logout successful')
     } catch (error) {
       console.error('Logout error:', error)
+      throw error
+    } finally {
       await jwtStorage.removeToken()
       clearJWTToken()
+      await clearUserSession()
       setUser(null)
-      throw error
+      setAuthChecked(true)
+      router.replace('/(auth)/' as any)
     }
   }, [])
-
+  
   const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()
@@ -86,6 +87,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       }
 
       const currentUser = await account.get()
+      await saveUserSession(currentUser)
       setUser(currentUser as any)
     } catch (error) {
       console.error('❌ Auth check failed:', error)
@@ -131,6 +133,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       console.error('Login error:', error)
       await jwtStorage.removeToken()
       clearJWTToken()
+      await clearUserSession()
       throw error
     }
   }
@@ -154,6 +157,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       setJWTToken(jwtToken)
 
       const currentUser = await account.get()
+      await saveUserSession(currentUser)
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)
@@ -162,6 +166,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       console.error('Register error:', error)
       await jwtStorage.removeToken()
       clearJWTToken()
+      await clearUserSession()
       throw error
     }
   }
@@ -200,6 +205,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       } catch {}
       await jwtStorage.removeToken()
       clearJWTToken()
+      await clearUserSession()
       await guestStorage.setGuestMode(true)
 
       const guestUser: User = {
@@ -214,6 +220,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       router.replace('/(tabs)/' as any)
     } catch (error) {
       console.error('❌ Guest login failed:', error)
+      await clearUserSession()
       await guestStorage.setGuestMode(true)
       const guestUser: User = {
         $id: DEMO_USER_ID || 'guest-no-data',

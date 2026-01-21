@@ -1,7 +1,7 @@
 import { Pressable, Text } from 'react-native'
 import React from 'react'
 import { Box, Center, HStack } from '@gluestack-ui/themed';
-import { MUAY_PURPLE } from '@/constants/Colors';
+import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons'
 import useSpeech from '../../hooks/useSpeech'
 type VowelItem = {
@@ -11,12 +11,16 @@ type VowelItem = {
   }
   
   type VowelPairProps = {
-    pair: { short: VowelItem; long: VowelItem };
+    pair: { short: VowelItem; long: VowelItem |null};
     isClosedMode: boolean;
   }
 const VowelPairRow = (props: VowelPairProps) => {
     const { pair, isClosedMode } = props
     const { speak } = useSpeech()
+ 
+  const longValue = isClosedMode ? pair?.long?.closed : pair?.long?.char
+  const hasLongValue = !!longValue
+
   return (
 <HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
       {/* 短音卡片 - 使用 VStack 處理內部層級 */}
@@ -55,11 +59,17 @@ const VowelPairRow = (props: VowelPairProps) => {
           </Text>
         </Box>
       </Pressable>
-
+   
+          
+          
       {/* 長音卡片 */}
       <Pressable
         style={{ flex: 1 }}
-        onPress={() => speak(isClosedMode ? pair.long.closed : pair.long.char)}
+        onPress={() => {
+          if (pair?.long) {
+            speak(isClosedMode ? pair?.long?.closed : pair?.long?.char)
+          }
+        }}
       >
         <Box
           bg="$secondary50"
@@ -73,26 +83,32 @@ const VowelPairRow = (props: VowelPairProps) => {
           <Text style={{ fontSize: 12, fontWeight: 'bold', color: MUAY_PURPLE, position: 'absolute', top: 8, left: 8 }}>
             LONG
           </Text>
-          <Ionicons
+          {hasLongValue && <Ionicons
             name="volume-high"
             size={24}
             color={MUAY_PURPLE}
             style={{ position: 'absolute', top: 8, right: 16 }}
-          />
+          />}
+         
           <Center h="$20">
             <Text
-              style={{ fontSize: 48, fontWeight: 'bold', color: MUAY_PURPLE }}
+              style={{
+                fontSize: hasLongValue ? 48 : 32,
+                fontWeight: 'bold',
+                color: hasLongValue ? MUAY_PURPLE : MUAY_PURPLE_30,
+              }}
               numberOfLines={1}
             >
-              {isClosedMode ? pair.long.closed : pair.long.char}
+              {longValue || '—'}
             </Text>
           </Center>
           <Text style={{ fontSize: 14, color: '$textLight500' }}>
-            {pair.long.roman}
+            {pair?.long?.roman}
           </Text>       
         </Box>
       </Pressable>
     </HStack>
+    
   )
 }
 

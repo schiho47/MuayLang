@@ -1,7 +1,7 @@
 import { ScrollView, Text,  Switch } from 'react-native'
 import React, { useState } from 'react'
 import { Box, Heading, HStack, VStack } from '@gluestack-ui/themed';
-import { basicVowels, complexVowels, diphthongs } from '@/lib/vowels';
+import { basicVowels, complexVowels, diphthongs, specialVowels } from '@/lib/vowels';
 import VowelPairRow from './VowelPairRow';
 import { MUAY_PURPLE } from '@/constants/Colors';
 
@@ -29,6 +29,12 @@ const VowelLearningScreen = () => {
       <Box>
         <Heading size="md" mb="$3" color={MUAY_PURPLE}>Complex Vowels</Heading>
         {complexVowels.map((item) => (
+          <VowelPairRow key={item.pairId} pair={item} isClosedMode={isClosedMode} />
+        ))}
+      </Box>
+      <Box>
+        <Heading size="md" mb="$3" color={MUAY_PURPLE}>Special Vowels</Heading>
+        {specialVowels.map((item) => (
           <VowelPairRow key={item.pairId} pair={item} isClosedMode={isClosedMode} />
         ))}
       </Box>

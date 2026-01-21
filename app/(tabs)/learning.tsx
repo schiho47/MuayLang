@@ -15,7 +15,7 @@ import { router } from 'expo-router'
 import { useUser } from '@/hooks/useUser'
 import AlphabetSection from '@/components/learning/AlphabetSection'
 import VowelLearningScreen from '@/components/learning/VowelLearningScreen'
-
+import DailyVocabularyList from '@/components/learning/DailyVocabulary'
 export default function TabTwoScreen() {
   const { user } = useUser()
   const { data: vocabularies, isLoading } = useVocabularies(user?.$id)
@@ -190,7 +190,7 @@ export default function TabTwoScreen() {
             <Spinner />
           </View>
         )}
-
+    <DailyVocabularyList />
         {!isLoading && (
           <FlatList
             data={filteredVocabularies}

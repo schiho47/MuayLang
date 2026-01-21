@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box, Text, Pressable, HStack, VStack } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import { MUAY_PURPLE } from '@/constants/Colors'
-import useSpeech from './useSpeech'
+import useSpeech from '../../hooks/useSpeech'
 
 type AlphabetCardProps = {
   item: { id: string; letter: string; vocabulary?: string; meaning?: string }

@@ -49,7 +49,12 @@ export const getCurrentLocalDate = (): Date => {
 export const convertLocalToUTC = (localDate: Date): string => {
   return localDate.toISOString()
 }
-
+export const getTodayKey = () => {
+  const now = new Date()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `${mm}${dd}`
+}
 /*
 Usage Examples:
 

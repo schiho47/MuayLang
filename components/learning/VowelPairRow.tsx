@@ -3,7 +3,7 @@ import React from 'react'
 import { Box, Center, HStack } from '@gluestack-ui/themed';
 import { MUAY_PURPLE } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons'
-import useSpeech from './useSpeech'
+import useSpeech from '../../hooks/useSpeech'
 type VowelItem = {
     char: string;
     closed: string;

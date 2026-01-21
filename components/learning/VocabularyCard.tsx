@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 import { VocabularyDataType, VocabularyFieldEnum } from './type'
-import useSpeech from './useSpeech'
+import useSpeech from '../../hooks/useSpeech'
 import { useUpdateVocabulary } from '@/lib/learningAPI'
 import { useUser } from '@/hooks/useUser'
 

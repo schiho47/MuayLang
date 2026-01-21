@@ -16,7 +16,7 @@ import { useDiscovery } from '@/lib/discoveryAPI';
 import { MUAY_PURPLE, MUAY_PURPLE_30, MUAY_WHITE } from '@/constants/Colors';
 import DiscovertDefault from './DiscoveryDefault';
 import { Ionicons } from '@expo/vector-icons'
-
+import { getTodayKey } from '@/utils/dateUtils';
 
 
 type DiscoveryItem = {
@@ -26,12 +26,7 @@ type DiscoveryItem = {
   imageUrl: string
 }
 
-const getTodayKey = () => {
-  const now = new Date()
-  const mm = String(now.getMonth() + 1).padStart(2, '0')
-  const dd = String(now.getDate()).padStart(2, '0')
-  return `${mm}${dd}`
-}
+
 
 const Discovery = () => {
   const { data: discoveryData, isLoading } = useDiscovery(getTodayKey());

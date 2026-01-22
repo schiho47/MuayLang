@@ -55,7 +55,7 @@ const AlphabetCard = (props: AlphabetCardProps) => {
             size="sm"
             color={MUAY_PURPLE}
             numberOfLines={2}
-            style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center',lineHeight: 32 }}
+            style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', lineHeight: 32 }}
           >
             {vocabulary || ''}
           </Text>

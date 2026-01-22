@@ -48,6 +48,7 @@ export default function RootLayout() {
               <Stack.Screen name="vocabulary/edit/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="section/add" options={{ headerShown: false }} />
               <Stack.Screen name="section/edit/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="vocabulary/review" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

@@ -33,24 +33,23 @@ const AlphabetSection = () => {
   const renderSeparator = () => <View style={{ width: 12 }} />
 
   return (
-      <View>
-      <Text  style={{ fontSize: 20, fontWeight: 'bold', color: MUAY_PURPLE,marginBottom: 16 }} >
+    <View>
+      <Text style={{ fontSize: 20, fontWeight: 'bold', color: MUAY_PURPLE, marginBottom: 16 }}>
         High class consonants
       </Text>
       <RenderRow data={highAlphabet} renderSeparator={renderSeparator} />
-    <Spacer/>
+      <Spacer />
       <Text style={{ fontSize: 20, fontWeight: 'bold', color: MUAY_PURPLE, marginBottom: 16 }}>
         Middle class consonants
       </Text>
       <RenderRow data={middleAlphabet} renderSeparator={renderSeparator} />
-      <Spacer/>
-      
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: MUAY_PURPLE, marginBottom:  16 }}>
+      <Spacer />
+
+      <Text style={{ fontSize: 20, fontWeight: 'bold', color: MUAY_PURPLE, marginBottom: 16 }}>
         Low class consonants
       </Text>
       <RenderRow data={lowAlphabet} renderSeparator={renderSeparator} />
-     
-      </View>
+    </View>
   )
 }
 

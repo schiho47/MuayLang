@@ -1,8 +1,6 @@
-import { useQuery, } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { getDiscovery } from './discoveryAppwrite'
-
-
 
 export const useDiscovery = (id?: string) => {
   return useQuery({
@@ -16,7 +14,3 @@ export const useDiscovery = (id?: string) => {
     refetchOnWindowFocus: false,
   })
 }
-
-
-
-

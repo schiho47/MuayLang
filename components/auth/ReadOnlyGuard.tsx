@@ -54,7 +54,7 @@ const ReadOnlyGuard = ({ children }: { children: React.ReactNode }) => {
         >
           Guest users can only view content
         </Text>
-       
+
         <TouchableOpacity
           onPress={() => router.replace('/(tabs)/')}
           style={{

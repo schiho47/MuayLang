@@ -16,7 +16,6 @@ export default function Training() {
   const { user } = useUser()
   const { data: training } = useTraining(user?.$id)
 
-
   const handleAddingSection = () => {
     // Prevent guests from adding
     if (user?.isGuest) {

@@ -22,7 +22,6 @@ type UserContextType = {
   resendVerification: () => Promise<void>
   verifyEmail: (userId: string, secret: string) => Promise<void>
   loginAsGuest: () => Promise<void>
-
 }
 
 const DEMO_USER_ID = process.env.EXPO_PUBLIC_DEMO_USER_ID || null
@@ -60,7 +59,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       router.replace('/(auth)/' as any)
     }
   }, [])
-  
+
   const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()

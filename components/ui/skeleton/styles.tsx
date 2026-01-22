@@ -1,4 +1,4 @@
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import { tva } from '@gluestack-ui/utils/nativewind-utils'
 
 export const skeletonStyle = tva({
   base: 'w-full h-full',
@@ -15,7 +15,7 @@ export const skeletonStyle = tva({
       4: 'duration-200',
     },
   },
-});
+})
 export const skeletonTextStyle = tva({
   base: 'rounded-sm w-full',
   variants: {
@@ -32,4 +32,4 @@ export const skeletonTextStyle = tva({
       4: 'gap-4',
     },
   },
-});
+})

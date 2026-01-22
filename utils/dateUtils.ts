@@ -76,3 +76,43 @@ const now = getCurrentLocalDate()
 // 5. Convert local time to UTC
 const utcString = convertLocalToUTC(now)
 */
+
+export const getRandomFourDate = () => {
+  const today = new Date()
+  const end = new Date(today)
+  end.setDate(end.getDate() - 1) // 昨天
+
+  const start = new Date(end.getFullYear(), 0, 1) // 今年 1/1
+
+  // 計算從 1/1 到昨天的總天數差 (毫秒換算)
+  const diffTime = end.getTime() - start.getTime()
+  const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+
+  // 如果總天數不足 4 天，直接回傳所有天數
+  if (totalDays <= 4) {
+    return Array.from({ length: totalDays }, (_, i) => {
+      const d = new Date(start)
+      d.setDate(start.getDate() + i)
+      return formatDate(d)
+    })
+  }
+
+  // 隨機抽 4 個不重複的整數 (天數索引)
+  const chosenIndices = new Set()
+  while (chosenIndices.size < 4) {
+    const randomIdx = Math.floor(Math.random() * totalDays)
+    chosenIndices.add(randomIdx)
+  }
+
+  // 只針對選中的那 4 天進行日期格式化
+  return Array.from(chosenIndices).map((idx) => {
+    const targetDate = new Date(start)
+    targetDate.setDate(start.getDate() + idx)
+    return formatDate(targetDate)
+  })
+}
+export const formatDate = (date: Date) => {
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${mm}${dd}`
+}

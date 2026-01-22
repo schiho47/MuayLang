@@ -1,28 +1,28 @@
 import { Pressable, Text } from 'react-native'
 import React from 'react'
-import { Box, Center, HStack } from '@gluestack-ui/themed';
-import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors';
+import { Box, Center, HStack } from '@gluestack-ui/themed'
+import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import useSpeech from '../../hooks/useSpeech'
 type VowelItem = {
-    char: string;
-    closed: string;
-    roman: string;
-  }
-  
-  type VowelPairProps = {
-    pair: { short: VowelItem; long: VowelItem |null};
-    isClosedMode: boolean;
-  }
+  char: string
+  closed: string
+  roman: string
+}
+
+type VowelPairProps = {
+  pair: { short: VowelItem; long: VowelItem | null }
+  isClosedMode: boolean
+}
 const VowelPairRow = (props: VowelPairProps) => {
-    const { pair, isClosedMode } = props
-    const { speak } = useSpeech()
- 
+  const { pair, isClosedMode } = props
+  const { speak } = useSpeech()
+
   const longValue = isClosedMode ? pair?.long?.closed : pair?.long?.char
   const hasLongValue = !!longValue
 
   return (
-<HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
+    <HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
       {/* 短音卡片 - 使用 VStack 處理內部層級 */}
       <Pressable
         style={{ flex: 1 }}
@@ -32,12 +32,21 @@ const VowelPairRow = (props: VowelPairProps) => {
           bg="$secondary50"
           p="$4"
           rounded="$xl"
-          borderWidth={1}   
+          borderWidth={1}
           borderColor="$secondary200"
           alignItems="center"
           position="relative"
         >
-          <Text style={{ fontSize: 12, fontWeight: 'bold', color: MUAY_PURPLE, position: 'absolute', top: 8, left: 8 }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: 'bold',
+              color: MUAY_PURPLE,
+              position: 'absolute',
+              top: 8,
+              left: 8,
+            }}
+          >
             SHORT
           </Text>
           <Ionicons
@@ -54,14 +63,10 @@ const VowelPairRow = (props: VowelPairProps) => {
               {isClosedMode ? pair.short.closed : pair.short.char}
             </Text>
           </Center>
-          <Text style={{ fontSize: 14, color: '$textLight500' }}>
-            {pair.short.roman}
-          </Text>
+          <Text style={{ fontSize: 14, color: '$textLight500' }}>{pair.short.roman}</Text>
         </Box>
       </Pressable>
-   
-          
-          
+
       {/* 長音卡片 */}
       <Pressable
         style={{ flex: 1 }}
@@ -80,16 +85,27 @@ const VowelPairRow = (props: VowelPairProps) => {
           alignItems="center"
           position="relative"
         >
-          <Text style={{ fontSize: 12, fontWeight: 'bold', color: MUAY_PURPLE, position: 'absolute', top: 8, left: 8 }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: 'bold',
+              color: MUAY_PURPLE,
+              position: 'absolute',
+              top: 8,
+              left: 8,
+            }}
+          >
             LONG
           </Text>
-          {hasLongValue && <Ionicons
-            name="volume-high"
-            size={24}
-            color={MUAY_PURPLE}
-            style={{ position: 'absolute', top: 8, right: 16 }}
-          />}
-         
+          {hasLongValue && (
+            <Ionicons
+              name="volume-high"
+              size={24}
+              color={MUAY_PURPLE}
+              style={{ position: 'absolute', top: 8, right: 16 }}
+            />
+          )}
+
           <Center h="$20">
             <Text
               style={{
@@ -102,15 +118,11 @@ const VowelPairRow = (props: VowelPairProps) => {
               {longValue || '—'}
             </Text>
           </Center>
-          <Text style={{ fontSize: 14, color: '$textLight500' }}>
-            {pair?.long?.roman}
-          </Text>       
+          <Text style={{ fontSize: 14, color: '$textLight500' }}>{pair?.long?.roman}</Text>
         </Box>
       </Pressable>
     </HStack>
-    
   )
 }
 
 export default VowelPairRow
-

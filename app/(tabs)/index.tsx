@@ -24,8 +24,6 @@ export default function HomeScreen() {
   const { data: training, isLoading: trainingLoading } = useTraining(user?.$id)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-
-
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(-50)).current

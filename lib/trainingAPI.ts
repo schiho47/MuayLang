@@ -7,6 +7,8 @@ import {
   updateTraining,
 } from './traningAppwrite'
 import { Platform, ToastAndroid } from 'react-native'
+import React from 'react'
+import { getCacheItem, setCacheItem } from './cacheStorage'
 
 // Cross-platform Toast function
 const showToast = (message: string) => {
@@ -19,11 +21,45 @@ const showToast = (message: string) => {
 }
 
 export const useTraining = (userId?: string) => {
+  const queryClient = useQueryClient()
+  const [isHydrated, setIsHydrated] = React.useState(false)
+  const cacheKey = userId ? `cache:training:${userId}` : ''
+
+  React.useEffect(() => {
+    let isMounted = true
+    if (!userId) {
+      setIsHydrated(false)
+      return
+    }
+
+    setIsHydrated(false)
+    getCacheItem<any[]>(cacheKey).then((cached) => {
+      if (!isMounted) return
+      if (cached) {
+        queryClient.setQueryData(['training', userId], cached)
+      }
+      setIsHydrated(true)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [cacheKey, queryClient, userId])
+
   return useQuery({
     queryKey: ['training', userId],
     queryFn: () => getTraining(userId),
-    enabled: !!userId, // Only execute query when userId exists
+    enabled: !!userId && isHydrated, // Only execute query when userId exists
     retry: false, // Don't auto-retry to avoid multiple failed requests
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24 * 365,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      if (cacheKey) {
+        setCacheItem(cacheKey, data)
+      }
+    },
   })
 }
 
@@ -53,9 +89,20 @@ export const useUpdateTraining = () => {
       console.log({ params })
       return updateTraining(id, data)
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       showToast('Updated successfully ✅')
-      queryClient.invalidateQueries({ queryKey: ['training'] })
+      const updated = result?.data
+      queryClient.setQueriesData({ queryKey: ['training'] }, (old: any) => {
+        if (!Array.isArray(old) || !updated?.$id) return old
+        return old.map((item) => (item?.$id === updated.$id ? updated : item))
+      })
+
+      queryClient.getQueriesData({ queryKey: ['training'] }).forEach(([key, data]) => {
+        const userId = Array.isArray(key) ? key[1] : undefined
+        if (userId && Array.isArray(data)) {
+          setCacheItem(`cache:training:${userId}`, data)
+        }
+      })
     },
     onError: (error) => {
       console.error('UpdateTraining failed', error)

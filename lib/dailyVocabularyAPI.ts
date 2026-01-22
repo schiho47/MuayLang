@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { getDailyVocabulary } from './dailyVocabulary'
+import { getDailyVocabulary, getQuizDateData } from './dailyVocabulary'
 
 export type DailyVocabularyWord = {
   th: string
@@ -33,6 +33,14 @@ export const useDailyVocabulary = (id?: string) => {
   })
 }
 
-
-
-
+export const useQuizDateData = (id: string[]) => {
+  return useQuery<unknown[] | null>({
+    queryKey: ['quizDateData', id],
+    queryFn: () => getQuizDateData(id) as Promise<unknown[] | null>,
+    enabled: id.length > 0,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24 * 365,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  })
+}

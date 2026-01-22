@@ -190,7 +190,7 @@ export default function TabTwoScreen() {
             <Spinner />
           </View>
         )}
-    <DailyVocabularyList />
+        <DailyVocabularyList />
         {!isLoading && (
           <FlatList
             data={filteredVocabularies}

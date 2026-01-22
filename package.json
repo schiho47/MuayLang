@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build": "expo export -p web"
+    "build": "expo export -p web",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",
@@ -20,6 +22,8 @@
     "@gluestack-ui/core": "^3.0.10",
     "@gluestack-ui/themed": "^1.1.73",
     "@gluestack-ui/utils": "^3.0.7",
+    "@google/genai": "^1.38.0",
+    "@google/generative-ai": "^0.24.1",
     "@legendapp/motion": "^2.5.3",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",

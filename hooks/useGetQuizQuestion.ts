@@ -1,8 +1,6 @@
 import { useState, useCallback } from 'react'
 import { GoogleGenAI } from '@google/genai'
 
-const ai = new GoogleGenAI({ apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY })
-
 export interface QuizQuestion {
   question: string
   phonetic: string
@@ -31,6 +29,13 @@ export const useGetQuizQuestion = () => {
     }): Promise<QuizQuestion | null> => {
       setLoading(true)
       setError(null)
+      const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY
+      if (!apiKey) {
+        setError('Missing Gemini API key.')
+        setLoading(false)
+        return null
+      }
+      const ai = new GoogleGenAI({ apiKey })
       console.log('dateObject', dateObject)
       const prompt = `
       You are an expert Thai educator.

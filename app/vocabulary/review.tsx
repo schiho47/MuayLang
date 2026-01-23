@@ -111,7 +111,7 @@ const VocabularyReview = () => {
   ])
 
   const handleSelectOption = (index: number) => {
-    if (!currentQuestion || selectedIndex !== null) return
+    if (!currentQuestion || isCorrect) return
     setSelectedIndex(index)
     setIsCorrect(index === currentQuestion.answerIndex)
   }
@@ -198,7 +198,7 @@ const VocabularyReview = () => {
               <Pressable
                 key={`${index}-${option}`}
                 onPress={() => handleSelectOption(index)}
-                disabled={selectedIndex !== null}
+                disabled={isCorrect}
                 sx={{
                   ':active': { opacity: 0.6 },
                 }}
@@ -215,7 +215,7 @@ const VocabularyReview = () => {
                     {String.fromCharCode(65 + index)}. {option}
                   </GText>
                   {showFeedback ? (
-                    <HStack space="sm" alignItems="center" mt="$3">
+                    <VStack space="xs" alignItems="flex-start" mt="$3">
                       <Ionicons
                         name={isAnswer ? 'checkmark' : 'close'}
                         size={16}
@@ -226,7 +226,12 @@ const VocabularyReview = () => {
                           <GText color="#2ecc71" fontWeight="$bold">
                             Correct!
                           </GText>
-                          <GText color="#2ecc71" fontSize={16} fontWeight="$normal">
+                          <GText
+                            color="#2ecc71"
+                            fontSize={16}
+                            fontWeight="$normal"
+                            style={{ flexWrap: 'wrap', flexShrink: 1, width: '100%' }}
+                          >
                             {currentQuestion?.cultural_note}
                           </GText>
                         </VStack>
@@ -235,7 +240,7 @@ const VocabularyReview = () => {
                           Try again
                         </GText>
                       )}
-                    </HStack>
+                    </VStack>
                   ) : null}
                 </Box>
               </Pressable>

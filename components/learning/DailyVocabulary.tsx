@@ -27,7 +27,7 @@ import { MUAY_PURPLE } from '@/constants/Colors'
 
 const DailyVocabularyList = () => {
   const router = useRouter()
-  const { data: vocabularyData } = useDailyVocabulary(getTodayKey())
+  const { data: vocabularyData, isLoading } = useDailyVocabulary(getTodayKey())
   const quizDates = useMemo(() => getRandomFourDate(), [])
   const { data: quizDateData } = useQuizDateData(quizDates)
   const quizCount = quizDateData?.length ?? 0
@@ -119,48 +119,65 @@ const DailyVocabularyList = () => {
         </Pressable>
       </VStack>
       <VStack space="sm">
-        {vocabularyData?.words?.map((item: DailyVocabularyWord, index: number) => (
-          <Pressable
-            key={index}
-            onPress={() => handlePress(item)}
+        {isLoading ? (
+          <Box
             p="$4"
             bg="$secondary50"
             borderRadius="$lg"
             borderWidth={1}
             borderColor="$secondary100"
-            sx={{
-              ':active': { bg: '$secondary100' },
-            }}
           >
-            <HStack justifyContent="space-between" alignItems="center">
-              <HStack space="md" alignItems="center">
-                <Center bg={MUAY_PURPLE} w="$5" h="$5" borderRadius="$full">
-                  <Text size="xs" color="$white" fontWeight="$bold" fontSize={10}>
-                    {index + 1}
-                  </Text>
-                </Center>
-                <Text fontWeight="$bold" size="lg" color={MUAY_PURPLE} fontSize={24}>
-                  {item.th}
-                </Text>
-                <Pressable
-                  onPress={() => speak(item.th)}
-                  accessibilityLabel={`Speak ${item.th}`}
-                  sx={{
-                    ':active': { opacity: 0.6 },
-                  }}
-                >
-                  <Ionicons name="volume-high" size={20} color={MUAY_PURPLE} />
-                </Pressable>
-              </HStack>
-              <HStack space="xs" alignItems="center">
-                <Text size="md" color="$text500" fontSize={14} fontWeight="$bold">
-                  {item.word}
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color="$text500" />
-              </HStack>
+            <HStack space="sm" alignItems="center">
+              <Ionicons name="time-outline" size={18} color={MUAY_PURPLE} />
+              <Text size="md" color={MUAY_PURPLE} fontWeight="$bold">
+                Loading daily vocabulary...
+              </Text>
             </HStack>
-          </Pressable>
-        ))}
+          </Box>
+        ) : (
+          vocabularyData?.words?.map((item: DailyVocabularyWord, index: number) => (
+            <Pressable
+              key={index}
+              onPress={() => handlePress(item)}
+              p="$4"
+              bg="$secondary50"
+              borderRadius="$lg"
+              borderWidth={1}
+              borderColor="$secondary100"
+              sx={{
+                ':active': { bg: '$secondary100' },
+              }}
+            >
+              <HStack justifyContent="space-between" alignItems="center">
+                <HStack space="md" alignItems="center">
+                  <Center bg={MUAY_PURPLE} w="$5" h="$5" borderRadius="$full">
+                    <Text size="xs" color="$white" fontWeight="$bold" fontSize={10}>
+                      {index + 1}
+                    </Text>
+                  </Center>
+                  <Text fontWeight="$bold" size="lg" color={MUAY_PURPLE} fontSize={24}>
+                    {item.th}
+                  </Text>
+                  <Pressable
+                    onPress={() => speak(item.th)}
+                    accessibilityLabel={`Speak ${item.th}`}
+                    sx={{
+                      ':active': { opacity: 0.6 },
+                    }}
+                  >
+                    <Ionicons name="volume-high" size={20} color={MUAY_PURPLE} />
+                  </Pressable>
+                </HStack>
+                <HStack space="xs" alignItems="center">
+                  <Text size="md" color="$text500" fontSize={14} fontWeight="$bold">
+                    {item.word}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color="$text500" />
+                </HStack>
+              </HStack>
+            </Pressable>
+          ))
+        )}
       </VStack>
 
       {/* 詳細資訊 Modal (保持不變) */}

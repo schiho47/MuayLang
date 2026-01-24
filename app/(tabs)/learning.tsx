@@ -140,29 +140,7 @@ export default function TabTwoScreen() {
       >
         {/* Learning Content */}
 
-        <View className="flex-row justify-end items-center px-4">
-          <View className="flex-row items-center gap-2">
-            {!user?.isGuest && (
-              <Ionicons
-                name="add-circle"
-                size={33}
-                color={MUAY_PURPLE}
-                onPress={handleAddingVocabulary}
-                className="p-1"
-              />
-            )}
-            <Ionicons
-              name={hasActiveFilter ? 'filter' : 'filter-outline'}
-              size={33}
-              color={MUAY_PURPLE}
-              onPress={() => {
-                console.log('Filtering vocabulary')
-                setOpenFilterSheet(true)
-              }}
-              className="p-1"
-            />
-          </View>
-        </View>
+
 
         <View className="mb-2.5 w-full h-[1.5px]" style={{ backgroundColor: MUAY_PURPLE }} />
 
@@ -191,6 +169,29 @@ export default function TabTwoScreen() {
           </View>
         )}
         <DailyVocabularyList />
+        <View className="flex-row justify-end items-center px-4">
+          <View className="flex-row items-center gap-2">
+            {!user?.isGuest && (
+              <Ionicons
+                name="add-circle"
+                size={33}
+                color={MUAY_PURPLE}
+                onPress={handleAddingVocabulary}
+                className="p-1"
+              />
+            )}
+            <Ionicons
+              name={hasActiveFilter ? 'filter' : 'filter-outline'}
+              size={33}
+              color={MUAY_PURPLE}
+              onPress={() => {
+                console.log('Filtering vocabulary')
+                setOpenFilterSheet(true)
+              }}
+              className="p-1"
+            />
+          </View>
+        </View>
         {!isLoading && (
           <FlatList
             data={filteredVocabularies}

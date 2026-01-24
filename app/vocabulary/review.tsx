@@ -1,125 +1,34 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Text, TouchableOpacity } from 'react-native'
 import { Box, HStack, Pressable, Text as GText, VStack } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
 import { useQuizDateData } from '@/lib/dailyVocabularyAPI'
-import { QuizQuestion, useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
-import { consumePrefetchedQuiz, QuizDateWord } from '@/lib/quizPrefetch'
+import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
+import { useQuizFlow } from '@/hooks/useQuizFlow'
+import type { QuizDateWord } from '@/lib/quizPrefetch'
+import useSpeech from '@/hooks/useSpeech'
 const VocabularyReview = () => {
   const { dates } = useLocalSearchParams<{ dates?: string }>()
   const dateList = useMemo(() => (dates ? dates.split(',').filter(Boolean) : []), [dates])
   const { data: quizDateData } = useQuizDateData(dateList)
   const { fetchQuestion, loading, error } = useGetQuizQuestion()
-  const [questionPool, setQuestionPool] = useState<QuizDateWord[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null)
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-  const [isCorrect, setIsCorrect] = useState(false)
-  const [hasPrefetchedFirst, setHasPrefetchedFirst] = useState(false)
-  const prefetchedRef = useRef(new Map<number, QuizQuestion | null>())
-  const inFlightRef = useRef(new Set<number>())
-
-  const totalQuestions = questionPool.length
-  const questionNumber = totalQuestions > 0 ? currentIndex + 1 : 0
-
-  const normalizeWordForQuiz = (word: QuizDateWord) => ({
-    ...word,
-    dateId: word.dayId ?? word.id ?? '',
-    tags: word.tags ?? '',
-  })
-
-  const prefetchQuestionAt = useCallback(
-    (index: number) => {
-      if (index < 0 || index >= questionPool.length) return
-      if (prefetchedRef.current.has(index) || inFlightRef.current.has(index)) return
-      const word = questionPool[index]
-      if (!word) return
-      inFlightRef.current.add(index)
-      fetchQuestion(normalizeWordForQuiz(word)).then((result) => {
-        prefetchedRef.current.set(index, result)
-        inFlightRef.current.delete(index)
-      })
-    },
-    [questionPool, fetchQuestion],
-  )
-
-  useEffect(() => {
-    if (!quizDateData || quizDateData.length === 0) return
-    const prefetched = consumePrefetchedQuiz()
-    if (prefetched?.pool?.length) {
-      setQuestionPool(prefetched.pool)
-      setCurrentIndex(0)
-      prefetchedRef.current = new Map()
-      inFlightRef.current = new Set()
-      prefetchedRef.current.set(0, prefetched.firstQuestion ?? null)
-      setCurrentQuestion(prefetched.firstQuestion ?? null)
-      setHasPrefetchedFirst(!!prefetched.firstQuestion)
-      return
-    }
-
-    const pool = [...(quizDateData as QuizDateWord[])]
-    for (let i = pool.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[pool[i], pool[j]] = [pool[j], pool[i]]
-    }
-    setQuestionPool(pool.slice(0, 10))
-    setCurrentIndex(0)
-    prefetchedRef.current = new Map()
-    inFlightRef.current = new Set()
-    setCurrentQuestion(null)
-    setHasPrefetchedFirst(false)
-  }, [quizDateData])
-
-  useEffect(() => {
-    if (questionPool.length === 0) return
-    const currentWord = questionPool[currentIndex]
-    if (!currentWord) return
-    setSelectedIndex(null)
-    setIsCorrect(false)
-    const cached = prefetchedRef.current.get(currentIndex)
-    if (cached !== undefined) {
-      setCurrentQuestion(cached)
-      prefetchQuestionAt(currentIndex + 1)
-      return
-    }
-
-    if (hasPrefetchedFirst && currentIndex === 0 && currentQuestion) {
-      prefetchQuestionAt(1)
-      return
-    }
-
-    setCurrentQuestion(null)
-    let isActive = true
-    fetchQuestion(normalizeWordForQuiz(currentWord)).then((result) => {
-      if (!isActive) return
-      prefetchedRef.current.set(currentIndex, result)
-      setCurrentQuestion(result)
-      prefetchQuestionAt(currentIndex + 1)
-    })
-    return () => {
-      isActive = false
-    }
-  }, [
-    questionPool,
-    currentIndex,
-    fetchQuestion,
-    hasPrefetchedFirst,
+  const { speak } = useSpeech()
+  const [isQuestionPressed, setIsQuestionPressed] = useState(false)
+  const {
+    questionNumber,
+    totalQuestions,
     currentQuestion,
-    prefetchQuestionAt,
-  ])
-
-  const handleSelectOption = (index: number) => {
-    if (!currentQuestion || isCorrect) return
-    setSelectedIndex(index)
-    setIsCorrect(index === currentQuestion.answerIndex)
-  }
-
-  const handleNext = () => {
-    if (!isCorrect || currentIndex >= totalQuestions - 1) return
-    setCurrentIndex((prev) => prev + 1)
-  }
+    selectedIndex,
+    isCorrect,
+    canGoNext,
+    handleSelectOption,
+    handleNext,
+  } = useQuizFlow({
+    quizDateData: (quizDateData as QuizDateWord[] | null) ?? undefined,
+    fetchQuestion,
+  })
 
   return (
     <Box flex={1} bg={MUAY_WHITE}>
@@ -147,20 +56,20 @@ const VocabularyReview = () => {
                 fontWeight: 'bold',
                 color: MUAY_PURPLE,
                 padding: 24,
-                paddingLeft: 40,
+                textAlign: 'center',
               }}
             >
               Vocabulary Review
             </Text>
             <Pressable
               onPress={handleNext}
-              disabled={!isCorrect || currentIndex >= totalQuestions - 1}
+              disabled={!canGoNext}
               accessibilityLabel="Next question"
               sx={{
                 ':active': { opacity: 0.6 },
               }}
               style={{
-                opacity: !isCorrect || currentIndex >= totalQuestions - 1 ? 0.3 : 1,
+                opacity: canGoNext ? 1 : 0.3,
                 paddingRight: 8,
               }}
             >
@@ -179,11 +88,29 @@ const VocabularyReview = () => {
           <GText size="lg" color={MUAY_PURPLE}>
             {questionNumber}.
           </GText>
-          <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1}>
-            {loading && !currentQuestion
-              ? 'Loading question...'
-              : currentQuestion?.question || 'No question available'}
-          </GText>
+          <HStack flex={1} alignItems="flex-start" justifyContent="space-between">
+            <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1}>
+              {loading && !currentQuestion
+                ? 'Loading question...'
+                : currentQuestion?.question || 'No question available'}
+            </GText>
+            <Pressable
+              onPress={() => speak(currentQuestion?.question ?? '')}
+              onPressIn={() => setIsQuestionPressed(true)}
+              onPressOut={() => setIsQuestionPressed(false)}
+              accessibilityLabel="Speak question"
+              sx={{
+                ':active': { opacity: 0.6 },
+              }}
+              style={{
+                opacity: isQuestionPressed ? 0.6 : 1,
+                transform: [{ scale: isQuestionPressed ? 0.95 : 1 }],
+                paddingLeft: 8,
+              }}
+            >
+              <Ionicons name="volume-high" size={22} color={MUAY_PURPLE} />
+            </Pressable>
+          </HStack>
         </HStack>
 
         <VStack space="md">

@@ -20,15 +20,22 @@ import { useRouter } from 'expo-router'
 import useSpeech from '../../hooks/useSpeech'
 import { DailyVocabularyWord, useDailyVocabulary, useQuizDateData } from '@/lib/dailyVocabularyAPI'
 import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
-import { getRandomFourDate, getTodayKey } from '@/utils/dateUtils'
+import { formatDate, getRandomFourDate, getTodayKey } from '@/utils/dateUtils'
 import { QuizDateWord, setPrefetchedQuiz } from '@/lib/quizPrefetch'
 import SpeakerButton from '@/components/ui/SpeakerButton'
+import SearchInput from '@/components/ui/SearchInput'
+import { ScrollView } from 'react-native'
 
 import { MUAY_PURPLE } from '@/constants/Colors'
 
 const DailyVocabularyList = () => {
   const router = useRouter()
-  const { data: vocabularyData, isLoading } = useDailyVocabulary(getTodayKey())
+  const todayKey = useMemo(() => getTodayKey(), [])
+  const [activeDate, setActiveDate] = useState(todayKey)
+  const [inputDateText, setInputDateText] = useState('')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const { data: vocabularyData, isLoading } = useDailyVocabulary(activeDate)
   const quizDates = useMemo(() => getRandomFourDate(), [])
   const { data: quizDateData } = useQuizDateData(quizDates)
   const quizCount = quizDateData?.length ?? 0
@@ -58,6 +65,49 @@ const DailyVocabularyList = () => {
     }
     return pool.slice(0, 10)
   }
+
+  const dateOptions = useMemo(() => {
+    const today = new Date()
+    const end = new Date(today)
+    end.setDate(end.getDate() - 1)
+    const start = new Date(end.getFullYear(), 0, 1)
+    const options: { value: string; label: string }[] = []
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const value = formatDate(d)
+      const label = formatDate(d)
+      options.push({ value, label })
+    }
+    return options
+  }, [])
+
+  const filteredDateOptions = useMemo(() => {
+    const query = inputDateText.trim()
+    if (!query) return []
+    return dateOptions.filter(
+      (option) =>
+        option.label.includes(query) ||
+        option.value.includes(query.replace('/', '').padStart(4, '0')),
+    )
+  }, [dateOptions, inputDateText])
+
+  const handleSelectDate = (value: string) => {
+    const option = dateOptions.find((item) => item.value === value)
+    setSelectedDate(value)
+    setInputDateText(option?.label ?? value)
+    setShowSuggestions(false)
+  }
+
+  const handleSearchDate = () => {
+    if (selectedDate) {
+      setActiveDate(selectedDate)
+      return
+    }
+    if (!inputDateText.trim()) {
+      setActiveDate(todayKey)
+    }
+  }
+
+  const canSearch = !!selectedDate || !inputDateText.trim()
 
   const handleGoReview = async () => {
     if (!quizDateData || quizDateData.length === 0) {
@@ -102,21 +152,75 @@ const DailyVocabularyList = () => {
         >
           Daily Vocabulary - {vocabularyData?.tags || ''}
         </Heading>
-        <Pressable
-          onPress={handleGoReview}
-          disabled={isPrefetching}
-          accessibilityLabel={`Go to vocabulary review (${quizCount})`}
-          sx={{
-            ':active': { opacity: 0.6 },
-          }}
-          mt="$4"
-          style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
-        >
-          <HStack space="xs" alignItems="center">
-            <Ionicons name="chevron-forward" size={18} color={MUAY_PURPLE} />
-            <Ionicons name="school-outline" size={28} color={MUAY_PURPLE} />
-          </HStack>
-        </Pressable>
+        <VStack space="sm" alignItems="stretch">
+          <Box flex={1}>
+            <SearchInput
+              value={inputDateText}
+              onChangeText={(text) => {
+                setInputDateText(text)
+                setSelectedDate('')
+                setShowSuggestions(!!text.trim())
+              }}
+              placeholder="Search date (e.g. 0109)"
+              onClear={() => {
+                setInputDateText('')
+                setSelectedDate('')
+                setShowSuggestions(false)
+              }}
+              iconPosition="right"
+              onIconPress={canSearch ? handleSearchDate : undefined}
+              iconDisabled={!canSearch}
+              showClear
+              iconFilledWhenValue
+            />
+            {showSuggestions && filteredDateOptions.length > 0 ? (
+              <Box
+                mt="$2"
+                borderWidth={1}
+                borderColor="$backgroundLight200"
+                borderRadius="$md"
+                bg="$white"
+                maxHeight={220}
+                overflow="hidden"
+              >
+                <ScrollView>
+                  <VStack space="xs" py="$2">
+                    {filteredDateOptions.map((option) => (
+                      <Pressable
+                        key={option.value}
+                        onPress={() => handleSelectDate(option.value)}
+                        sx={{ ':active': { opacity: 0.6 } }}
+                      >
+                        <Box px="$3" py="$2">
+                          <Text
+                            color={option.value === selectedDate ? MUAY_PURPLE : '$text700'}
+                            fontWeight={option.value === selectedDate ? '$bold' : '$normal'}
+                          >
+                            {option.label}
+                          </Text>
+                        </Box>
+                      </Pressable>
+                    ))}
+                  </VStack>
+                </ScrollView>
+              </Box>
+            ) : null}
+          </Box>
+          <Pressable
+            onPress={handleGoReview}
+            disabled={isPrefetching}
+            accessibilityLabel={`Go to vocabulary review (${quizCount})`}
+            sx={{
+              ':active': { opacity: 0.6 },
+            }}
+            style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
+          >
+            <HStack space="xs" alignItems="center">
+              <Ionicons name="chevron-forward" size={18} color={MUAY_PURPLE} />
+              <Ionicons name="school-outline" size={28} color={MUAY_PURPLE} />
+            </HStack>
+          </Pressable>
+        </VStack>
       </VStack>
       <VStack space="sm">
         {isLoading ? (
@@ -148,8 +252,9 @@ const DailyVocabularyList = () => {
                 ':active': { bg: '$secondary100' },
               }}
             >
-              <HStack justifyContent="space-between" alignItems="center">
-                <HStack space="md" alignItems="center">
+              <HStack space="xs" alignItems="center" justifyContent="space-between">
+              <VStack space="xs">
+                <HStack space="md" alignItems="center" justifyContent="flex-start">
                   <Center bg={MUAY_PURPLE} w="$5" h="$5" borderRadius="$full">
                     <Text size="xs" color="$white" fontWeight="$bold" fontSize={10}>
                       {index + 1}
@@ -165,12 +270,20 @@ const DailyVocabularyList = () => {
                     color={MUAY_PURPLE}
                   />
                 </HStack>
-                <HStack space="xs" alignItems="center">
-                  <Text size="md" color="$text500" fontSize={14} fontWeight="$bold">
-                    {item.word}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={16} color="$text500" />
-                </HStack>
+                <Text
+                  size="md"
+                  color="$text500"
+                  fontSize={14}
+                  fontWeight="$bold"
+                  textAlign="left"
+                  style={{ marginLeft: 36 }}
+                >
+                  {item.word}
+                </Text>
+              </VStack>
+              <Box alignSelf="flex-end">
+                <Ionicons name="chevron-forward" size={24} color="$text500" />
+              </Box>
               </HStack>
             </Pressable>
           ))

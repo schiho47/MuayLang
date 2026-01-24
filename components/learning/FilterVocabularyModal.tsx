@@ -5,6 +5,7 @@ import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors'
 import useGetTagList from '@/hooks/useGetTagList'
 import { FilterDataType, VocabularyDataType, VocabularyFieldEnum } from './type'
 import { Divider } from '@gluestack-ui/themed'
+import SearchInput from '@/components/ui/SearchInput'
 
 type SearchField = 'thai' | 'english' | 'romanization'
 
@@ -203,38 +204,12 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
             </View>
 
             {/* Search input box */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                borderWidth: 1,
-                borderColor: MUAY_PURPLE_30,
-                borderRadius: 8,
-                paddingHorizontal: 12,
-                backgroundColor: '#fff',
-                marginBottom: 8,
-              }}
-            >
-              <Ionicons name="search" size={20} color={MUAY_PURPLE_30} />
-              <TextInput
-                placeholder={`Search by ${searchField}...`}
-                value={searchText}
-                onChangeText={setSearchText}
-                style={{
-                  flex: 1,
-                  paddingVertical: 12,
-                  paddingHorizontal: 8,
-                  fontSize: 16,
-                  color: '#222',
-                }}
-                placeholderTextColor="#bbb"
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchText('')}>
-                  <Ionicons name="close-circle" size={20} color={MUAY_PURPLE_30} />
-                </TouchableOpacity>
-              )}
-            </View>
+            <SearchInput
+              value={searchText}
+              onChangeText={setSearchText}
+              placeholder={`Search by ${searchField}`}
+              onClear={() => setSearchText('')}
+            />
 
             {/* Search results (real-time display) */}
             {searchText.trim() && filteredVocabularies.length > 0 && (

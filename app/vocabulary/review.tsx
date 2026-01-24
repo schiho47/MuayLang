@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Text, TouchableOpacity } from 'react-native'
 import { Box, HStack, Pressable, Text as GText, VStack } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
@@ -9,13 +9,14 @@ import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
 import { useQuizFlow } from '@/hooks/useQuizFlow'
 import type { QuizDateWord } from '@/lib/quizPrefetch'
 import useSpeech from '@/hooks/useSpeech'
+import VocabularyReviewSummary from '@/components/learning/VocabularyReviewSummary'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 const VocabularyReview = () => {
   const { dates } = useLocalSearchParams<{ dates?: string }>()
   const dateList = useMemo(() => (dates ? dates.split(',').filter(Boolean) : []), [dates])
   const { data: quizDateData } = useQuizDateData(dateList)
   const { fetchQuestion, loading, error } = useGetQuizQuestion()
   const { speak } = useSpeech()
-  const [isQuestionPressed, setIsQuestionPressed] = useState(false)
   const {
     questionNumber,
     totalQuestions,
@@ -25,10 +26,28 @@ const VocabularyReview = () => {
     canGoNext,
     handleSelectOption,
     handleNext,
+    resetQuiz,
+    summaryItems,
+    correctCount,
+    wrongCount,
+    isFinished,
   } = useQuizFlow({
     quizDateData: (quizDateData as QuizDateWord[] | null) ?? undefined,
     fetchQuestion,
   })
+
+  if (isFinished) {
+    return (
+      <VocabularyReviewSummary
+        totalQuestions={totalQuestions}
+        correctCount={correctCount}
+        wrongCount={wrongCount}
+        summaryItems={summaryItems}
+        onBack={() => router.back()}
+        onReplay={resetQuiz}
+      />
+    )
+  }
 
   return (
     <Box flex={1} bg={MUAY_WHITE}>
@@ -89,27 +108,24 @@ const VocabularyReview = () => {
             {questionNumber}.
           </GText>
           <HStack flex={1} alignItems="flex-start" justifyContent="space-between">
-            <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1}>
+            <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1} mr="$2">
               {loading && !currentQuestion
                 ? 'Loading question...'
                 : currentQuestion?.question || 'No question available'}
             </GText>
-            <Pressable
-              onPress={() => speak(currentQuestion?.question ?? '')}
-              onPressIn={() => setIsQuestionPressed(true)}
-              onPressOut={() => setIsQuestionPressed(false)}
+            <SpeakerButton
+              onPress={() =>
+                speak(
+                  currentQuestion?.question.replace(
+                    '____',
+                    currentQuestion?.options[currentQuestion?.answerIndex] ?? '',
+                  ) ?? '',
+                )
+              }
               accessibilityLabel="Speak question"
-              sx={{
-                ':active': { opacity: 0.6 },
-              }}
-              style={{
-                opacity: isQuestionPressed ? 0.6 : 1,
-                transform: [{ scale: isQuestionPressed ? 0.95 : 1 }],
-                paddingLeft: 8,
-              }}
-            >
-              <Ionicons name="volume-high" size={22} color={MUAY_PURPLE} />
-            </Pressable>
+              size={22}
+              color={MUAY_PURPLE}
+            />
           </HStack>
         </HStack>
 
@@ -149,7 +165,7 @@ const VocabularyReview = () => {
                         color={isAnswer ? '#2ecc71' : '#ef4444'}
                       />
                       {isAnswer ? (
-                        <VStack space="xs">
+                        <VStack space="xs" alignItems="flex-start" style={{ width: '100%' }}>
                           <GText color="#2ecc71" fontWeight="$bold">
                             Correct!
                           </GText>

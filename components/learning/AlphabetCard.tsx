@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Box, Text, Pressable, HStack, VStack } from '@gluestack-ui/themed'
-import { Ionicons } from '@expo/vector-icons'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import useSpeech from '../../hooks/useSpeech'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 
 type AlphabetCardProps = {
   item: { id: string; letter: string; vocabulary?: string; meaning?: string }
@@ -48,7 +48,12 @@ const AlphabetCard = (props: AlphabetCardProps) => {
           <Text fontWeight="$bold" color={MUAY_PURPLE} style={{ fontSize: 48, lineHeight: 48 }}>
             {letter}
           </Text>
-          <Ionicons name="volume-high" size={24} color={MUAY_PURPLE} />
+          <SpeakerButton
+            onPress={() => speak(speechText)}
+            accessibilityLabel={`Speak ${speechText}`}
+            size={24}
+            color={MUAY_PURPLE}
+          />
         </HStack>
         <VStack width="100%" space="xs">
           <Text

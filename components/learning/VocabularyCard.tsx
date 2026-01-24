@@ -5,6 +5,7 @@ import { Box, Divider } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 import { VocabularyDataType, VocabularyFieldEnum } from './type'
 import useSpeech from '../../hooks/useSpeech'
 import { useUpdateVocabulary } from '@/lib/learningAPI'
@@ -133,9 +134,12 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
                   marginVertical: 8,
                 }}
               >
-                <TouchableOpacity onPress={() => speak(thai)}>
-                  <Ionicons name="volume-high" size={32} color={MUAY_PURPLE} />
-                </TouchableOpacity>
+                <SpeakerButton
+                  onPress={() => speak(thai)}
+                  accessibilityLabel="Speak Thai"
+                  size={32}
+                  color={MUAY_PURPLE}
+                />
                 <TouchableOpacity onPress={() => copyToClipboard(thai)}>
                   <Ionicons name="copy-outline" size={32} color={MUAY_PURPLE} />
                 </TouchableOpacity>
@@ -172,9 +176,13 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
                   >
                     {exampleTH}
                   </Text>
-                  <TouchableOpacity onPress={() => speak(exampleTH)} style={{ marginLeft: 8 }}>
-                    <Ionicons name="volume-high" size={20} color={MUAY_PURPLE} />
-                  </TouchableOpacity>
+                  <SpeakerButton
+                    onPress={() => speak(exampleTH)}
+                    accessibilityLabel="Speak example Thai"
+                    size={20}
+                    color={MUAY_PURPLE}
+                    style={{ marginLeft: 8 }}
+                  />
                 </View>
               )}
               <Text style={{ fontSize: 18, marginLeft: 16 }}>{exampleEN}</Text>

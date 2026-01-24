@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { QuizQuestion } from '@/hooks/useGetQuizQuestion'
 import { consumePrefetchedQuiz, type QuizDateWord } from '@/lib/quizPrefetch'
@@ -21,6 +21,13 @@ type UseQuizFlowParams = {
   fetchQuestion: FetchQuestion
 }
 
+type SummaryItem = {
+  index: number
+  question: string
+  answer: string
+  hadWrong: boolean
+}
+
 export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) => {
   const [questionPool, setQuestionPool] = useState<QuizDateWord[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -28,8 +35,11 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [isCorrect, setIsCorrect] = useState(false)
   const [hasPrefetchedFirst, setHasPrefetchedFirst] = useState(false)
+  const [results, setResults] = useState<SummaryItem[]>([])
+  const [resetKey, setResetKey] = useState(0)
   const prefetchedRef = useRef(new Map<number, QuizQuestion | null>())
   const inFlightRef = useRef(new Set<number>())
+  const wrongMapRef = useRef(new Map<number, boolean>())
 
   const totalQuestions = questionPool.length
   const questionNumber = totalQuestions > 0 ? currentIndex + 1 : 0
@@ -68,16 +78,20 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
   useEffect(() => {
     if (!quizDateData || quizDateData.length === 0) return
 
-    const prefetched = consumePrefetchedQuiz()
-    if (prefetched?.pool?.length) {
-      setQuestionPool(prefetched.pool)
-      setCurrentIndex(0)
-      prefetchedRef.current = new Map()
-      inFlightRef.current = new Set()
-      prefetchedRef.current.set(0, prefetched.firstQuestion ?? null)
-      setCurrentQuestion(prefetched.firstQuestion ?? null)
-      setHasPrefetchedFirst(!!prefetched.firstQuestion)
-      return
+    if (resetKey === 0) {
+      const prefetched = consumePrefetchedQuiz()
+      if (prefetched?.pool?.length) {
+        setQuestionPool(prefetched.pool)
+        setCurrentIndex(0)
+        prefetchedRef.current = new Map()
+        inFlightRef.current = new Set()
+        wrongMapRef.current = new Map()
+        prefetchedRef.current.set(0, prefetched.firstQuestion ?? null)
+        setCurrentQuestion(prefetched.firstQuestion ?? null)
+        setHasPrefetchedFirst(!!prefetched.firstQuestion)
+        setResults([])
+        return
+      }
     }
 
     const pool = buildQuestionPool(quizDateData)
@@ -85,9 +99,11 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
     setCurrentIndex(0)
     prefetchedRef.current = new Map()
     inFlightRef.current = new Set()
+    wrongMapRef.current = new Map()
     setCurrentQuestion(null)
     setHasPrefetchedFirst(false)
-  }, [quizDateData])
+    setResults([])
+  }, [quizDateData, resetKey])
 
   useEffect(() => {
     if (questionPool.length === 0) return
@@ -95,6 +111,9 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
     if (!currentWord) return
     setSelectedIndex(null)
     setIsCorrect(false)
+    if (!wrongMapRef.current.has(currentIndex)) {
+      wrongMapRef.current.set(currentIndex, false)
+    }
     const cached = prefetchedRef.current.get(currentIndex)
     if (cached !== undefined) {
       setCurrentQuestion(cached)
@@ -130,13 +149,48 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
   const handleSelectOption = (index: number) => {
     if (!currentQuestion || isCorrect) return
     setSelectedIndex(index)
-    setIsCorrect(index === currentQuestion.answerIndex)
+    const correct = index === currentQuestion.answerIndex
+    if (!correct) {
+      wrongMapRef.current.set(currentIndex, true)
+      setIsCorrect(false)
+      return
+    }
+
+    const answerText = currentQuestion.options?.[currentQuestion.answerIndex] ?? ''
+    const hadWrong = wrongMapRef.current.get(currentIndex) ?? false
+    setResults((prev) => {
+      const next = prev.filter((item) => item.index !== currentIndex)
+      next.push({
+        index: currentIndex,
+        question: currentQuestion.question,
+        answer: answerText,
+        hadWrong,
+      })
+      return next.sort((a, b) => a.index - b.index)
+    })
+    setIsCorrect(true)
   }
 
   const handleNext = () => {
     if (!canGoNext) return
     setCurrentIndex((prev) => prev + 1)
   }
+
+  const resetQuiz = () => {
+    setResetKey((prev) => prev + 1)
+  }
+
+  const summaryItems = useMemo(() => {
+    return results.slice().sort((a, b) => a.index - b.index)
+  }, [results])
+
+  const correctCount = summaryItems.filter((item) => !item.hadWrong).length
+  const wrongCount = summaryItems.filter((item) => item.hadWrong).length
+  const isFinished =
+    totalQuestions > 0 &&
+    summaryItems.length === totalQuestions &&
+    isCorrect &&
+    currentIndex === totalQuestions - 1
 
   return {
     questionNumber,
@@ -147,5 +201,10 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
     canGoNext,
     handleSelectOption,
     handleNext,
+    resetQuiz,
+    summaryItems,
+    correctCount,
+    wrongCount,
+    isFinished,
   }
 }

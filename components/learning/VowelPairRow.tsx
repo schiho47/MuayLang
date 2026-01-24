@@ -2,8 +2,8 @@ import { Pressable, Text } from 'react-native'
 import React from 'react'
 import { Box, Center, HStack } from '@gluestack-ui/themed'
 import { MUAY_PURPLE, MUAY_PURPLE_30 } from '@/constants/Colors'
-import { Ionicons } from '@expo/vector-icons'
 import useSpeech from '../../hooks/useSpeech'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 type VowelItem = {
   char: string
   closed: string
@@ -49,8 +49,9 @@ const VowelPairRow = (props: VowelPairProps) => {
           >
             SHORT
           </Text>
-          <Ionicons
-            name="volume-high"
+          <SpeakerButton
+            onPress={() => speak(isClosedMode ? pair.short.closed : pair.short.char)}
+            accessibilityLabel="Speak short vowel"
             size={18}
             color={MUAY_PURPLE}
             style={{ position: 'absolute', top: 8, right: 8 }}
@@ -98,8 +99,13 @@ const VowelPairRow = (props: VowelPairProps) => {
             LONG
           </Text>
           {hasLongValue && (
-            <Ionicons
-              name="volume-high"
+            <SpeakerButton
+              onPress={() => {
+                if (pair?.long) {
+                  speak(isClosedMode ? pair?.long?.closed : pair?.long?.char)
+                }
+              }}
+              accessibilityLabel="Speak long vowel"
               size={24}
               color={MUAY_PURPLE}
               style={{ position: 'absolute', top: 8, right: 16 }}

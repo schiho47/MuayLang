@@ -22,6 +22,7 @@ import { DailyVocabularyWord, useDailyVocabulary, useQuizDateData } from '@/lib/
 import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
 import { getRandomFourDate, getTodayKey } from '@/utils/dateUtils'
 import { QuizDateWord, setPrefetchedQuiz } from '@/lib/quizPrefetch'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 
 import { MUAY_PURPLE } from '@/constants/Colors'
 
@@ -35,7 +36,6 @@ const DailyVocabularyList = () => {
   const [showModal, setShowModal] = useState(false)
   const [selectedWord, setSelectedWord] = useState<DailyVocabularyWord | null>(null)
   const { speak } = useSpeech()
-  const [isExamplePressed, setIsExamplePressed] = useState(false)
   const [isPrefetching, setIsPrefetching] = useState(false)
 
   console.log({ vocabularyData, selectedWord })
@@ -158,15 +158,12 @@ const DailyVocabularyList = () => {
                   <Text fontWeight="$bold" size="lg" color={MUAY_PURPLE} fontSize={24}>
                     {item.th}
                   </Text>
-                  <Pressable
+                  <SpeakerButton
                     onPress={() => speak(item.th)}
                     accessibilityLabel={`Speak ${item.th}`}
-                    sx={{
-                      ':active': { opacity: 0.6 },
-                    }}
-                  >
-                    <Ionicons name="volume-high" size={20} color={MUAY_PURPLE} />
-                  </Pressable>
+                    size={20}
+                    color={MUAY_PURPLE}
+                  />
                 </HStack>
                 <HStack space="xs" alignItems="center">
                   <Text size="md" color="$text500" fontSize={14} fontWeight="$bold">
@@ -223,21 +220,12 @@ const DailyVocabularyList = () => {
                 <Text size="md" fontWeight="$medium" mb="$1" fontSize={28} color={MUAY_PURPLE}>
                   {selectedWord?.ex_th}
                 </Text>
-                <Pressable
+                <SpeakerButton
                   onPress={() => speak(selectedWord?.ex_th ?? '')}
-                  onPressIn={() => setIsExamplePressed(true)}
-                  onPressOut={() => setIsExamplePressed(false)}
                   accessibilityLabel="Speak example Thai"
-                  sx={{
-                    ':active': { opacity: 0.6 },
-                  }}
-                  style={{
-                    opacity: isExamplePressed ? 0.6 : 1,
-                    transform: [{ scale: isExamplePressed ? 0.95 : 1 }],
-                  }}
-                >
-                  <Ionicons name="volume-high" size={26} color={MUAY_PURPLE} />
-                </Pressable>
+                  size={26}
+                  color={MUAY_PURPLE}
+                />
               </HStack>
               {/* 例句標籤改為 TW 與 EN */}
               <Text size="sm" color="$text400" mb="$2" mt="$2">

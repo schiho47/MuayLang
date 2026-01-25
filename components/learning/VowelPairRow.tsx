@@ -8,21 +8,21 @@ type VowelItem = {
   char: string
   closed: string
   roman: string
-}
-
-type VowelPairProps = {
+  }
+  
+  type VowelPairProps = {
   pair: { short: VowelItem; long: VowelItem | null }
   isClosedMode: boolean
-}
+  }
 const VowelPairRow = (props: VowelPairProps) => {
-  const { pair, isClosedMode } = props
+    const { pair, isClosedMode } = props
   const { speak } = useSpeech()
 
   const longValue = isClosedMode ? pair?.long?.closed : pair?.long?.char
   const hasLongValue = !!longValue
 
   return (
-    <HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
+<HStack space="md" reversed={false} mb="$4" justifyContent="space-between" px="$4">
       {/* 短音卡片 - 使用 VStack 處理內部層級 */}
       <Pressable
         style={{ flex: 1 }}
@@ -32,7 +32,7 @@ const VowelPairRow = (props: VowelPairProps) => {
           bg="$secondary50"
           p="$4"
           rounded="$xl"
-          borderWidth={1}
+          borderWidth={1}   
           borderColor="$secondary200"
           alignItems="center"
           position="relative"

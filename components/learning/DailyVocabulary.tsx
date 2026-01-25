@@ -1,17 +1,17 @@
-import React, { useMemo, useState } from 'react'
-import {
-  Box,
-  VStack,
+import React, { useEffect, useMemo, useState } from 'react'
+import { 
+  Box, 
+  VStack, 
   HStack,
-  Text,
-  Pressable,
-  Heading,
-  Modal,
-  ModalBackdrop,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
+  Text, 
+  Pressable, 
+  Heading, 
+  Modal, 
+  ModalBackdrop, 
+  ModalContent, 
+  ModalHeader, 
+  ModalCloseButton, 
+  ModalBody, 
   Center,
   Divider,
 } from '@gluestack-ui/themed'
@@ -35,7 +35,7 @@ const DailyVocabularyList = () => {
   const [inputDateText, setInputDateText] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const { data: vocabularyData, isLoading } = useDailyVocabulary(activeDate)
+  const { data: vocabularyData, isLoading, error } = useDailyVocabulary(activeDate)
   const quizDates = useMemo(() => getRandomFourDate(), [])
   const { data: quizDateData } = useQuizDateData(quizDates)
   const quizCount = quizDateData?.length ?? 0
@@ -134,6 +134,13 @@ const DailyVocabularyList = () => {
     })
   }
 
+  useEffect(() => {
+    const errorCode = (error as any)?.code ?? (error as any)?.response?.status
+    if (errorCode === 401) {
+      router.replace('/login')
+    }
+  }, [error, router])
+
   return (
     <Box
       p="$4"
@@ -216,8 +223,8 @@ const DailyVocabularyList = () => {
             style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
           >
             <HStack space="xs" alignItems="center">
-              <Ionicons name="chevron-forward" size={18} color={MUAY_PURPLE} />
-              <Ionicons name="school-outline" size={28} color={MUAY_PURPLE} />
+              <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
+              <Ionicons name="school-outline" size={33} color={MUAY_PURPLE} />
             </HStack>
           </Pressable>
         </VStack>
@@ -238,20 +245,32 @@ const DailyVocabularyList = () => {
               </Text>
             </HStack>
           </Box>
+        ) : !vocabularyData?.words?.length ? (
+          <Box
+            p="$4"
+            bg="$secondary50"
+            borderRadius="$lg"
+            borderWidth={1}
+            borderColor="$secondary100"
+          >
+            <Text size="md" color={MUAY_PURPLE} fontWeight="$bold">
+              No daily vocabulary found
+            </Text>
+          </Box>
         ) : (
           vocabularyData?.words?.map((item: DailyVocabularyWord, index: number) => (
-            <Pressable
-              key={index}
-              onPress={() => handlePress(item)}
-              p="$4"
-              bg="$secondary50"
-              borderRadius="$lg"
-              borderWidth={1}
-              borderColor="$secondary100"
-              sx={{
+          <Pressable
+            key={index}
+            onPress={() => handlePress(item)}
+            p="$4"
+            bg="$secondary50"
+            borderRadius="$lg"
+            borderWidth={1}
+            borderColor="$secondary100"
+            sx={{
                 ':active': { bg: '$secondary100' },
-              }}
-            >
+            }}
+          >
               <HStack space="xs" alignItems="center" justifyContent="space-between">
               <VStack space="xs">
                 <HStack space="md" alignItems="center" justifyContent="flex-start">
@@ -259,9 +278,9 @@ const DailyVocabularyList = () => {
                     <Text size="xs" color="$white" fontWeight="$bold" fontSize={10}>
                       {index + 1}
                     </Text>
-                  </Center>
+                </Center>
                   <Text fontWeight="$bold" size="lg" color={MUAY_PURPLE} fontSize={24}>
-                    {item.th}
+                  {item.th}
                   </Text>
                   <SpeakerButton
                     onPress={() => speak(item.th)}
@@ -284,8 +303,8 @@ const DailyVocabularyList = () => {
               <Box alignSelf="flex-end">
                 <Ionicons name="chevron-forward" size={24} color="$text500" />
               </Box>
-              </HStack>
-            </Pressable>
+            </HStack>
+          </Pressable>
           ))
         )}
       </VStack>
@@ -303,7 +322,7 @@ const DailyVocabularyList = () => {
                 <Text size="sm" color="$text400" fontSize={18} textAlign="left">
                   {selectedWord?.roman}
                 </Text>
-              </VStack>
+            </VStack>
               <Text size="md" color="$text500" textAlign="right" flexShrink={0}>
                 {selectedWord?.word}
               </Text>
@@ -324,11 +343,11 @@ const DailyVocabularyList = () => {
                     {selectedWord?.tw_r}
                   </Text>
                 </VStack>
-              </HStack>
-            </VStack>
-            <Divider />
+                </HStack>
+              </VStack>
+              <Divider />
 
-            <Box bg="$backgroundLight50" p="$4" borderRadius="$md">
+              <Box bg="$backgroundLight50" p="$4" borderRadius="$md">
               <HStack justifyContent="space-between" alignItems="center">
                 <Text size="md" fontWeight="$medium" mb="$1" fontSize={28} color={MUAY_PURPLE}>
                   {selectedWord?.ex_th}
@@ -347,7 +366,7 @@ const DailyVocabularyList = () => {
               <Text size="sm" color="$secondary600" mb="$2">
                 TW : {selectedWord?.ex_tw}
               </Text>
-            </Box>
+              </Box>
           </ModalBody>
         </ModalContent>
       </Modal>

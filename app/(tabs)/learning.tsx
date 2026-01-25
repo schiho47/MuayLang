@@ -16,6 +16,7 @@ import { useUser } from '@/hooks/useUser'
 import AlphabetSection from '@/components/learning/AlphabetSection'
 import VowelLearningScreen from '@/components/learning/VowelLearningScreen'
 import DailyVocabularyList from '@/components/learning/DailyVocabulary'
+import { Heading } from '@gluestack-ui/themed'
 export default function TabTwoScreen() {
   const { user } = useUser()
   const { data: vocabularies, isLoading } = useVocabularies(user?.$id)
@@ -96,6 +97,18 @@ export default function TabTwoScreen() {
     setFilterData(null)
   }
 
+  const getRandomVocabularyIds = (items: VocabularyDataType[], count: number = 5) => {
+    const pool = [...items]
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[pool[i], pool[j]] = [pool[j], pool[i]]
+    }
+    return pool
+      .slice(0, Math.min(count, pool.length))
+      .map((item) => item?.$id)
+      .filter(Boolean)
+  }
+
   // Check if there are active filter conditions
   const hasActiveFilter = useMemo(() => {
     if (!filterData) return false
@@ -170,7 +183,14 @@ export default function TabTwoScreen() {
         )}
         <DailyVocabularyList />
         <View className="flex-row justify-end items-center px-4">
-          <View className="flex-row items-center gap-2">
+          <Heading
+            size="md"
+            color={MUAY_PURPLE}
+            style={{ flexWrap: 'wrap', flexShrink: 1, width: '100%' }}
+          >
+            My Vocabulary
+          </Heading>
+          
             {!user?.isGuest && (
               <Ionicons
                 name="add-circle"
@@ -188,10 +208,30 @@ export default function TabTwoScreen() {
                 console.log('Filtering vocabulary')
                 setOpenFilterSheet(true)
               }}
-              className="p-1"
+              className="p-1 ms-2"
             />
+            <View className="flex-row items-center gap-2 ms-2">
+            <TouchableOpacity
+              onPress={() => {
+                const items = filteredVocabularies as VocabularyDataType[]
+                const ids = getRandomVocabularyIds(items)
+                router.push({
+                  pathname: '/vocabulary/myVocabularyReview',
+                  params: {
+                    vocabularies: ids.join(','),
+                  },
+                })
+              }}
+              className="p-1"
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
+                <Ionicons name="school-outline" size={33} color={MUAY_PURPLE} />
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
+
         {!isLoading && (
           <FlatList
             data={filteredVocabularies}

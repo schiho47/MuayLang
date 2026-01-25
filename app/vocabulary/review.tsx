@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Text, TouchableOpacity } from 'react-native'
+import { ScrollView, Text, TouchableOpacity } from 'react-native'
 import { Box, HStack, Pressable, Text as GText, VStack } from '@gluestack-ui/themed'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -11,6 +11,7 @@ import type { QuizDateWord } from '@/lib/quizPrefetch'
 import useSpeech from '@/hooks/useSpeech'
 import VocabularyReviewSummary from '@/components/learning/VocabularyReviewSummary'
 import SpeakerButton from '@/components/ui/SpeakerButton'
+
 const VocabularyReview = () => {
   const { dates } = useLocalSearchParams<{ dates?: string }>()
   const dateList = useMemo(() => (dates ? dates.split(',').filter(Boolean) : []), [dates])
@@ -97,111 +98,113 @@ const VocabularyReview = () => {
           </HStack>
         </HStack>
       </Box>
-      <VStack space="lg" px="$5" py="$6">
-        <HStack justifyContent="flex-end">
-          <GText size="sm" color="$text400">
-            {questionNumber}/{totalQuestions}
-          </GText>
-        </HStack>
-        <HStack alignItems="flex-start" space="sm">
-          <GText size="lg" color={MUAY_PURPLE}>
-            {questionNumber}.
-          </GText>
-          <HStack flex={1} alignItems="flex-start" justifyContent="space-between">
-            <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1} mr="$2">
-              {loading && !currentQuestion
-                ? 'Loading question...'
-                : currentQuestion?.question || 'No question available'}
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 24 }}>
+        <VStack space="lg">
+          <HStack justifyContent="flex-end">
+            <GText size="sm" color="$text400">
+              {questionNumber}/{totalQuestions}
             </GText>
-            <SpeakerButton
-              onPress={() =>
-                speak(
-                  currentQuestion?.question.replace(
-                    '____',
-                    currentQuestion?.options[currentQuestion?.answerIndex] ?? '',
-                  ) ?? '',
-                )
-              }
-              accessibilityLabel="Speak question"
-              size={22}
-              color={MUAY_PURPLE}
-            />
           </HStack>
-        </HStack>
-
-        <VStack space="md">
-          {currentQuestion?.options?.map((option, index) => {
-            const isSelected = selectedIndex === index
-            const isAnswer = currentQuestion.answerIndex === index
-            const showFeedback = selectedIndex !== null && isSelected
-            const borderColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
-            const textColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
-
-            return (
-              <Pressable
-                key={`${index}-${option}`}
-                onPress={() => handleSelectOption(index)}
-                disabled={isCorrect}
-                sx={{
-                  ':active': { opacity: 0.6 },
-                }}
-              >
-                <Box
-                  bg={MUAY_WHITE}
-                  borderRadius="$xl"
-                  px="$4"
-                  py="$4"
-                  borderWidth={1}
-                  borderColor={borderColor}
-                >
-                  <GText color={textColor}>
-                    {String.fromCharCode(65 + index)}. {option}
-                  </GText>
-                  {showFeedback ? (
-                    <VStack space="xs" alignItems="flex-start" mt="$3">
-                      <Ionicons
-                        name={isAnswer ? 'checkmark' : 'close'}
-                        size={16}
-                        color={isAnswer ? '#2ecc71' : '#ef4444'}
-                      />
-                      {isAnswer ? (
-                        <VStack space="xs" alignItems="flex-start" style={{ width: '100%' }}>
-                          <GText color="#2ecc71" fontWeight="$bold">
-                            Correct!
-                          </GText>
-                          <GText
-                            color="#2ecc71"
-                            fontSize={16}
-                            fontWeight="$normal"
-                            style={{ flexWrap: 'wrap', flexShrink: 1, width: '100%' }}
-                          >
-                            {currentQuestion?.cultural_note}
-                          </GText>
-                        </VStack>
-                      ) : (
-                        <GText color="#ef4444" fontWeight="$bold">
-                          Try again
-                        </GText>
-                      )}
-                    </VStack>
-                  ) : null}
-                </Box>
-              </Pressable>
-            )
-          })}
-
-          {error ? (
-            <GText color="#ef4444" mt="$2">
-              {error}
+          <HStack alignItems="flex-start" space="sm">
+            <GText size="lg" color={MUAY_PURPLE}>
+              {questionNumber}.
             </GText>
-          ) : null}
-        </VStack>
+            <HStack flex={1} alignItems="flex-start" justifyContent="space-between">
+              <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1} mr="$2">
+                {loading && !currentQuestion
+                  ? 'Loading question...'
+                  : currentQuestion?.question || 'No question available'}
+              </GText>
+              <SpeakerButton
+                onPress={() =>
+                  speak(
+                    currentQuestion?.question.replace(
+                      '____',
+                      currentQuestion?.options[currentQuestion?.answerIndex] ?? '',
+                    ) ?? '',
+                  )
+                }
+                accessibilityLabel="Speak question"
+                size={22}
+                color={MUAY_PURPLE}
+              />
+            </HStack>
+          </HStack>
 
-        {/* <HStack alignItems="center" space="xs" mt="$2">
-          <GText color="$text300">顯示提示</GText>
-          <Ionicons name="chevron-down" size={16} color="#9ca3af" />
-        </HStack> */}
-      </VStack>
+          <VStack space="md">
+            {currentQuestion?.options?.map((option, index) => {
+              const isSelected = selectedIndex === index
+              const isAnswer = currentQuestion.answerIndex === index
+              const showFeedback = selectedIndex !== null && isSelected
+              const borderColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
+              const textColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
+
+              return (
+                <Pressable
+                  key={`${index}-${option}`}
+                  onPress={() => handleSelectOption(index)}
+                  disabled={isCorrect}
+                  sx={{
+                    ':active': { opacity: 0.6 },
+                  }}
+                >
+                  <Box
+                    bg={MUAY_WHITE}
+                    borderRadius="$xl"
+                    px="$4"
+                    py="$4"
+                    borderWidth={1}
+                    borderColor={borderColor}
+                  >
+                    <GText color={textColor}>
+                      {String.fromCharCode(65 + index)}. {option}
+                    </GText>
+                    {showFeedback ? (
+                      <VStack space="xs" alignItems="flex-start" mt="$3">
+                        <Ionicons
+                          name={isAnswer ? 'checkmark' : 'close'}
+                          size={16}
+                          color={isAnswer ? '#2ecc71' : '#ef4444'}
+                        />
+                        {isAnswer ? (
+                          <VStack space="xs" alignItems="flex-start" style={{ width: '100%' }}>
+                            <GText color="#2ecc71" fontWeight="$bold">
+                              Correct!
+                            </GText>
+                            <GText
+                              color="#2ecc71"
+                              fontSize={16}
+                              fontWeight="$normal"
+                              style={{ flexWrap: 'wrap', flexShrink: 1, width: '100%' }}
+                            >
+                              {currentQuestion?.cultural_note}
+                            </GText>
+                          </VStack>
+                        ) : (
+                          <GText color="#ef4444" fontWeight="$bold">
+                            Try again
+                          </GText>
+                        )}
+                      </VStack>
+                    ) : null}
+                  </Box>
+                </Pressable>
+              )
+            })}
+
+            {error ? (
+              <GText color="#ef4444" mt="$2">
+                {error}
+              </GText>
+            ) : null}
+          </VStack>
+
+          {/* <HStack alignItems="center" space="xs" mt="$2">
+            <GText color="$text300">顯示提示</GText>
+            <Ionicons name="chevron-down" size={16} color="#9ca3af" />
+          </HStack> */}
+        </VStack>
+      </ScrollView>
     </Box>
   )
 }

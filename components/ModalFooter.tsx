@@ -58,7 +58,7 @@ const ModalFooter: React.FC<ModalFooterProps> = (props) => {
         {loading ? (
           <ActivityIndicator color={MUAY_WHITE} />
         ) : (
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+          <Text className="text-white font-bold text-lg">
             {confirmText || (isEdit ? 'Update' : 'Add')}
           </Text>
         )}

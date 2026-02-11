@@ -63,45 +63,46 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()
-      if (isGuestSession) {
-        await jwtStorage.removeToken()
-        clearJWTToken()
-        const guestUser: User = {
-          $id: DEMO_USER_ID || 'guest-public',
-          email: 'guest@muaylang.app',
-          name: 'Guest User',
-          emailVerification: false,
-          isGuest: true,
-        }
-        setUser(guestUser)
-        setAuthChecked(true)
+
+      const hasValidToken = await initializeJWT()
+      if (hasValidToken) {
+        const currentUser = await account.get()
+        await saveUserSession(currentUser)
+        await guestStorage.clearGuestMode()
+        setUser(currentUser as any)
         return
       }
 
-      const hasValidToken = await initializeJWT()
-      if (!hasValidToken) {
-        try {
-          // Fall back to Appwrite session cookie and refresh JWT
-          const currentUser = await account.get()
-          const jwtResponse = await account.createJWT()
-          const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000
+      try {
+        // Fall back to Appwrite session cookie and refresh JWT
+        const currentUser = await account.get()
+        const jwtResponse = await account.createJWT()
+        const jwtToken = jwtResponse.jwt
+          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
 
-          await jwtStorage.saveToken(jwtToken, expiry)
-          setJWTToken(jwtToken)
-          await saveUserSession(currentUser)
-          setUser(currentUser as any)
-          return
-        } catch (sessionError) {
-          setUser(null)
-          setAuthChecked(true)
+        await jwtStorage.saveToken(jwtToken, expiry)
+        setJWTToken(jwtToken)
+        await saveUserSession(currentUser)
+        await guestStorage.clearGuestMode()
+        setUser(currentUser as any)
+        return
+      } catch (sessionError) {
+        if (isGuestSession) {
+          await jwtStorage.removeToken()
+          clearJWTToken()
+          const guestUser: User = {
+            $id: DEMO_USER_ID || 'guest-public',
+            email: 'guest@muaylang.app',
+            name: 'Guest User',
+            emailVerification: false,
+            isGuest: true,
+          }
+          setUser(guestUser)
           return
         }
+        setUser(null)
+        return
       }
-
-      const currentUser = await account.get()
-      await saveUserSession(currentUser)
-      setUser(currentUser as any)
     } catch (error) {
       console.error('❌ Auth check failed:', error)
       await jwtStorage.removeToken()
@@ -128,11 +129,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         clearJWTToken()
       } catch {}
 
-      await account.createEmailPasswordSession({ email, password })
+      await account.createEmailPasswordSession(email, password)
 
       const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
-      const expiry = Date.now() + 3600 * 1000
+          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
 
       await jwtStorage.saveToken(jwtToken, expiry)
       setJWTToken(jwtToken)
@@ -161,11 +162,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       } catch {}
 
       await account.create('unique()', email, password)
-      await account.createEmailPasswordSession({ email, password })
+      await account.createEmailPasswordSession(email, password)
 
       const jwtResponse = await account.createJWT()
       const jwtToken = jwtResponse.jwt
-      const expiry = Date.now() + 3600 * 1000
+          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
 
       await jwtStorage.saveToken(jwtToken, expiry)
       setJWTToken(jwtToken)

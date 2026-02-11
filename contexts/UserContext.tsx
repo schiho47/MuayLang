@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react'
-import { account, initializeJWT, setJWTToken, clearJWTToken } from '../lib/appwrite'
+import { account, clearJWTToken } from '../lib/appwrite'
 import { router } from 'expo-router'
 import { Platform } from 'react-native'
 import { jwtStorage, guestStorage } from '../utils/jwtStorage'
@@ -63,30 +63,15 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()
-
-      const hasValidToken = await initializeJWT()
-      if (hasValidToken) {
-        const currentUser = await account.get()
-        await saveUserSession(currentUser)
-        await guestStorage.clearGuestMode()
-        setUser(currentUser as any)
-        return
-      }
-
+      // Session-based auth only: if we can fetch account, we're logged in.
+      // If not, fall back to guest mode only when guest flag is set.
       try {
-        // Fall back to Appwrite session cookie and refresh JWT
         const currentUser = await account.get()
-        const jwtResponse = await account.createJWT()
-        const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
-
-        await jwtStorage.saveToken(jwtToken, expiry)
-        setJWTToken(jwtToken)
         await saveUserSession(currentUser)
         await guestStorage.clearGuestMode()
         setUser(currentUser as any)
         return
-      } catch (sessionError) {
+      } catch {
         if (isGuestSession) {
           await jwtStorage.removeToken()
           clearJWTToken()
@@ -131,19 +116,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
       await account.createEmailPasswordSession(email, password)
 
-      const jwtResponse = await account.createJWT()
-      const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
-
-      await jwtStorage.saveToken(jwtToken, expiry)
-      setJWTToken(jwtToken)
-
       const currentUser = await account.get()
       await saveUserSession(currentUser)
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)
-      console.log('✅ Login successful, JWT token stored')
+      console.log('✅ Login successful')
     } catch (error) {
       console.error('Login error:', error)
       await jwtStorage.removeToken()
@@ -164,19 +142,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       await account.create('unique()', email, password)
       await account.createEmailPasswordSession(email, password)
 
-      const jwtResponse = await account.createJWT()
-      const jwtToken = jwtResponse.jwt
-          const expiry = Date.now() + 3600 * 1000 * 24 * 90 // 90 days
-
-      await jwtStorage.saveToken(jwtToken, expiry)
-      setJWTToken(jwtToken)
-
       const currentUser = await account.get()
       await saveUserSession(currentUser)
       setUser(currentUser as any)
 
       router.replace('/(tabs)/' as any)
-      console.log('✅ Registration successful, JWT token stored')
+      console.log('✅ Registration successful')
     } catch (error) {
       console.error('Register error:', error)
       await jwtStorage.removeToken()

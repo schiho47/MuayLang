@@ -9,7 +9,11 @@ import SpeakerButton from '@/components/ui/SpeakerButton'
 type SummaryItem = {
   index: number
   question: string
+  questionEn?: string
+  questionTwH?: string
   answer: string
+  answerEn?: string
+  answerTwH?: string
   hadWrong: boolean
 }
 
@@ -142,12 +146,32 @@ const VocabularyReviewSummary = ({
                     color={MUAY_PURPLE}
                   />
                   </HStack>
+                {item.questionEn ? (
+                  <GText color={MUAY_PURPLE} mt="$1" style={{ fontSize: 13 }}>
+                    EN: {item.questionEn}
+                  </GText>
+                ) : null}
+                {item.questionTwH ? (
+                  <GText color={MUAY_PURPLE} mt="$1" style={{ fontSize: 13 }}>
+                    台語漢字: {item.questionTwH}
+                  </GText>
+                ) : null}
                 <GText color="$text400" size="sm" mt="$2">
                   Answer
                 </GText>
                   <GText color={item.hadWrong ? '#ef4444' : MUAY_PURPLE} fontWeight="$bold">
                     {item.answer}
                   </GText>
+                  {item.answerEn ? (
+                    <GText color={MUAY_PURPLE} mt="$1" style={{ fontSize: 13 }}>
+                      EN: {item.answerEn}
+                    </GText>
+                  ) : null}
+                  {item.answerTwH ? (
+                    <GText color={MUAY_PURPLE} mt="$1" style={{ fontSize: 13 }}>
+                      台語漢字: {item.answerTwH}
+                    </GText>
+                  ) : null}
               </Box>
             ))}
           </VStack>

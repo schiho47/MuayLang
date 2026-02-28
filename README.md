@@ -311,10 +311,16 @@ npm install
 
 ```env
 EXPO_PUBLIC_APPWRITE_ENDPOINT=your_appwrite_endpoint
+EXPO_PUBLIC_APPWRITE_ENDPOINT_WEB=your_appwrite_endpoint_for_web  # optional (recommended)
+EXPO_PUBLIC_APPWRITE_ENDPOINT_NATIVE=your_appwrite_endpoint_for_native  # optional
 EXPO_PUBLIC_APPWRITE_PROJECT_ID=your_project_id
 EXPO_PUBLIC_APPWRITE_DATABASE_ID=your_database_id
 EXPO_PUBLIC_DEMO_USER_ID=your_demo_user_id  # Required for guest mode
 ```
+
+Notes:
+- If your web app runs on `https://www.muaylang.app`, your Appwrite endpoint must return valid CORS headers for that origin.
+- If you point `EXPO_PUBLIC_APPWRITE_ENDPOINT` to a native-only domain like `https://api.muaylang.app/v1`, set `EXPO_PUBLIC_APPWRITE_ENDPOINT_WEB=https://cloud.appwrite.io/v1` (or a properly configured custom domain) to avoid browser CORS blocks.
 
 ⚠️ **Security Note**: Never commit your `.env` file to Git. See [SECURITY.md](./SECURITY.md) for details.
 

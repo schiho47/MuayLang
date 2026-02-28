@@ -82,7 +82,11 @@ export const useGetQuizQuestion = () => {
       1. **question**: Use "${dateObject.ex_th}", replace "${dateObject.th}" with "____". 
         **STRICT RULE**: NO English translation in the question field.
       2. **options**: 4 Thai words (Index 0 is correct).
-      3. **options_display**: "Thai words with Taiwanese Hanzi after the Thai word(台語漢字)"
+      3. **options_display**: For EACH option, provide: 
+         - English meaning
+         - Taiwanese Hokkien Romanization (台羅)
+         - Taiwanese Hanzi (台語漢字)
+         Format each string like: "EN: ... | 台羅: ... | 台語漢字: ..."
       4. **cultural_note**: 
         - Must be written in English to explain the sentence structure.
         - Must mention the topic "${dateObject.dateId}" or "${dateObject.tags}" and comparing related Thai words, and sharing relevant cultural insights. when translating the thai word please add both English and traditional hanzi.*
@@ -92,7 +96,10 @@ export const useGetQuizQuestion = () => {
      #### If TYPE B (Word Matching):
       1. **question**: Display "${dateObject.th}" only.
       2. **options**: 4 English words (Index 0 is correct).
-      3. **options_display**: "English Meaning with Taiwanese Hanzi after the English word (台語漢字)"
+      3. **options_display**: For EACH option, provide Taiwanese translations:
+         - Taiwanese Hokkien Romanization (台羅)
+         - Taiwanese Hanzi (台語漢字)
+         Format each string like: "台羅: ... | 台語漢字: ..."
       4. **cultural_note**:* Must mention the topic "${dateObject.dateId}" or "${dateObject.tags}" or comparing related Thai words and sharing relevant cultural insights. when translating the thai word please add both English and traditional hanzi.*
 
         

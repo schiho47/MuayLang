@@ -9,6 +9,7 @@ import {
 import { Platform, ToastAndroid } from 'react-native'
 import React from 'react'
 import { getCacheItem, setCacheItem } from './cacheStorage'
+import type { TrainingDataType } from '@/components/training/type'
 
 // Cross-platform Toast function
 const showToast = (message: string) => {
@@ -18,6 +19,16 @@ const showToast = (message: string) => {
     // iOS and Web use console.log
     console.log(message)
   }
+}
+
+const sortTrainingByDateDesc = (items: TrainingDataType[]) => {
+  const toMs = (dateString: string) => {
+    const ms = new Date(dateString).getTime()
+    // Put invalid / missing dates at the bottom when sorting desc
+    return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY
+  }
+
+  return [...items].sort((a, b) => toMs(b.date) - toMs(a.date))
 }
 
 export const useTraining = (userId?: string) => {
@@ -33,10 +44,10 @@ export const useTraining = (userId?: string) => {
     }
 
     setIsHydrated(false)
-    getCacheItem<any[]>(cacheKey).then((cached) => {
+    getCacheItem<TrainingDataType[]>(cacheKey).then((cached) => {
       if (!isMounted) return
       if (cached) {
-        queryClient.setQueryData(['training', userId], cached)
+        queryClient.setQueryData(['training', userId], sortTrainingByDateDesc(cached))
       }
       setIsHydrated(true)
     })
@@ -46,21 +57,27 @@ export const useTraining = (userId?: string) => {
     }
   }, [cacheKey, queryClient, userId])
 
-  return useQuery({
+  const query = useQuery<TrainingDataType[]>({
     queryKey: ['training', userId],
-    queryFn: () => getTraining(userId),
+    queryFn: async () => {
+      const data = (await getTraining(userId)) as TrainingDataType[]
+      return sortTrainingByDateDesc(data)
+    },
     enabled: !!userId && isHydrated, // Only execute query when userId exists
     retry: false, // Don't auto-retry to avoid multiple failed requests
     staleTime: Infinity,
     gcTime: 1000 * 60 * 60 * 24 * 365,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      if (cacheKey) {
-        setCacheItem(cacheKey, data)
-      }
-    },
   })
+
+  React.useEffect(() => {
+    if (!cacheKey) return
+    if (!query.data) return
+    setCacheItem(cacheKey, query.data)
+  }, [cacheKey, query.data])
+
+  return query
 }
 
 export const useCreateTraining = () => {
@@ -94,7 +111,8 @@ export const useUpdateTraining = () => {
       const updated = result?.data
       queryClient.setQueriesData({ queryKey: ['training'] }, (old: any) => {
         if (!Array.isArray(old) || !updated?.$id) return old
-        return old.map((item) => (item?.$id === updated.$id ? updated : item))
+        const next = old.map((item) => (item?.$id === updated.$id ? updated : item))
+        return sortTrainingByDateDesc(next as TrainingDataType[])
       })
 
       queryClient.getQueriesData({ queryKey: ['training'] }).forEach(([key, data]) => {

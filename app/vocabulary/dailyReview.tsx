@@ -4,10 +4,8 @@ import { Box, HStack, Pressable, Text as GText, VStack } from '@gluestack-ui/the
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
-import { useQuizDateData } from '@/lib/dailyVocabularyAPI'
-import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
-import { useQuizFlow } from '@/hooks/useQuizFlow'
-import type { QuizDateWord } from '@/lib/quizPrefetch'
+import { useDailyVocabulary } from '@/lib/dailyVocabularyAPI'
+import { useDailyVocabularyQuizFlow } from '@/hooks/useDailyVocabularyQuizFlow'
 import useSpeech from '@/hooks/useSpeech'
 import VocabularyReviewSummary from '@/components/learning/VocabularyReviewSummary'
 import SpeakerButton from '@/components/ui/SpeakerButton'
@@ -35,40 +33,23 @@ const formatOptionDisplay = (raw?: string) => {
   return raw
 }
 
-const VocabularyReview = () => {
-  const { dates } = useLocalSearchParams<{ dates?: string }>()
-  const dateList = useMemo(() => (dates ? dates.split(',').filter(Boolean) : []), [dates])
-  const { data: quizDateData } = useQuizDateData(dateList)
-  const { fetchQuestion, loading, error } = useGetQuizQuestion()
+const DailyVocabularyReview = () => {
+  const { date } = useLocalSearchParams<{ date?: string }>()
+  const dateId = useMemo(() => (date ? String(date) : ''), [date])
+  const { data: vocabData, isLoading } = useDailyVocabulary(dateId)
   const { speak } = useSpeech()
-  const {
-    questionNumber,
-    totalQuestions,
-    currentQuestion,
-    selectedIndex,
-    isCorrect,
-    canGoNext,
-    handleSelectOption,
-    handleNext,
-    resetQuiz,
-    summaryItems,
-    correctCount,
-    wrongCount,
-    isFinished,
-  } = useQuizFlow({
-    quizDateData: (quizDateData as QuizDateWord[] | null) ?? undefined,
-    fetchQuestion,
-  })
 
-  if (isFinished) {
+  const flow = useDailyVocabularyQuizFlow(vocabData?.words ?? [])
+
+  if (flow.isFinished) {
     return (
       <VocabularyReviewSummary
-        totalQuestions={totalQuestions}
-        correctCount={correctCount}
-        wrongCount={wrongCount}
-        summaryItems={summaryItems}
+        totalQuestions={flow.totalQuestions}
+        correctCount={flow.correctCount}
+        wrongCount={flow.wrongCount}
+        summaryItems={flow.summaryItems}
         onBack={() => router.back()}
-        onReplay={resetQuiz}
+        onReplay={flow.resetQuiz}
       />
     )
   }
@@ -102,17 +83,17 @@ const VocabularyReview = () => {
                 textAlign: 'center',
               }}
             >
-              Vocabulary Review
+              Daily Quiz {dateId ? `(${dateId})` : ''}
             </Text>
             <Pressable
-              onPress={handleNext}
-              disabled={!canGoNext}
+              onPress={flow.handleNext}
+              disabled={!flow.canGoNext}
               accessibilityLabel="Next question"
               sx={{
                 ':active': { opacity: 0.6 },
               }}
               style={{
-                opacity: canGoNext ? 1 : 0.3,
+                opacity: flow.canGoNext ? 1 : 0.3,
                 paddingRight: 8,
               }}
             >
@@ -121,29 +102,31 @@ const VocabularyReview = () => {
           </HStack>
         </HStack>
       </Box>
+
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 24 }}>
         <VStack space="lg">
           <HStack justifyContent="flex-end">
             <GText size="sm" color="$text400">
-              {questionNumber}/{totalQuestions}
+              {flow.questionNumber}/{flow.totalQuestions}
             </GText>
           </HStack>
+
           <HStack alignItems="flex-start" space="sm">
             <GText size="lg" color={MUAY_PURPLE}>
-              {questionNumber}.
+              {flow.questionNumber}.
             </GText>
             <HStack flex={1} alignItems="flex-start" justifyContent="space-between">
               <GText size="lg" color={MUAY_PURPLE} fontWeight="$bold" flex={1} mr="$2">
-                {loading && !currentQuestion
-                  ? 'Loading question...'
-                  : currentQuestion?.question || 'No question available'}
+                {isLoading && !flow.currentQuestion
+                  ? 'Loading...'
+                  : flow.currentQuestion?.question || 'No question available'}
               </GText>
               <SpeakerButton
                 onPress={() =>
                   speak(
-                    currentQuestion?.question.replace(
+                    flow.currentQuestion?.question.replace(
                       '____',
-                      currentQuestion?.options[currentQuestion?.answerIndex] ?? '',
+                      flow.currentQuestion?.options[flow.currentQuestion?.answerIndex] ?? '',
                     ) ?? '',
                   )
                 }
@@ -155,21 +138,21 @@ const VocabularyReview = () => {
           </HStack>
 
           <VStack space="md">
-            {currentQuestion?.options?.map((option, index) => {
-              const isSelected = selectedIndex === index
-              const isAnswer = currentQuestion.answerIndex === index
-              const showFeedback = selectedIndex !== null && isSelected
+            {flow.currentQuestion?.options?.map((option, index) => {
+              const isSelected = flow.selectedIndex === index
+              const isAnswer = flow.currentQuestion?.answerIndex === index
+              const showFeedback = flow.selectedIndex !== null && isSelected
               const borderColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
               const textColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
-              const revealTranslations = isCorrect
-              const optionDisplay = currentQuestion?.options_display?.[index]
+              const revealTranslations = flow.isCorrect
+              const optionDisplay = flow.currentQuestion?.options_display?.[index]
               const formattedOptionDisplay = formatOptionDisplay(optionDisplay)
 
               return (
                 <Pressable
                   key={`${index}-${option}`}
-                  onPress={() => handleSelectOption(index)}
-                  disabled={isCorrect}
+                  onPress={() => flow.handleSelectOption(index)}
+                  disabled={flow.isCorrect}
                   sx={{
                     ':active': { opacity: 0.6 },
                   }}
@@ -195,6 +178,7 @@ const VocabularyReview = () => {
                         </GText>
                       ) : null}
                     </VStack>
+
                     {showFeedback ? (
                       <VStack space="xs" alignItems="flex-start" mt="$3">
                         <Ionicons
@@ -213,7 +197,7 @@ const VocabularyReview = () => {
                               fontWeight="$normal"
                               style={{ flexWrap: 'wrap', flexShrink: 1, width: '100%' }}
                             >
-                              {currentQuestion?.cultural_note}
+                              {flow.currentQuestion?.cultural_note}
                             </GText>
                           </VStack>
                         ) : (
@@ -227,22 +211,12 @@ const VocabularyReview = () => {
                 </Pressable>
               )
             })}
-
-            {error ? (
-              <GText color="#ef4444" mt="$2">
-                {error}
-              </GText>
-            ) : null}
           </VStack>
-
-          {/* <HStack alignItems="center" space="xs" mt="$2">
-            <GText color="$text300">顯示提示</GText>
-            <Ionicons name="chevron-down" size={16} color="#9ca3af" />
-          </HStack> */}
         </VStack>
       </ScrollView>
     </Box>
   )
 }
 
-export default VocabularyReview
+export default DailyVocabularyReview
+

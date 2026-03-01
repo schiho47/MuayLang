@@ -24,7 +24,11 @@ type UseQuizFlowParams = {
 type SummaryItem = {
   index: number
   question: string
+  questionEn?: string
+  questionTwH?: string
   answer: string
+  answerEn?: string
+  answerTwH?: string
   hadWrong: boolean
 }
 
@@ -57,7 +61,7 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
       const j = Math.floor(Math.random() * (i + 1))
       ;[pool[i], pool[j]] = [pool[j], pool[i]]
     }
-    return pool.slice(0, 10)
+    return pool.slice(0, 5)
   }
 
   const prefetchQuestionAt = useCallback(
@@ -156,14 +160,26 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
       return
     }
 
+    const currentWord = questionPool[currentIndex]
     const answerText = currentQuestion.options?.[currentQuestion.answerIndex] ?? ''
     const hadWrong = wrongMapRef.current.get(currentIndex) ?? false
+
+    const isTypeA = currentQuestion.quiz_type === 'TYPE_A'
+    const questionEn = isTypeA ? currentWord?.ex_en : currentWord?.word
+    const questionTwH = isTypeA ? currentWord?.ex_tw : currentWord?.tw_h
+    const answerEn = isTypeA ? currentWord?.word : answerText
+    const answerTwH = currentWord?.tw_h
+
     setResults((prev) => {
       const next = prev.filter((item) => item.index !== currentIndex)
       next.push({
         index: currentIndex,
         question: currentQuestion.question,
+        questionEn: questionEn || undefined,
+        questionTwH: questionTwH || undefined,
         answer: answerText,
+        answerEn: answerEn || undefined,
+        answerTwH: answerTwH || undefined,
         hadWrong,
       })
       return next.sort((a, b) => a.index - b.index)

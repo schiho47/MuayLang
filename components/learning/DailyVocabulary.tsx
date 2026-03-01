@@ -63,7 +63,7 @@ const DailyVocabularyList = () => {
       const j = Math.floor(Math.random() * (i + 1))
       ;[pool[i], pool[j]] = [pool[j], pool[i]]
     }
-    return pool.slice(0, 10)
+    return pool.slice(0, 5)
   }
 
   const dateOptions = useMemo(() => {
@@ -108,6 +108,13 @@ const DailyVocabularyList = () => {
   }
 
   const canSearch = !!selectedDate || !inputDateText.trim()
+
+  const handleGoDailyQuiz = () => {
+    router.push({
+      pathname: '/vocabulary/dailyReview',
+      params: { date: activeDate },
+    })
+  }
 
   const handleGoReview = async () => {
     if (!quizDateData || quizDateData.length === 0) {
@@ -213,20 +220,36 @@ const DailyVocabularyList = () => {
               </Box>
             ) : null}
           </Box>
-          <Pressable
-            onPress={handleGoReview}
-            disabled={isPrefetching}
-            accessibilityLabel={`Go to vocabulary review (${quizCount})`}
-            sx={{
-              ':active': { opacity: 0.6 },
-            }}
-            style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
-          >
-            <HStack space="xs" alignItems="center">
-              <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
-              <Ionicons name="school-outline" size={33} color={MUAY_PURPLE} />
-            </HStack>
-          </Pressable>
+          <HStack space="md" alignItems="center" justifyContent="flex-end">
+            <Pressable
+              onPress={handleGoDailyQuiz}
+              accessibilityLabel={`Go to daily quiz (${activeDate})`}
+              sx={{
+                ':active': { opacity: 0.6 },
+              }}
+              style={{ alignSelf: 'flex-end' }}
+            >
+              <HStack space="xs" alignItems="center">
+                <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
+                <Ionicons name="reader-outline" size={33} color={MUAY_PURPLE} />
+              </HStack>
+            </Pressable>
+
+            <Pressable
+              onPress={handleGoReview}
+              disabled={isPrefetching}
+              accessibilityLabel={`Go to vocabulary review (${quizCount})`}
+              sx={{
+                ':active': { opacity: 0.6 },
+              }}
+              style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
+            >
+              <HStack space="xs" alignItems="center">
+                <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
+                <Ionicons name="school-outline" size={33} color={MUAY_PURPLE} />
+              </HStack>
+            </Pressable>
+          </HStack>
         </VStack>
       </VStack>
       <VStack space="sm">

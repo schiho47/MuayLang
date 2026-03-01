@@ -62,9 +62,9 @@ export default function Training() {
         </View>
       )}
       <View className="w-full h-[1px] bg-gray-300" />
-      <Overview training={(training as unknown as TrainingDataType[]) || []} />
+      <Overview training={Array.isArray(training) ? (training as TrainingDataType[]) : []} />
       <View className="w-full h-[1px] bg-gray-300" />
-      {training && training.length > 0 && (
+      {Array.isArray(training) && training.length > 0 && (
         <View>
           {training.map((item: any) => (
             <Session
@@ -83,7 +83,7 @@ export default function Training() {
         </View>
       )}
 
-      {training && training.length === 0 && (
+      {Array.isArray(training) && training.length === 0 && (
         <View className="flex-1 justify-center items-center p-5">
           <Text>No training sessions found</Text>
         </View>

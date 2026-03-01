@@ -1,9 +1,10 @@
-import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import React, { createContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react'
 import { account, clearJWTToken } from '../lib/appwrite'
 import { router } from 'expo-router'
 import { Platform } from 'react-native'
 import { jwtStorage, guestStorage } from '../utils/jwtStorage'
 import { clearUserSession, saveUserSession } from '../lib/storage'
+import { onAuthUnauthorized } from '@/lib/authEvents'
 
 type User = {
   $id: string
@@ -35,6 +36,7 @@ type UserProviderProps = {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>(null)
   const [authChecked, setAuthChecked] = useState(false)
+  const isHandlingUnauthorizedRef = useRef(false)
 
   const logout = useCallback(async () => {
     try {
@@ -101,6 +103,37 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   useEffect(() => {
     checkAuth()
   }, [checkAuth])
+
+  useEffect(() => {
+    const unsubscribe = onAuthUnauthorized(async () => {
+      // Prevent event storms when multiple requests fail together
+      if (isHandlingUnauthorizedRef.current) return
+      isHandlingUnauthorizedRef.current = true
+
+      try {
+        // If user explicitly in guest mode, don't force redirect.
+        const isGuestSession = await guestStorage.isGuestMode()
+        if (isGuestSession) return
+
+        await jwtStorage.removeToken()
+        clearJWTToken()
+        await clearUserSession()
+        setUser(null)
+
+        // Best-effort: clear Appwrite session (may already be invalid)
+        try {
+          await account.deleteSession('current')
+        } catch {}
+
+        router.replace('/(auth)/' as any)
+      } finally {
+        // allow future events
+        isHandlingUnauthorizedRef.current = false
+      }
+    })
+
+    return unsubscribe
+  }, [])
 
   // JWT refresh now happens on-demand when API returns 401
 

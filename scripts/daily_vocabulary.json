@@ -1,211 +1,571 @@
 [
   {
-    "date_id": "0101",
-    "topic": "Essential Greetings",
-    "tags": "Basic, Social",
+    "date_id": "0421",
+    "topic": "Monthly Reflection",
+    "tags": "Review, Growth",
     "words": [
       {
-        "th": "สวัสดี",
-        "word": "Hello",
-        "tw_h": "Lí-hó",
-        "tw_h_han": "你好",
-        "example": "สวัสดีครับ (你好)"
+        "th": "ทบทวนเดือนนี้",
+        "roman": "thop-thuan-duean-ni",
+        "word": "Review this month",
+        "tw_h": "回顧這個月",
+        "tw_r": "huê-kòo tsit-ê gue̍h",
+        "ex_th": "คืนนี้จะทบทวนเดือนนี้",
+        "ex_tw": "今暗欲回顧這個月 (Kin-àm beh huê-kòo tsit-ê gue̍h)",
+        "ex_en": "Tonight I’ll review this month."
       },
       {
-        "th": "ขอบคุณ",
-        "word": "Thank you",
-        "tw_h": "Tox-siā",
-        "tw_h_han": "多謝",
-        "example": "ขอบคุณมาก (非常感謝)"
+        "th": "สิ่งที่ทำสำเร็จ",
+        "roman": "sing-thi-tham-sam-ret",
+        "word": "Achievements",
+        "tw_h": "完成的事情",
+        "tw_r": "uân-sîng ê tāi-tsì",
+        "ex_th": "เขียนสิ่งที่ทำสำเร็จ",
+        "ex_tw": "寫完成的代誌 (Siá uân-sîng ê tāi-tsì)",
+        "ex_en": "Write down achievements."
       },
       {
-        "th": "ขอโทษ",
-        "word": "Sorry",
-        "tw_h": "Phái-sè",
-        "tw_h_han": "拍勢",
-        "example": "ขอโทษนะครับ (不好意思/抱歉)"
+        "th": "บทเรียนสำคัญ",
+        "roman": "bot-rian-sam-khan",
+        "word": "Important lesson",
+        "tw_h": "重要的學習",
+        "tw_r": "tiōng-iàu ê ha̍k-si̍p",
+        "ex_th": "นี่คือบทเรียนสำคัญ",
+        "ex_tw": "這是重要的學習 (Tsē sī tiōng-iàu ê ha̍k-si̍p)",
+        "ex_en": "This is an important lesson."
       },
       {
-        "th": "สบายดีไหม",
-        "word": "How are you?",
-        "tw_h": "Lí hó--bô?",
-        "tw_h_han": "你好無？",
-        "example": "สบายดีครับ (我很好)"
+        "th": "พัฒนาขึ้นมาก",
+        "roman": "phatthana-khuen-mak",
+        "word": "Improved a lot",
+        "tw_h": "進步很多",
+        "tw_r": "tsìn-pōo tsin-tsuē",
+        "ex_th": "รู้สึกว่าพัฒนาขึ้นมาก",
+        "ex_tw": "感覺進步真多 (Kám-kak tsìn-pōo tsin-tsuē)",
+        "ex_en": "I’ve improved a lot."
       },
       {
-        "th": "ลาก่อน",
-        "word": "Goodbye",
-        "tw_h": "Tsài-kiàn",
-        "tw_h_han": "再見",
-        "example": "ลาก่อนนะ (再見囉)"
+        "th": "ภูมิใจกับตัวเอง",
+        "roman": "phum-jai-kap-tua-eng",
+        "word": "Proud of myself",
+        "tw_h": "為自己感到驕傲",
+        "tw_r": "uī tsū-kí kám-kàu kiau-ngō",
+        "ex_th": "วันนี้ภูมิใจกับตัวเอง",
+        "ex_tw": "今仔日為自己驕傲 (Kin-á-ji̍t uī tsū-kí kiau-ngō)",
+        "ex_en": "I’m proud of myself today."
       }
     ]
   },
   {
-    "date_id": "0102",
-    "topic": "Numbers (1-5)",
-    "tags": "Numbers, Basic",
+    "date_id": "0422",
+    "topic": "Healthy Routine",
+    "tags": "Health, Lifestyle",
     "words": [
       {
-        "th": "หนึ่ง (๑)",
-        "word": "One",
-        "tw_h": "Tsi̍t",
-        "tw_h_han": "一",
-        "example": "หนึ่งชั่วโมง (一小時)"
+        "th": "ตื่นเช้า",
+        "roman": "tuen-chao",
+        "word": "Wake up early",
+        "tw_h": "早起",
+        "tw_r": "tsá-khí",
+        "ex_th": "ช่วงนี้ตื่นเช้าทุกวัน",
+        "ex_tw": "這陣子逐工早起 (Tsit-tsūn-tsí ta̍k-kang tsá-khí)",
+        "ex_en": "I wake up early every day lately."
       },
       {
-        "th": "สอง (๒)",
-        "word": "Two",
-        "tw_h": "Nn̄g",
-        "tw_h_han": "二",
-        "example": "สองคน (兩個人)"
+        "th": "ออกกำลังกาย",
+        "roman": "ok-kam-lang-kai",
+        "word": "Exercise",
+        "tw_h": "運動",
+        "tw_r": "ūn-tōng",
+        "ex_th": "ออกกำลังกายตอนเช้า",
+        "ex_tw": "早起運動 (Tsá-khí ūn-tōng)",
+        "ex_en": "Exercise in the morning."
       },
       {
-        "th": "สาม (๓)",
-        "word": "Three",
-        "tw_h": "Sann",
-        "tw_h_han": "三",
-        "example": "สามวัน (三天)"
+        "th": "กินอาหารดี",
+        "roman": "kin-a-han-di",
+        "word": "Eat healthy food",
+        "tw_h": "吃健康的食物",
+        "tw_r": "tsia̍h kiān-khong ê si̍t-bu̍t",
+        "ex_th": "พยายามกินอาหารดี",
+        "ex_tw": "盡量食健康的物 (Tsin-liōng tsia̍h kiān-khong ê mi̍h)",
+        "ex_en": "Try to eat healthy."
       },
       {
-        "th": "สี่ (๔)",
-        "word": "Four",
-        "tw_h": "Sì",
-        "tw_h_han": "四",
-        "example": "สี่แยก (十字路口)"
+        "th": "ดูแลตัวเอง",
+        "roman": "du-lae-tua-eng",
+        "word": "Take care of yourself",
+        "tw_h": "照顧自己",
+        "tw_r": "tsiàu-kòo tsū-kí",
+        "ex_th": "ต้องดูแลตัวเองให้ดี",
+        "ex_tw": "愛好好照顧自己 (Ài hó-hó tsiàu-kòo tsū-kí)",
+        "ex_en": "Need to take good care of myself."
       },
       {
-        "th": "ห้า (๕)",
-        "word": "Five",
-        "tw_h": "Gōo",
-        "tw_h_han": "五",
-        "example": "ห้าทุ่ม (晚上十一點)"
+        "th": "สุขภาพสำคัญ",
+        "roman": "suk-kha-phap-sam-khan",
+        "word": "Health is important",
+        "tw_h": "健康很重要",
+        "tw_r": "kiān-khong tsin tiōng-iàu",
+        "ex_th": "สุขภาพสำคัญที่สุด",
+        "ex_tw": "健康上重要 (Kiān-khong siōng tiōng-iàu)",
+        "ex_en": "Health is most important."
       }
     ]
   },
   {
-    "date_id": "0103",
-    "topic": "Personal Pronouns",
-    "tags": "Grammar, Basic",
+    "date_id": "0423",
+    "topic": "Long Term Vision",
+    "tags": "Future, Planning",
     "words": [
       {
-        "th": "ผม",
-        "word": "I (male)",
-        "tw_h": "Guá",
-        "tw_h_han": "我",
-        "example": "ผมเป็นคนไต้หวัน (我是台灣人)"
+        "th": "แผนระยะยาว",
+        "roman": "phaen-ra-ya-yaw",
+        "word": "Long-term plan",
+        "tw_h": "長期計畫",
+        "tw_r": "tn̂g-kî kè-uā",
+        "ex_th": "กำลังวางแผนระยะยาว",
+        "ex_tw": "咧規劃長期計畫 (Leh kui-uā tn̂g-kî kè-uā)",
+        "ex_en": "Planning long term."
       },
       {
-        "th": "ฉัน",
-        "word": "I (female)",
-        "tw_h": "Guá",
-        "tw_h_han": "我",
-        "example": "ฉันรักคุณ (我愛你)"
+        "th": "เป้าหมายชีวิต",
+        "roman": "pao-mai-chi-wit",
+        "word": "Life goal",
+        "tw_h": "人生目標",
+        "tw_r": "jîn-sing bo̍k-phiau",
+        "ex_th": "เป้าหมายชีวิตชัดขึ้น",
+        "ex_tw": "人生目標愈來愈清楚 (Jîn-sing bo̍k-phiau jú-lâi-jú tshing-tshó)",
+        "ex_en": "My life goal is clearer."
       },
       {
-        "th": "คุณ",
-        "word": "You",
-        "tw_h": "Lí",
-        "tw_h_han": "你",
-        "example": "คุณชื่ออะไร? (你叫什麼名字？)"
+        "th": "เส้นทางของตัวเอง",
+        "roman": "sen-thang-khong-tua-eng",
+        "word": "Own path",
+        "tw_h": "自己的人生路",
+        "tw_r": "tsū-kí ê jîn-sing-lōo",
+        "ex_th": "เดินเส้นทางของตัวเอง",
+        "ex_tw": "行自己的路 (Kiânn tsū-kí ê lōo)",
+        "ex_en": "Walk my own path."
       },
       {
-        "th": "เพื่อน",
-        "word": "Friend",
-        "tw_h": "Pîng-iú",
-        "tw_h_han": "朋友",
-        "example": "เพื่อนสนิท (好朋友)"
+        "th": "ไม่เปรียบเทียบ",
+        "roman": "mai-priap-thiap",
+        "word": "Don’t compare",
+        "tw_h": "不比較",
+        "tw_r": "m̄ pí-kàu",
+        "ex_th": "จะไม่เปรียบเทียบกับใคร",
+        "ex_tw": "袂閣佮人比較 (Buē koh kah lâng pí-kàu)",
+        "ex_en": "I won’t compare myself."
       },
       {
-        "th": "คน",
-        "word": "Person",
-        "tw_h": "Lâng",
-        "tw_h_han": "人",
-        "example": "คนไทย (泰國人)"
+        "th": "โฟกัสตัวเอง",
+        "roman": "focus-tua-eng",
+        "word": "Focus on yourself",
+        "tw_h": "專注自己",
+        "tw_r": "tsuan-tsù tsū-kí",
+        "ex_th": "โฟกัสตัวเองให้มากขึ้น",
+        "ex_tw": "更加專注自己 (Koh-kha tsuan-tsù tsū-kí)",
+        "ex_en": "Focus more on myself."
       }
     ]
   },
   {
-    "date_id": "0104",
-    "topic": "Family Members",
-    "tags": "Family, Personal",
+    "date_id": "0424",
+    "topic": "Inner Peace",
+    "tags": "Mindfulness, Life",
     "words": [
       {
-        "th": "พ่อ",
-        "word": "Father",
-        "tw_h": "Lao-pē",
-        "tw_h_han": "老爸",
-        "example": "พ่อทำงาน (爸爸在工作)"
+        "th": "ใจสงบ",
+        "roman": "jai-sa-ngop",
+        "word": "Peaceful mind",
+        "tw_h": "內心平靜",
+        "tw_r": "lāi-sim pîng-tsīng",
+        "ex_th": "วันนี้ใจสงบมาก",
+        "ex_tw": "今仔日內心真平靜 (Kin-á-ji̍t lāi-sim tsin pîng-tsīng)",
+        "ex_en": "My mind is peaceful today."
       },
       {
-        "th": "แม่",
-        "word": "Mother",
-        "tw_h": "Lao-bú",
-        "tw_h_han": "老母",
-        "example": "แม่ทำอาหาร (媽媽在煮飯)"
+        "th": "ปล่อยวาง",
+        "roman": "ploi-wang",
+        "word": "Let go",
+        "tw_h": "放下",
+        "tw_r": "pàng-hā",
+        "ex_th": "เรียนรู้ที่จะปล่อยวาง",
+        "ex_tw": "學會放下 (Ha̍k-uē pàng-hā)",
+        "ex_en": "Learn to let go."
       },
       {
-        "th": "พี่สาว",
-        "word": "Older Sister",
-        "tw_h": "A-tsí",
-        "tw_h_han": "阿姊",
-        "example": "พี่สาวสวย (姊姊很漂亮)"
+        "th": "อยู่กับปัจจุบัน",
+        "roman": "yu-kap-pat-chu-ban",
+        "word": "Live in the present",
+        "tw_h": "活在當下",
+        "tw_r": "ua̍h-tsāi tong-hā",
+        "ex_th": "อยากอยู่กับปัจจุบัน",
+        "ex_tw": "想欲活在當下 (Siūnn-beh ua̍h-tsāi tong-hā)",
+        "ex_en": "Live in the present."
       },
       {
-        "th": "น้องชาย",
-        "word": "Younger Brother",
-        "tw_h": "Sió-tī",
-        "tw_h_han": "小弟",
-        "example": "น้องชายเรียนหนังสือ (弟弟在唸書)"
+        "th": "ไม่เครียด",
+        "roman": "mai-khriat",
+        "word": "Not stressed",
+        "tw_h": "不壓力",
+        "tw_r": "m̄ ap-li̍k",
+        "ex_th": "วันนี้ไม่เครียดเลย",
+        "ex_tw": "今仔日攏無壓力 (Kin-á-ji̍t lóng bô ap-li̍k)",
+        "ex_en": "Not stressed today."
       },
       {
-        "th": "บ้าน",
-        "word": "Home",
-        "tw_h": "Tshù",
-        "tw_h_han": "厝",
-        "example": "กลับบ้าน (回家)"
+        "th": "มีความสุขง่ายๆ",
+        "roman": "mi-khwam-suk-ngai-ngai",
+        "word": "Simple happiness",
+        "tw_h": "簡單的快樂",
+        "tw_r": "kán-tan ê khuài-lo̍k",
+        "ex_th": "มีความสุขง่ายๆก็พอ",
+        "ex_tw": "簡單的快樂就好 (Kán-tan ê khuài-lo̍k tō hó)",
+        "ex_en": "Simple happiness is enough."
       }
     ]
   },
   {
-    "date_id": "0105",
-    "topic": "Basic Actions",
-    "tags": "Verbs, Daily",
+    "date_id": "0425",
+    "topic": "New Challenge",
+    "tags": "Growth, Courage",
     "words": [
       {
-        "th": "กิน",
-        "word": "To eat",
-        "tw_h": "Chia̍h",
-        "tw_h_han": "食",
-        "example": "กินข้าว (吃飯)"
+        "th": "ก้าวออกจาก comfort zone",
+        "roman": "gao-ok-jak-comfort-zone",
+        "word": "Step out of comfort zone",
+        "tw_h": "走出舒適圈",
+        "tw_r": "tsáu-tshut su-sik-khuan",
+        "ex_th": "ต้องก้าวออกจาก comfort zone",
+        "ex_tw": "愛走出舒適圈 (Ài tsáu-tshut su-sik-khuan)",
+        "ex_en": "Step out of the comfort zone."
       },
       {
-        "th": "ไป",
-        "word": "To go",
-        "tw_h": "Khì",
-        "tw_h_han": "去",
-        "example": "ไปไหน? (去哪？)"
+        "th": "ลองสิ่งใหม่",
+        "roman": "long-sing-mai",
+        "word": "Try new things",
+        "tw_h": "嘗試新事物",
+        "tw_r": "siông-sù sin sū-bu̍t",
+        "ex_th": "อยากลองสิ่งใหม่",
+        "ex_tw": "想欲試新的物 (Siūnn-beh tshì sin ê mi̍h)",
+        "ex_en": "Want to try something new."
       },
       {
-        "th": "ดู",
-        "word": "To watch",
-        "tw_h": "Khuànn",
-        "tw_h_han": "看",
-        "example": "ดูทีวี (看電視)"
+        "th": "ความกล้า",
+        "roman": "khwam-kla",
+        "word": "Courage",
+        "tw_h": "勇氣",
+        "tw_r": "ióng-khì",
+        "ex_th": "ต้องใช้ความกล้า",
+        "ex_tw": "需要勇氣 (Su-iàu ióng-khì)",
+        "ex_en": "It takes courage."
       },
       {
-        "th": "นอน",
-        "word": "To sleep",
-        "tw_h": "Khùn",
-        "tw_h_han": "睏",
-        "example": "นอนหลับ (睡覺)"
+        "th": "โอกาสใหม่",
+        "roman": "o-kat-mai",
+        "word": "New opportunity",
+        "tw_h": "新機會",
+        "tw_r": "sin ki-huē",
+        "ex_th": "นี่คือโอกาสใหม่",
+        "ex_tw": "這是新的機會 (Tsē sī sin ê ki-huē)",
+        "ex_en": "This is a new opportunity."
       },
       {
-        "th": "รัก",
-        "word": "To love",
-        "tw_h": "Ài",
-        "tw_h_han": "愛",
-        "example": "รักทุกคน (愛大家)"
+        "th": "เริ่มต้นอีกครั้ง",
+        "roman": "roem-ton-ik-khrang",
+        "word": "Start again",
+        "tw_h": "重新開始",
+        "tw_r": "tiông-sin khai-sí",
+        "ex_th": "พร้อมเริ่มต้นอีกครั้ง",
+        "ex_tw": "準備重新開始 (Tsún-pī tiông-sin khai-sí)",
+        "ex_en": "Ready to start again."
+      }
+    ]
+  },
+  {
+    "date_id": "0426",
+    "topic": "Consistency",
+    "tags": "Discipline, Habit",
+    "words": [
+      {
+        "th": "ความสม่ำเสมอ",
+        "roman": "khwam-sa-ma-samer",
+        "word": "Consistency",
+        "tw_h": "持續性",
+        "tw_r": "tî-siok-sìng",
+        "ex_th": "ความสม่ำเสมอสำคัญมาก",
+        "ex_tw": "持續性真重要 (Tî-siok-sìng tsin tiōng-iàu)",
+        "ex_en": "Consistency is very important."
+      },
+      {
+        "th": "วินัย",
+        "roman": "wi-nai",
+        "word": "Discipline",
+        "tw_h": "自律",
+        "tw_r": "tsū-lu̍t",
+        "ex_th": "ต้องมีวินัยกับตัวเอง",
+        "ex_tw": "愛對自己自律 (Ài tuì tsū-kí tsū-lu̍t)",
+        "ex_en": "Need self-discipline."
+      },
+      {
+        "th": "ทำต่อไป",
+        "roman": "tham-tor-pai",
+        "word": "Keep going",
+        "tw_h": "繼續做",
+        "tw_r": "kè-sio̍k tsò",
+        "ex_th": "เหนื่อยแต่ต้องทำต่อไป",
+        "ex_tw": "雖然忝猶是愛繼續做 (Sui-jiân siám iáu-sī ài kè-sio̍k tsò)",
+        "ex_en": "Tired but keep going."
+      },
+      {
+        "th": "ไม่ยอมแพ้",
+        "roman": "mai-yom-phae",
+        "word": "Never give up",
+        "tw_h": "不放棄",
+        "tw_r": "m̄ pàng-khì",
+        "ex_th": "จะไม่ยอมแพ้",
+        "ex_tw": "袂放棄 (Buē pàng-khì)",
+        "ex_en": "I won’t give up."
+      },
+      {
+        "th": "เห็นผลลัพธ์",
+        "roman": "hen-phon-lap",
+        "word": "See results",
+        "tw_h": "看到成果",
+        "tw_r": "khuànn-tio̍h sêng-kó",
+        "ex_th": "เริ่มเห็นผลลัพธ์แล้ว",
+        "ex_tw": "開始看著成果矣 (Khai-sí khuànn-tio̍h sêng-kó--ah)",
+        "ex_en": "Starting to see results."
+      }
+    ]
+  },
+  {
+    "date_id": "0427",
+    "topic": "Freedom Lifestyle",
+    "tags": "Life, Freedom",
+    "words": [
+      {
+        "th": "อิสระทางการเงิน",
+        "roman": "it-sa-ra-thang-kan-ngoen",
+        "word": "Financial freedom",
+        "tw_h": "財務自由",
+        "tw_r": "tsâi-bū tsū-iû",
+        "ex_th": "เป้าหมายคืออิสระทางการเงิน",
+        "ex_tw": "目標是財務自由 (Bo̍k-phiau sī tsâi-bū tsū-iû)",
+        "ex_en": "The goal is financial freedom."
+      },
+      {
+        "th": "เลือกเวลาทำงาน",
+        "roman": "lueak-we-la-tham-ngan",
+        "word": "Choose working time",
+        "tw_h": "選擇工作時間",
+        "tw_r": "suán-tik kang-tsok sî-kan",
+        "ex_th": "สามารถเลือกเวลาทำงาน",
+        "ex_tw": "會使選擇工作時間 (Ē-sái suán-tik kang-tsok sî-kan)",
+        "ex_en": "Can choose working hours."
+      },
+      {
+        "th": "ทำงานจากบ้าน",
+        "roman": "tham-ngan-jak-ban",
+        "word": "Work from home",
+        "tw_h": "在家工作",
+        "tw_r": "tsāi-ke kang-tsok",
+        "ex_th": "วันนี้ทำงานจากบ้าน",
+        "ex_tw": "今仔日佇厝做工課 (Kin-á-ji̍t tī tshù tsò kang-khuè)",
+        "ex_en": "Working from home today."
+      },
+      {
+        "th": "ใช้ชีวิตในแบบที่ต้องการ",
+        "roman": "chai-chi-wit-nai-baep-thi-tong-kan",
+        "word": "Live the life you want",
+        "tw_h": "過想要的生活",
+        "tw_r": "kuè siūnn-beh ê sing-ua̍h",
+        "ex_th": "อยากใช้ชีวิตในแบบที่ต้องการ",
+        "ex_tw": "想欲過想要的生活 (Siūnn-beh kuè siūnn-beh ê sing-ua̍h)",
+        "ex_en": "Live the life I want."
+      },
+      {
+        "th": "คุณภาพชีวิต",
+        "roman": "khun-na-phap-chi-wit",
+        "word": "Quality of life",
+        "tw_h": "生活品質",
+        "tw_r": "sing-ua̍h phín-tsit",
+        "ex_th": "คุณภาพชีวิตดีขึ้น",
+        "ex_tw": "生活品質變好 (Sing-ua̍h phín-tsit piàn hó)",
+        "ex_en": "Quality of life improved."
+      }
+    ]
+  },
+  {
+    "date_id": "0428",
+    "topic": "Gratitude",
+    "tags": "Mindset, Positive",
+    "words": [
+      {
+        "th": "ขอบคุณทุกอย่าง",
+        "roman": "khop-khun-thuk-yang",
+        "word": "Grateful for everything",
+        "tw_h": "感謝一切",
+        "tw_r": "kám-siā it-tshè",
+        "ex_th": "ขอบคุณทุกอย่างในชีวิต",
+        "ex_tw": "感謝人生的一切 (Kám-siā jîn-sing ê it-tshè)",
+        "ex_en": "Grateful for everything in life."
+      },
+      {
+        "th": "ช่วงเวลาที่ดี",
+        "roman": "chuang-we-la-thi-di",
+        "word": "Good moments",
+        "tw_h": "美好的時光",
+        "tw_r": "bí-hó ê sî-kng",
+        "ex_th": "นี่คือช่วงเวลาที่ดี",
+        "ex_tw": "這是美好的時光 (Tsē sī bí-hó ê sî-kng)",
+        "ex_en": "These are good moments."
+      },
+      {
+        "th": "ผู้คนรอบตัว",
+        "roman": "phu-khon-rop-tua",
+        "word": "People around you",
+        "tw_h": "身邊的人",
+        "tw_r": "sin-pinn ê lâng",
+        "ex_th": "ขอบคุณผู้คนรอบตัว",
+        "ex_tw": "感謝身邊的人 (Kám-siā sin-pinn ê lâng)",
+        "ex_en": "Grateful for people around me."
+      },
+      {
+        "th": "การเดินทาง",
+        "roman": "kan-doen-thang",
+        "word": "The journey",
+        "tw_h": "這段旅程",
+        "tw_r": "tsit-tuān lú-tîng",
+        "ex_th": "รักการเดินทางนี้",
+        "ex_tw": "真愛這段旅程 (Tsin ài tsit-tuān lú-tîng)",
+        "ex_en": "Love this journey."
+      },
+      {
+        "th": "มีค่าเสมอ",
+        "roman": "mi-kha-samer",
+        "word": "Always meaningful",
+        "tw_h": "永遠有價值",
+        "tw_r": "íng-uán ū kè-tat",
+        "ex_th": "ทุกอย่างมีค่าเสมอ",
+        "ex_tw": "逐項攏有價值 (Ta̍k-hāng lóng ū kè-tat)",
+        "ex_en": "Everything is meaningful."
+      }
+    ]
+  },
+  {
+    "date_id": "0429",
+    "topic": "Reset & Recharge",
+    "tags": "Rest, Balance",
+    "words": [
+      {
+        "th": "พักผ่อนเต็มที่",
+        "roman": "phak-phon-tem-thi",
+        "word": "Rest fully",
+        "tw_h": "好好休息",
+        "tw_r": "hó-hó hioh-sik",
+        "ex_th": "วันนี้พักผ่อนเต็มที่",
+        "ex_tw": "今仔日好好休息 (Kin-á-ji̍t hó-hó hioh-sik)",
+        "ex_en": "Resting fully today."
+      },
+      {
+        "th": "ชาร์จพลัง",
+        "roman": "charge-pha-lang",
+        "word": "Recharge energy",
+        "tw_h": "充電",
+        "tw_r": "tshiong-tiān",
+        "ex_th": "ต้องชาร์จพลัง",
+        "ex_tw": "愛充電 (Ài tshiong-tiān)",
+        "ex_en": "Need to recharge."
+      },
+      {
+        "th": "หยุดคิดเรื่องงาน",
+        "roman": "yut-khit-ruang-ngan",
+        "word": "Stop thinking about work",
+        "tw_h": "暫時不想工作",
+        "tw_r": "tsiām-sî m̄ siūnn kang-tsok",
+        "ex_th": "หยุดคิดเรื่องงานก่อน",
+        "ex_tw": "暫時莫想工作 (Tsiām-sî mài siūnn kang-tsok)",
+        "ex_en": "Stop thinking about work for now."
+      },
+      {
+        "th": "ให้รางวัลตัวเอง",
+        "roman": "hai-rang-wan-tua-eng",
+        "word": "Reward yourself",
+        "tw_h": "犒賞自己",
+        "tw_r": "khò-sióng tsū-kí",
+        "ex_th": "วันนี้ให้รางวัลตัวเอง",
+        "ex_tw": "今仔日犒賞自己 (Kin-á-ji̍t khò-sióng tsū-kí)",
+        "ex_en": "Reward myself today."
+      },
+      {
+        "th": "พร้อมเริ่มใหม่",
+        "roman": "phrom-roem-mai",
+        "word": "Ready to start again",
+        "tw_h": "準備重新開始",
+        "tw_r": "tsún-pī tiông-sin khai-sí",
+        "ex_th": "พรุ่งนี้พร้อมเริ่มใหม่",
+        "ex_tw": "明仔載準備重新開始 (Mîn-á-tsái tsún-pī tiông-sin khai-sí)",
+        "ex_en": "Ready to start again tomorrow."
+      }
+    ]
+  },
+  {
+    "date_id": "0430",
+    "topic": "Next Chapter",
+    "tags": "Future, Motivation",
+    "words": [
+      {
+        "th": "เดือนใหม่",
+        "roman": "duean-mai",
+        "word": "New month",
+        "tw_h": "新的月份",
+        "tw_r": "sin ê gue̍h-hūn",
+        "ex_th": "ต้อนรับเดือนใหม่",
+        "ex_tw": "歡迎新的月份 (Huan-gîng sin ê gue̍h-hūn)",
+        "ex_en": "Welcome the new month."
+      },
+      {
+        "th": "เป้าหมายใหม่",
+        "roman": "pao-mai-mai",
+        "word": "New goal",
+        "tw_h": "新的目標",
+        "tw_r": "sin ê bo̍k-phiau",
+        "ex_th": "ตั้งเป้าหมายใหม่",
+        "ex_tw": "設定新的目標 (Siat-tīng sin ê bo̍k-phiau)",
+        "ex_en": "Set new goals."
+      },
+      {
+        "th": "เริ่มต้นบทใหม่",
+        "roman": "roem-ton-bot-mai",
+        "word": "Start a new chapter",
+        "tw_h": "新的篇章",
+        "tw_r": "sin ê phian-tsiong",
+        "ex_th": "เริ่มต้นบทใหม่ของชีวิต",
+        "ex_tw": "開始人生新的篇章 (Khai-sí jîn-sing sin ê phian-tsiong)",
+        "ex_en": "Start a new life chapter."
+      },
+      {
+        "th": "ก้าวไปข้างหน้า",
+        "roman": "gao-pai-khang-na",
+        "word": "Move forward",
+        "tw_h": "向前走",
+        "tw_r": "hiòng-tsîng tsáu",
+        "ex_th": "ก้าวไปข้างหน้าอย่างมั่นใจ",
+        "ex_tw": "自信向前行 (Tsū-sìn hiòng-tsîng kiânn)",
+        "ex_en": "Move forward with confidence."
+      },
+      {
+        "th": "เวอร์ชันที่ดีกว่าเดิม",
+        "roman": "version-thi-di-kwa-doem",
+        "word": "Better version of yourself",
+        "tw_h": "更好的自己",
+        "tw_r": "kín hó ê tsū-kí",
+        "ex_th": "เป็นเวอร์ชันที่ดีกว่าเดิม",
+        "ex_tw": "成做閣較好的自己 (Sîng-tsò koh-khah hó ê tsū-kí)",
+        "ex_en": "Become a better version of myself."
       }
     ]
   }

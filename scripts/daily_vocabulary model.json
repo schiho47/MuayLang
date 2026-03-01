@@ -1,0 +1,212 @@
+[
+  {
+    "date_id": "0101",
+    "topic": "Essential Greetings",
+    "tags": "Basic, Social",
+    "words": [
+      {
+        "th": "สวัสดี",
+        "word": "Hello",
+        "tw_h": "Lí-hó",
+        "tw_h_han": "你好",
+        "example": "สวัสดีครับ (你好)"
+      },
+      {
+        "th": "ขอบคุณ",
+        "word": "Thank you",
+        "tw_h": "Tox-siā",
+        "tw_h_han": "多謝",
+        "example": "ขอบคุณมาก (非常感謝)"
+      },
+      {
+        "th": "ขอโทษ",
+        "word": "Sorry",
+        "tw_h": "Phái-sè",
+        "tw_h_han": "拍勢",
+        "example": "ขอโทษนะครับ (不好意思/抱歉)"
+      },
+      {
+        "th": "สบายดีไหม",
+        "word": "How are you?",
+        "tw_h": "Lí hó--bô?",
+        "tw_h_han": "你好無？",
+        "example": "สบายดีครับ (我很好)"
+      },
+      {
+        "th": "ลาก่อน",
+        "word": "Goodbye",
+        "tw_h": "Tsài-kiàn",
+        "tw_h_han": "再見",
+        "example": "ลาก่อนนะ (再見囉)"
+      }
+    ]
+  },
+  {
+    "date_id": "0102",
+    "topic": "Numbers (1-5)",
+    "tags": "Numbers, Basic",
+    "words": [
+      {
+        "th": "หนึ่ง (๑)",
+        "word": "One",
+        "tw_h": "Tsi̍t",
+        "tw_h_han": "一",
+        "example": "หนึ่งชั่วโมง (一小時)"
+      },
+      {
+        "th": "สอง (๒)",
+        "word": "Two",
+        "tw_h": "Nn̄g",
+        "tw_h_han": "二",
+        "example": "สองคน (兩個人)"
+      },
+      {
+        "th": "สาม (๓)",
+        "word": "Three",
+        "tw_h": "Sann",
+        "tw_h_han": "三",
+        "example": "สามวัน (三天)"
+      },
+      {
+        "th": "สี่ (๔)",
+        "word": "Four",
+        "tw_h": "Sì",
+        "tw_h_han": "四",
+        "example": "สี่แยก (十字路口)"
+      },
+      {
+        "th": "ห้า (๕)",
+        "word": "Five",
+        "tw_h": "Gōo",
+        "tw_h_han": "五",
+        "example": "ห้าทุ่ม (晚上十一點)"
+      }
+    ]
+  },
+  {
+    "date_id": "0103",
+    "topic": "Personal Pronouns",
+    "tags": "Grammar, Basic",
+    "words": [
+      {
+        "th": "ผม",
+        "word": "I (male)",
+        "tw_h": "Guá",
+        "tw_h_han": "我",
+        "example": "ผมเป็นคนไต้หวัน (我是台灣人)"
+      },
+      {
+        "th": "ฉัน",
+        "word": "I (female)",
+        "tw_h": "Guá",
+        "tw_h_han": "我",
+        "example": "ฉันรักคุณ (我愛你)"
+      },
+      {
+        "th": "คุณ",
+        "word": "You",
+        "tw_h": "Lí",
+        "tw_h_han": "你",
+        "example": "คุณชื่ออะไร? (你叫什麼名字？)"
+      },
+      {
+        "th": "เพื่อน",
+        "word": "Friend",
+        "tw_h": "Pîng-iú",
+        "tw_h_han": "朋友",
+        "example": "เพื่อนสนิท (好朋友)"
+      },
+      {
+        "th": "คน",
+        "word": "Person",
+        "tw_h": "Lâng",
+        "tw_h_han": "人",
+        "example": "คนไทย (泰國人)"
+      }
+    ]
+  },
+  {
+    "date_id": "0104",
+    "topic": "Family Members",
+    "tags": "Family, Personal",
+    "words": [
+      {
+        "th": "พ่อ",
+        "word": "Father",
+        "tw_h": "Lao-pē",
+        "tw_h_han": "老爸",
+        "example": "พ่อทำงาน (爸爸在工作)"
+      },
+      {
+        "th": "แม่",
+        "word": "Mother",
+        "tw_h": "Lao-bú",
+        "tw_h_han": "老母",
+        "example": "แม่ทำอาหาร (媽媽在煮飯)"
+      },
+      {
+        "th": "พี่สาว",
+        "word": "Older Sister",
+        "tw_h": "A-tsí",
+        "tw_h_han": "阿姊",
+        "example": "พี่สาวสวย (姊姊很漂亮)"
+      },
+      {
+        "th": "น้องชาย",
+        "word": "Younger Brother",
+        "tw_h": "Sió-tī",
+        "tw_h_han": "小弟",
+        "example": "น้องชายเรียนหนังสือ (弟弟在唸書)"
+      },
+      {
+        "th": "บ้าน",
+        "word": "Home",
+        "tw_h": "Tshù",
+        "tw_h_han": "厝",
+        "example": "กลับบ้าน (回家)"
+      }
+    ]
+  },
+  {
+    "date_id": "0105",
+    "topic": "Basic Actions",
+    "tags": "Verbs, Daily",
+    "words": [
+      {
+        "th": "กิน",
+        "word": "To eat",
+        "tw_h": "Chia̍h",
+        "tw_h_han": "食",
+        "example": "กินข้าว (吃飯)"
+      },
+      {
+        "th": "ไป",
+        "word": "To go",
+        "tw_h": "Khì",
+        "tw_h_han": "去",
+        "example": "ไปไหน? (去哪？)"
+      },
+      {
+        "th": "ดู",
+        "word": "To watch",
+        "tw_h": "Khuànn",
+        "tw_h_han": "看",
+        "example": "ดูทีวี (看電視)"
+      },
+      {
+        "th": "นอน",
+        "word": "To sleep",
+        "tw_h": "Khùn",
+        "tw_h_han": "睏",
+        "example": "นอนหลับ (睡覺)"
+      },
+      {
+        "th": "รัก",
+        "word": "To love",
+        "tw_h": "Ài",
+        "tw_h_han": "愛",
+        "example": "รักทุกคน (愛大家)"
+      }
+    ]
+  }
+]

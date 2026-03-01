@@ -44,7 +44,7 @@ const Discovery = () => {
     )
   }
 
-  // 如果今天剛好沒資料，顯示一個溫馨的預設值
+  // if no discovery data, show the default component
   if (!discovery) return <DiscovertDefault />
   const link = discovery.link
 

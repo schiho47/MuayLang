@@ -121,7 +121,7 @@ const ChartModal: React.FC<ChartModalProps> = ({
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={true}
-              contentContainerStyle={{ alignItems: 'center' }}
+              contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 16 }}
             >
               <View style={{ padding: isLandscape ? 10 : 20 }}>
                 <LineChart
@@ -133,6 +133,10 @@ const ChartModal: React.FC<ChartModalProps> = ({
                   yAxisInterval={1}
                   fromZero={false}
                   segments={5}
+                  withHorizontalLabels={true}
+                  withVerticalLabels={true}
+                  yLabelsOffset={14}
+                  xLabelsOffset={8}
                   formatXLabel={(value) => {
                     return value || ''
                   }}
@@ -145,6 +149,9 @@ const ChartModal: React.FC<ChartModalProps> = ({
                     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                     style: {
                       borderRadius: 8,
+                    },
+                    propsForLabels: {
+                      fontSize: 12,
                     },
                     propsForDots: {
                       r: '6',
@@ -198,6 +205,8 @@ const ChartModal: React.FC<ChartModalProps> = ({
                   bezier
                   style={{
                     borderRadius: 8,
+                    marginLeft: 6,
+                    marginRight: 12,
                   }}
                 />
               </View>

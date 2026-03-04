@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Animated } from '
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useMemo, useEffect, useRef, useState } from 'react'
+import { startOfWeek } from 'date-fns'
 
 import ParallaxScrollView from '@/components/parallax-scroll-view'
 import { ThemedText } from '@/components/themed-text'
@@ -84,10 +85,11 @@ export default function HomeScreen() {
   const weekStats = useMemo(() => {
     if (!training) return { sessions: 0, calories: 0, duration: 0 }
 
-    const today = new Date()
-    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const now = new Date()
+    // Week starts on Monday
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
 
-    const thisWeek = (training as any[]).filter((item: any) => new Date(item.date) >= weekAgo)
+    const thisWeek = (training as any[]).filter((item: any) => new Date(item.date) >= weekStart)
 
     return {
       sessions: thisWeek.length,

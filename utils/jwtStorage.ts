@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 const JWT_TOKEN_KEY = 'muaylang_jwt_token'
 const JWT_EXPIRY_KEY = 'muaylang_jwt_expiry'
 const GUEST_MODE_KEY = 'muaylang_guest_mode'
+const APPWRITE_SESSION_ID_KEY = 'muaylang_appwrite_session_id'
+const APPWRITE_SESSION_EXPIRY_KEY = 'muaylang_appwrite_session_expiry'
 
 /**
  * Cross-platform storage interface
@@ -135,5 +137,40 @@ export const guestStorage = {
 
   clearGuestMode: async (): Promise<void> => {
     await storage.removeItem(GUEST_MODE_KEY)
+  },
+}
+
+/**
+ * Appwrite Session Storage Utilities
+ * Used with react-native-appwrite `client.setSession(sessionId)` for stable auth on web (Safari)
+ */
+export const sessionStorage = {
+  saveSession: async (sessionId: string, expiryIso?: string): Promise<void> => {
+    await storage.setItem(APPWRITE_SESSION_ID_KEY, sessionId)
+    if (expiryIso) {
+      const ms = Date.parse(expiryIso)
+      if (Number.isFinite(ms)) {
+        await storage.setItem(APPWRITE_SESSION_EXPIRY_KEY, String(ms))
+      }
+    }
+  },
+
+  getSessionId: async (): Promise<string | null> => {
+    return await storage.getItem(APPWRITE_SESSION_ID_KEY)
+  },
+
+  isSessionExpired: async (): Promise<boolean> => {
+    const expiryStr = await storage.getItem(APPWRITE_SESSION_EXPIRY_KEY)
+    if (!expiryStr) return false // unknown => treat as potentially valid
+    const expiry = parseInt(expiryStr, 10)
+    if (!Number.isFinite(expiry)) return false
+    const now = Date.now()
+    // Consider expired if less than 2 minutes remaining
+    return now >= expiry - 2 * 60 * 1000
+  },
+
+  removeSession: async (): Promise<void> => {
+    await storage.removeItem(APPWRITE_SESSION_ID_KEY)
+    await storage.removeItem(APPWRITE_SESSION_EXPIRY_KEY)
   },
 }

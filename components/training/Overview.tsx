@@ -265,6 +265,10 @@ const Overview = (props: OverviewProps) => {
                   yAxisInterval={1}
                   fromZero={false}
                   segments={5}
+                  withHorizontalLabels={true}
+                  withVerticalLabels={true}
+                  yLabelsOffset={14}
+                  xLabelsOffset={8}
                   formatXLabel={(value) => {
                     // Only show non-empty labels
                     return value || ''
@@ -278,6 +282,9 @@ const Overview = (props: OverviewProps) => {
                     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                     style: {
                       borderRadius: 8,
+                    },
+                    propsForLabels: {
+                      fontSize: 11,
                     },
                     propsForDots: {
                       r: '4',
@@ -330,6 +337,8 @@ const Overview = (props: OverviewProps) => {
                   bezier
                   style={{
                     borderRadius: 8,
+                    marginLeft: 6,
+                    marginRight: 12,
                   }}
                 />
               </TouchableOpacity>

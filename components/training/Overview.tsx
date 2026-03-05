@@ -25,7 +25,9 @@ const Overview = (props: OverviewProps) => {
   // Only recalculate when training data changes, not when chartType or modal state changes
   const statistics = useMemo(() => {
     const isPersonalTraining = training.filter((item) => +item.sessionNumber > 0)
-    const isExtraTraining = training.filter((item) => item.sessionNumber === 'Extra')
+    const isExtraTraining = training.filter(
+      (item) => item.sessionNumber === 'Extra' || !item.sessionNumber,
+    )
 
     return {
       sessionTaken: isPersonalTraining.length,

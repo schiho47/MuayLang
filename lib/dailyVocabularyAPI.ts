@@ -21,26 +21,28 @@ export type DailyVocabularyDataType = {
 }
 
 export const useDailyVocabulary = (id?: string) => {
+  const isWeb = typeof window !== 'undefined'
   return useQuery<DailyVocabularyDataType | null>({
     queryKey: ['dailyVocabulary', id],
     queryFn: () => getDailyVocabulary(id) as Promise<DailyVocabularyDataType | null>,
     enabled: !!id, // Only execute query when date exists
     retry: false, // Don't auto-retry to avoid multiple failed requests
-    staleTime: Infinity, // Treat as immutable for this date
+    staleTime: isWeb ? 0 : Infinity, // Web: allow cross-device updates
     gcTime: 1000 * 60 * 60 * 24 * 365, // Keep cache for 1 year
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: isWeb ? 'always' : false,
+    refetchOnWindowFocus: isWeb,
   })
 }
 
 export const useQuizDateData = (id: string[]) => {
+  const isWeb = typeof window !== 'undefined'
   return useQuery<unknown[] | null>({
     queryKey: ['quizDateData', id],
     queryFn: () => getQuizDateData(id) as Promise<unknown[] | null>,
     enabled: id.length > 0,
-    staleTime: Infinity,
+    staleTime: isWeb ? 0 : Infinity,
     gcTime: 1000 * 60 * 60 * 24 * 365,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: isWeb ? 'always' : false,
+    refetchOnWindowFocus: isWeb,
   })
 }

@@ -35,6 +35,7 @@ export const useTraining = (userId?: string) => {
   const queryClient = useQueryClient()
   const [isHydrated, setIsHydrated] = React.useState(false)
   const cacheKey = userId ? `cache:training:${userId}` : ''
+  const isWeb = Platform.OS === 'web'
 
   React.useEffect(() => {
     let isMounted = true
@@ -65,10 +66,11 @@ export const useTraining = (userId?: string) => {
     },
     enabled: !!userId && isHydrated, // Only execute query when userId exists
     retry: false, // Don't auto-retry to avoid multiple failed requests
-    staleTime: Infinity,
+    // On web (iOS Safari), keep data fresh across devices/tabs.
+    staleTime: isWeb ? 0 : Infinity,
     gcTime: 1000 * 60 * 60 * 24 * 365,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: isWeb ? 'always' : false,
+    refetchOnWindowFocus: isWeb,
   })
 
   React.useEffect(() => {

@@ -25,6 +25,7 @@ export const useVocabularies = (userId?: string) => {
   const queryClient = useQueryClient()
   const [isHydrated, setIsHydrated] = React.useState(false)
   const cacheKey = userId ? `cache:vocabularies:${userId}` : ''
+  const isWeb = Platform.OS === 'web'
 
   React.useEffect(() => {
     let isMounted = true
@@ -52,10 +53,10 @@ export const useVocabularies = (userId?: string) => {
     queryFn: () => getAllVocabularies(userId),
     enabled: !!userId && isHydrated, // Only execute query when userId exists
     retry: false, // Don't auto-retry to avoid multiple failed requests
-    staleTime: Infinity,
+    staleTime: isWeb ? 0 : Infinity,
     gcTime: 1000 * 60 * 60 * 24 * 365,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: isWeb ? 'always' : false,
+    refetchOnWindowFocus: isWeb,
     onSuccess: (data) => {
       if (cacheKey) {
         setCacheItem(cacheKey, data)

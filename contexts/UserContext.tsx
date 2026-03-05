@@ -1,13 +1,14 @@
-import React, { createContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react'
+import React, { createContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   account,
-  initializeSession,
+  clearJWTToken,
   clearSessionToken,
   initializeJWT,
-  clearJWTToken,
+  initializeSession,
+  setSessionToken,
 } from '../lib/appwrite'
 import { router } from 'expo-router'
-import { Platform } from 'react-native'
+import { AppState, Platform } from 'react-native'
 import { jwtStorage, guestStorage, sessionStorage } from '../utils/jwtStorage'
 import { clearUserSession, saveUserSession } from '../lib/storage'
 import { onAuthUnauthorized } from '@/lib/authEvents'
@@ -58,6 +59,24 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
+  const loginAsGuest = useCallback(async () => {
+    // Guest = local flag only (no account scope)
+    await guestStorage.setGuestMode(true)
+    await Promise.all([jwtStorage.removeToken(), sessionStorage.removeSession(), clearUserSession()])
+    clearJWTToken()
+    await clearSessionToken()
+
+    setUser({
+      $id: DEMO_USER_ID,
+      email: 'guest@muaylang.app',
+      name: 'Guest',
+      emailVerification: false,
+      isGuest: true,
+    })
+    setAuthChecked(true)
+    router.replace('/(tabs)/' as any)
+  }, [])
+
   const checkAuth = useCallback(async () => {
     try {
       const isGuestSession = await guestStorage.isGuestMode()
@@ -69,6 +88,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       try {
         const currentUser = await account.get()
         await saveUserSession(currentUser)
+        await guestStorage.clearGuestMode()
         setUser(currentUser as any)
       } catch (apiError) {
         if (isGuestSession) {
@@ -80,15 +100,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             isGuest: true,
           })
         } else {
-          throw apiError
+          setUser(null)
+          router.replace('/(auth)/' as any)
         }
       }
     } catch (error) {
       setUser(null)
-      // 防死循環：Web 端若在 auth 頁面則不重複跳轉
-      if (Platform.OS !== 'web' || !window.location.pathname.includes('/auth')) {
-        router.replace('/(auth)/' as any)
-      }
+      router.replace('/(auth)/' as any)
     } finally {
       setAuthChecked(true)
     }
@@ -114,24 +132,99 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [logout])
 
   const login = async (email: string, password: string) => {
-    try {
-      await guestStorage.clearGuestMode()
-      await account.createEmailPasswordSession(email, password)
+    await guestStorage.clearGuestMode()
 
-      // 登入後立即更新 User 狀態
-      const currentUser = await account.get()
-      await saveUserSession(currentUser)
-      setUser(currentUser as any)
-      router.replace('/(tabs)/' as any)
-    } catch (error) {
-      throw error
-    }
+    // Best-effort clean old session first
+    try {
+      await account.deleteSession('current')
+    } catch {}
+    await Promise.all([jwtStorage.removeToken(), sessionStorage.removeSession(), clearUserSession()])
+    clearJWTToken()
+    await clearSessionToken()
+
+    const session = await account.createEmailPasswordSession(email, password)
+    await setSessionToken(session.$id, session.expire)
+
+    const currentUser = await account.get()
+    await saveUserSession(currentUser)
+    setUser(currentUser as any)
+    router.replace('/(tabs)/' as any)
   }
 
-  // ... (register, resendVerification 邏輯保持原本樣式)
+  const register = async (email: string, password: string) => {
+    await guestStorage.clearGuestMode()
+    try {
+      await account.deleteSession('current')
+    } catch {}
+    await Promise.all([jwtStorage.removeToken(), sessionStorage.removeSession(), clearUserSession()])
+    clearJWTToken()
+    await clearSessionToken()
+
+    await account.create('unique()', email, password)
+    const session = await account.createEmailPasswordSession(email, password)
+    await setSessionToken(session.$id, session.expire)
+
+    const currentUser = await account.get()
+    await saveUserSession(currentUser)
+    setUser(currentUser as any)
+    router.replace('/(tabs)/' as any)
+  }
+
+  const resendVerification = async () => {
+    const verificationUrl =
+      Platform.OS === 'web'
+        ? `${typeof window !== 'undefined' ? window.location.origin : 'https://muaylang.app'}/verify`
+        : 'exp://localhost:8081'
+    await account.createVerification(verificationUrl)
+  }
+
+  const verifyEmail = async (userId: string, secret: string) => {
+    await account.updateVerification(userId, secret)
+    const currentUser = await account.get()
+    setUser(currentUser as any)
+  }
+
+  // Keep session alive (helps with “time passes then becomes guest”)
+  useEffect(() => {
+    if (!user || user.isGuest) return
+
+    let isActive = true
+    const refresh = async () => {
+      try {
+        const updated = await account.updateSession('current')
+        if (!isActive) return
+        await setSessionToken(updated.$id, updated.expire)
+      } catch {
+        // ignore; global handler will deal with unauthorized
+      }
+    }
+
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refresh()
+    })
+    const id = setInterval(refresh, 1000 * 60 * 8)
+    refresh()
+
+    return () => {
+      isActive = false
+      sub.remove()
+      clearInterval(id)
+    }
+  }, [user])
 
   return (
-    <UserContext.Provider value={{ user, authChecked, login, logout /* ...其他 function */ }}>
+    <UserContext.Provider
+      value={{
+        user,
+        authChecked,
+        login,
+        register,
+        logout,
+        resendVerification,
+        verifyEmail,
+        loginAsGuest,
+      }}
+    >
       {children}
     </UserContext.Provider>
   )

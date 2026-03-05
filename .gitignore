@@ -37,10 +37,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# scripts
+/scripts/
+
 app-example
 
 # generated native folders
 /ios
 /android
-
-/scripts/

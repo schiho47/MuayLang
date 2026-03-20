@@ -19,7 +19,6 @@ export default function Training() {
   const handleAddingSection = () => {
     // Prevent guests from adding
     if (user?.isGuest) {
-      console.log('Guest users cannot add training sessions')
       return
     }
     router.push('/section/add')

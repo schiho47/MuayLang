@@ -26,17 +26,14 @@ export default function TabTwoScreen() {
   const handleAddingVocabulary = () => {
     // Prevent guests from adding
     if (user?.isGuest) {
-      console.log('Guest users cannot add vocabulary')
       return
     }
     router.push('/vocabulary/add')
   }
-  console.log({ vocabularies })
 
   const handleEditingVocabulary = (id: string) => {
     // Prevent guests from editing
     if (user?.isGuest) {
-      console.log('Guest users cannot edit vocabulary')
       return
     }
     router.push(`/vocabulary/edit/${id}`)
@@ -88,7 +85,6 @@ export default function TabTwoScreen() {
   }, [vocabularies, filterData])
 
   const handleConfirmFilteringVocabulary = (filterDataInput: FilterDataType) => {
-    console.log('Filter data:', filterDataInput)
     setFilterData(filterDataInput)
     setOpenFilterSheet(false)
   }
@@ -205,7 +201,6 @@ export default function TabTwoScreen() {
               size={33}
               color={MUAY_PURPLE}
               onPress={() => {
-                console.log('Filtering vocabulary')
                 setOpenFilterSheet(true)
               }}
               className="p-1 ms-2"
@@ -213,6 +208,7 @@ export default function TabTwoScreen() {
             <View className="flex-row items-center gap-2 ms-2">
             <TouchableOpacity
               onPress={() => {
+                if (user?.isGuest) return
                 const items = filteredVocabularies as VocabularyDataType[]
                 const ids = getRandomVocabularyIds(items)
                 router.push({
@@ -223,6 +219,8 @@ export default function TabTwoScreen() {
                 })
               }}
               className="p-1"
+              disabled={user?.isGuest}
+              style={{ opacity: user?.isGuest ? 0.25 : 1 }}
             >
               <View className="flex-row items-center">
                 <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />

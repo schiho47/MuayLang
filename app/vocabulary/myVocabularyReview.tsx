@@ -14,6 +14,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useVocabularies } from '@/lib/learningAPI'
 import { useUser } from '@/hooks/useUser'
 import type { VocabularyDataType } from '@/components/learning/type'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
 
 const MyVocabularyReview = () => {
@@ -56,31 +57,36 @@ const MyVocabularyReview = () => {
   // 3. 結算畫面
   if (isFinished) {
     return (
-      <VocabularyReviewSummary
-        totalQuestions={totalQuestions}
-        correctCount={correctCount}
-        wrongCount={wrongCount}
-        summaryItems={summaryItems}
-        onBack={() => router.back()}
-        onReplay={resetQuiz}
-      />
+      <ReadOnlyGuard>
+        <VocabularyReviewSummary
+          totalQuestions={totalQuestions}
+          correctCount={correctCount}
+          wrongCount={wrongCount}
+          summaryItems={summaryItems}
+          onBack={() => router.back()}
+          onReplay={resetQuiz}
+        />
+      </ReadOnlyGuard>
     )
   }
 
 
   if ((loading || vocabLoading) && !currentQuestion) {
     return (
-      <Box flex={1} bg={MUAY_WHITE} alignItems="center" justifyContent="center">
-        <Spinner color={MUAY_PURPLE} size="large" />
-        <GText mt="$3" size="md" color={MUAY_PURPLE} fontWeight="$bold">
-          Generating...
-        </GText>
-      </Box>
+      <ReadOnlyGuard>
+        <Box flex={1} bg={MUAY_WHITE} alignItems="center" justifyContent="center">
+          <Spinner color={MUAY_PURPLE} size="large" />
+          <GText mt="$3" size="md" color={MUAY_PURPLE} fontWeight="$bold">
+            Generating...
+          </GText>
+        </Box>
+      </ReadOnlyGuard>
     )
   }
 
   return (
-    <Box flex={1} bg={MUAY_WHITE}>
+    <ReadOnlyGuard>
+      <Box flex={1} bg={MUAY_WHITE}>
       {/* Header 導航欄 */}
       <Box pt={50} pb={10} px={10} bg={MUAY_WHITE} borderBottomWidth={1} borderBottomColor="$coolGray100">
         <HStack alignItems="center" justifyContent="space-between">
@@ -238,7 +244,8 @@ const MyVocabularyReview = () => {
           )}
         </VStack>
       </ScrollView>
-    </Box>
+      </Box>
+    </ReadOnlyGuard>
   )
 }
 

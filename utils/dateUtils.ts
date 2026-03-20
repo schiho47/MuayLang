@@ -55,27 +55,6 @@ export const getTodayKey = () => {
   const dd = String(now.getDate()).padStart(2, '0')
   return `${mm}${dd}`
 }
-/*
-Usage Examples:
-
-// 1. Convert UTC time string to local time
-const utcString = "2025-07-18T23:59:59.999+00:00"
-const localDate = convertUTCToLocal(utcString)
-console.log(localDate) // 2025-07-19T00:00:00.000+08:00 (assuming UTC+8 timezone)
-
-// 2. Format local date
-const formattedDate = formatLocalDate(localDate) // "2025-07-19"
-const formattedWithTime = formatLocalDate(localDate, 'yyyy-MM-dd HH:mm:ss') // "2025-07-19 00:00:00"
-
-// 3. Directly convert UTC string to local date string
-const localDateString = convertUTCToLocalString(utcString) // "2025-07-19"
-
-// 4. Get current local time
-const now = getCurrentLocalDate()
-
-// 5. Convert local time to UTC
-const utcString = convertLocalToUTC(now)
-*/
 
 export const getRandomFourDate = () => {
   const today = new Date()

@@ -41,67 +41,73 @@ const BigImageModal = (props: BigImageModalProps) => {
     }
   }).current
 
-  return (
-    <Modal visible={visible} onRequestClose={onDismiss} transparent animationType="fade">
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
-        <View style={{ flex: 1 }}>
-          <TouchableOpacity
-            onPress={onDismiss}
+  const content = (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      <View style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={onDismiss}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 20,
+            zIndex: 10,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            borderRadius: 20,
+            padding: 8,
+          }}
+        >
+          <Ionicons name="close" size={24} color="white" />
+        </TouchableOpacity>
+
+        {/* Photo index indicator */}
+        {photos.length > 1 && (
+          <View
             style={{
               position: 'absolute',
               top: 10,
-              right: 20,
+              left: 0,
+              right: 0,
               zIndex: 10,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              borderRadius: 20,
-              padding: 8,
+              alignItems: 'center',
             }}
           >
-            <Ionicons name="close" size={24} color="white" />
-          </TouchableOpacity>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
+              {currentIndex + 1} / {photos.length}
+            </Text>
+          </View>
+        )}
 
-          {/* Photo index indicator */}
-          {photos.length > 1 && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 10,
-                left: 0,
-                right: 0,
-                zIndex: 10,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
-                {currentIndex + 1} / {photos.length}
-              </Text>
+        <FlatList
+          ref={flatListRef}
+          data={photos}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          renderItem={({ item }) => (
+            <View style={{ width: screenWidth, justifyContent: 'center', alignItems: 'center' }}>
+              <Image
+                source={{ uri: getPhotoUrl(item) as string }}
+                style={{
+                  width: screenWidth,
+                  height: '100%',
+                  resizeMode: 'contain',
+                }}
+              />
             </View>
           )}
+        />
+      </View>
+    </SafeAreaView>
+  )
 
-          <FlatList
-            ref={flatListRef}
-            data={photos}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-            keyExtractor={(item, index) => `${item}-${index}`}
-            renderItem={({ item }) => (
-              <View style={{ width: screenWidth, justifyContent: 'center', alignItems: 'center' }}>
-                <Image
-                  source={{ uri: getPhotoUrl(item) as string }}
-                  style={{
-                    width: screenWidth,
-                    height: '100%',
-                    resizeMode: 'contain',
-                  }}
-                />
-              </View>
-            )}
-          />
-        </View>
-      </SafeAreaView>
+  if (!visible) return null
+
+  return (
+    <Modal visible={visible} onRequestClose={onDismiss} transparent animationType="fade">
+      {content}
     </Modal>
   )
 }

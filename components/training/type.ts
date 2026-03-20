@@ -17,5 +17,10 @@ export type TrainingDataType = {
   sessionNumber: string
   maxHeartRate: number
   avgHeartRate: number
+  noteAiTopic?: string
+  noteAiFeedback?: string
+  noteAiSupplements?: string
+  noteAiGeneratedAt?: string
+  noteAiModel?: string
   $id: string
 }

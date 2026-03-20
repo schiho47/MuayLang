@@ -33,15 +33,6 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
   const [tagSearchText, setTagSearchText] = useState('')
   const [showFavoriteOnly, setShowFavoriteOnly] = useState(false)
 
-  // Debug logs
-  console.log('FilterVocabularyModal render:', {
-    isOpen,
-    vocabulariesCount: vocabularies?.length,
-    tagsListCount: tagsList?.length,
-    searchText,
-    searchField,
-  })
-
   // Filter vocabularies based on search text and field
   const filteredVocabularies = useMemo(() => {
     if (!searchText.trim()) return []
@@ -55,14 +46,6 @@ const FilterVocabularyModal: React.FC<FilterVocabularyModalProps> = (props) => {
         return fieldValue.includes(searchLower)
       })
       .slice(0, 5) // Limit to show first 5 results
-
-    console.log('Filtered vocabularies:', {
-      searchText,
-      searchField,
-      fieldKey,
-      filteredCount: filtered.length,
-      totalCount: vocabularies.length,
-    })
 
     return filtered
   }, [searchText, searchField, vocabularies])

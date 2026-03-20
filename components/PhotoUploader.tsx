@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Ionicons } from '@expo/vector-icons'
-import { getPhotoUrl } from '@/utils/photos'
+import { getPhotoPreviewUrl, getPhotoUrl } from '@/utils/photos'
 
 type Props = {
   photos: string[]
@@ -35,7 +35,7 @@ const PhotoUploader = ({ photos, setPhotos }: Props) => {
       return photo
     } else {
       // Appwrite file ID
-      return getPhotoUrl(photo)
+      return getPhotoPreviewUrl(photo, 160, 160) || getPhotoUrl(photo)
     }
   }
 

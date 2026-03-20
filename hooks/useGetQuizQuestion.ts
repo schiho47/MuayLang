@@ -61,7 +61,6 @@ export const useGetQuizQuestion = () => {
         return null
       }
       const ai = new GoogleGenAI({ apiKey })
-      console.log('dateObject', dateObject)
       const prompt = `
           You are an expert Thai educator. 
       Generate ONE quiz based **STRICTLY** on the provided data.
@@ -129,7 +128,6 @@ export const useGetQuizQuestion = () => {
             temperature: 0.8, // 稍微提高溫度，讓台語口吻更生動
           },
         })
-        console.log('response', response)
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text
 
         if (!text) throw new Error('Empty response')

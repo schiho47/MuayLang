@@ -19,17 +19,18 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import useSpeech from '../../hooks/useSpeech'
 import { DailyVocabularyWord, useDailyVocabulary, useQuizDateData } from '@/lib/dailyVocabularyAPI'
-import { useGetQuizQuestion } from '@/hooks/useGetQuizQuestion'
 import { formatDate, getRandomFourDate, getTodayKey } from '@/utils/dateUtils'
 import { QuizDateWord, setPrefetchedQuiz } from '@/lib/quizPrefetch'
 import SpeakerButton from '@/components/ui/SpeakerButton'
 import SearchInput from '@/components/ui/SearchInput'
 import { ScrollView } from 'react-native'
+import { useUser } from '@/hooks/useUser'
 
 import { MUAY_PURPLE } from '@/constants/Colors'
 
 const DailyVocabularyList = () => {
   const router = useRouter()
+  const { user } = useUser()
   const todayKey = useMemo(() => getTodayKey(), [])
   const [activeDate, setActiveDate] = useState(todayKey)
   const [inputDateText, setInputDateText] = useState('')
@@ -39,23 +40,15 @@ const DailyVocabularyList = () => {
   const quizDates = useMemo(() => getRandomFourDate(), [])
   const { data: quizDateData } = useQuizDateData(quizDates)
   const quizCount = quizDateData?.length ?? 0
-  const { fetchQuestion } = useGetQuizQuestion()
   const [showModal, setShowModal] = useState(false)
   const [selectedWord, setSelectedWord] = useState<DailyVocabularyWord | null>(null)
   const { speak } = useSpeech()
   const [isPrefetching, setIsPrefetching] = useState(false)
 
-  console.log({ vocabularyData, selectedWord })
   const handlePress = (item: DailyVocabularyWord) => {
     setSelectedWord(item)
     setShowModal(true)
   }
-
-  const normalizeWordForQuiz = (word: QuizDateWord) => ({
-    ...word,
-    dateId: word.dayId ?? word.id ?? '',
-    tags: word.tags ?? '',
-  })
 
   const buildQuestionPool = (data: QuizDateWord[]) => {
     const pool = [...data]
@@ -63,7 +56,42 @@ const DailyVocabularyList = () => {
       const j = Math.floor(Math.random() * (i + 1))
       ;[pool[i], pool[j]] = [pool[j], pool[i]]
     }
-    return pool.slice(0, 5)
+    return pool.slice(0, 10)
+  }
+
+  const shuffle = <T,>(arr: T[]) => {
+    const out = [...arr]
+    for (let i = out.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[out[i], out[j]] = [out[j], out[i]]
+    }
+    return out
+  }
+
+  const buildFirstLocalQuestion = (pool: QuizDateWord[]) => {
+    const word = pool[0]
+    if (!word) return null
+    const distractors = shuffle(pool.filter((w) => w?.th && w.th !== word.th)).slice(0, 3)
+    const optionWords = [word, ...distractors]
+
+    // TYPE_B (fast): Thai word -> English options
+    const options = optionWords.map((w) => w.word ?? '')
+    const options_display = optionWords.map(
+      (w) => `EN: ${w.word ?? ''} | 台羅: ${w.tw_r ?? ''} | 台語漢字: ${w.tw_h ?? ''}`,
+    )
+    const paired = options.map((opt, i) => ({ opt, disp: options_display[i], isCorrect: i === 0 }))
+    const shuffledPaired = shuffle(paired)
+
+    return {
+      quiz_type: 'TYPE_B' as const,
+      question: word.th ?? '',
+      phonetic: word.roman ?? '',
+      options: shuffledPaired.map((p) => p.opt),
+      options_display: shuffledPaired.map((p) => p.disp),
+      answerIndex: Math.max(0, shuffledPaired.findIndex((p) => p.isCorrect)),
+      cultural_note: `EN: ${word.ex_en ?? ''} 【台語漢字：${word.ex_tw ?? ''}】`,
+      encouragement: '',
+    }
   }
 
   const dateOptions = useMemo(() => {
@@ -108,8 +136,10 @@ const DailyVocabularyList = () => {
   }
 
   const canSearch = !!selectedDate || !inputDateText.trim()
+  const canTakeQuiz = !user?.isGuest
 
   const handleGoDailyQuiz = () => {
+    if (!canTakeQuiz) return
     router.push({
       pathname: '/vocabulary/dailyReview',
       params: { date: activeDate },
@@ -117,6 +147,7 @@ const DailyVocabularyList = () => {
   }
 
   const handleGoReview = async () => {
+    if (!canTakeQuiz) return
     if (!quizDateData || quizDateData.length === 0) {
       router.push({
         pathname: '/vocabulary/review',
@@ -128,8 +159,8 @@ const DailyVocabularyList = () => {
     setIsPrefetching(true)
     try {
       const pool = buildQuestionPool(quizDateData as QuizDateWord[])
-      const firstWord = pool[0]
-      const firstQuestion = firstWord ? await fetchQuestion(normalizeWordForQuiz(firstWord)) : null
+      // First question is non-AI to avoid long initial wait
+      const firstQuestion = buildFirstLocalQuestion(pool)
       setPrefetchedQuiz({ pool, firstQuestion })
     } finally {
       setIsPrefetching(false)
@@ -223,11 +254,12 @@ const DailyVocabularyList = () => {
           <HStack space="md" alignItems="center" justifyContent="flex-end">
             <Pressable
               onPress={handleGoDailyQuiz}
+              disabled={!canTakeQuiz}
               accessibilityLabel={`Go to daily quiz (${activeDate})`}
               sx={{
                 ':active': { opacity: 0.6 },
               }}
-              style={{ alignSelf: 'flex-end' }}
+              style={{ alignSelf: 'flex-end', opacity: canTakeQuiz ? 1 : 0.25 }}
             >
               <HStack space="xs" alignItems="center">
                 <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />
@@ -237,12 +269,15 @@ const DailyVocabularyList = () => {
 
             <Pressable
               onPress={handleGoReview}
-              disabled={isPrefetching}
+              disabled={isPrefetching || !canTakeQuiz}
               accessibilityLabel={`Go to vocabulary review (${quizCount})`}
               sx={{
                 ':active': { opacity: 0.6 },
               }}
-              style={{ opacity: isPrefetching ? 0.6 : 1, alignSelf: 'flex-end' }}
+              style={{
+                opacity: !canTakeQuiz ? 0.25 : isPrefetching ? 0.6 : 1,
+                alignSelf: 'flex-end',
+              }}
             >
               <HStack space="xs" alignItems="center">
                 <Ionicons name="chevron-forward" size={20} color={MUAY_PURPLE} />

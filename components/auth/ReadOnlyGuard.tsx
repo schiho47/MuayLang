@@ -15,8 +15,7 @@ const ReadOnlyGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (user?.isGuest) {
-      console.log('⚠️ Guest users cannot access this page - redirecting to home')
-      router.replace('/(tabs)/')
+      router.replace('/(tabs)')
     }
   }, [user, router])
 
@@ -56,7 +55,7 @@ const ReadOnlyGuard = ({ children }: { children: React.ReactNode }) => {
         </Text>
 
         <TouchableOpacity
-          onPress={() => router.replace('/(tabs)/')}
+          onPress={() => router.replace('/(tabs)')}
           style={{
             marginTop: 24,
             backgroundColor: MUAY_WHITE,

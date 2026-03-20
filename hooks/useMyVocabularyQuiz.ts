@@ -33,7 +33,6 @@ export const useMyVocabularyQuiz = () => {
         return null
       }
       const ai = new GoogleGenAI({ apiKey })
-      console.log('dateObject', dateObject)
       const prompt = `
 Act as a Thai Language Expert and Data Engineer. Your task is to process a JSON object representing a vocabulary entry and enrich it with precise Thai tokenization and complementary Taiwanese Hokkien translations.
 
@@ -83,7 +82,6 @@ Act as a Thai Language Expert and Data Engineer. Your task is to process a JSON 
             temperature: 0.8, // 稍微提高溫度，讓台語口吻更生動
           },
         })
-        console.log('response', response)
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text
 
         if (!text) throw new Error('Empty response')

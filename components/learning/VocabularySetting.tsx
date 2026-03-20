@@ -81,7 +81,6 @@ const VocabularySetting = (props: VocabularySettingProps) => {
 
     // Save data if no errors
     if (Object.keys(newError).length === 0) {
-      console.log({ pageData })
       handleSaveData()
     }
   }
@@ -95,7 +94,6 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         setIsSaving(false)
         return
       }
-      console.log('Updating vocabulary with ID:', pageData.$id)
       // Exclude all system fields (fields starting with $)
       const updateData = Object.fromEntries(
         Object.entries(pageData)
@@ -108,7 +106,6 @@ const VocabularySetting = (props: VocabularySettingProps) => {
             return true
           }),
       )
-      console.log('📝 Update data:', updateData)
       updateVocabularyMutation(
         { id: pageData.$id, data: updateData },
         {
@@ -142,8 +139,6 @@ const VocabularySetting = (props: VocabularySettingProps) => {
         userId: user?.$id,
       }
 
-      console.log('📝 Create data to send:', dataWithUserId)
-      console.log('📝 Full pageData:', pageData)
       addVocabulary(dataWithUserId, {
         onSettled: () => {
           setIsSaving(false)

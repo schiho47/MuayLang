@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { Platform, ToastAndroid } from 'react-native'
+import { Alert, Platform, ToastAndroid } from 'react-native'
 import { FilterDataType } from '../components/learning/type'
 import {
   createVocabulary,
@@ -16,8 +16,7 @@ const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
   } else {
-    // iOS and Web use console.log or Alert
-    console.log(message)
+    Alert.alert('MuayLang', message)
   }
 }
 

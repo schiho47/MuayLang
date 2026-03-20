@@ -1,5 +1,5 @@
-import { KeyboardAvoidingView, ScrollView, Platform, ActivityIndicator, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { KeyboardAvoidingView, ScrollView, Platform, ActivityIndicator, View, Text, TouchableOpacity, Alert } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import FormInput from '../ui/input/FormInput'
 import FormNumberInput from '../ui/input/FormNumberInput'
@@ -16,6 +16,11 @@ import { trainingValidators } from '@/utils/validators'
 import { useDeleteTraining } from '@/lib/trainingAPI'
 import { MUAY_PURPLE } from '@/constants/Colors'
 import { useUser } from '@/hooks/useUser'
+import { useTrainingNoteAI, type TrainingNoteSupplement } from '@/hooks/useTrainingNoteAI'
+import { useAddVocabulary, useVocabularies } from '@/lib/learningAPI'
+import type { VocabularyDataType } from '@/components/learning/type'
+import useSpeech from '@/hooks/useSpeech'
+import SpeakerButton from '@/components/ui/SpeakerButton'
 
 type SettingSectionProps = {
   handleConfirmApi: (pageData: any) => void
@@ -32,6 +37,11 @@ const initialPageData = {
   photos: [],
   maxHeartRate: '',
   avgHeartRate: '',
+  noteAiTopic: '',
+  noteAiFeedback: '',
+  noteAiSupplements: '',
+  noteAiGeneratedAt: '',
+  noteAiModel: '',
 }
 const isRequiredFields = [
   TrainingFieldEnum.Date,
@@ -49,6 +59,26 @@ const SettingSection = (props: SettingSectionProps) => {
   const [pageData, setPageData] = useState(initialPageData)
   const [isSaving, setIsSaving] = useState(false)
   const { mutateAsync: deleteTraining, isPending: isDeleting } = useDeleteTraining()
+  const { generate, loading: aiLoading, error: aiError } = useTrainingNoteAI()
+  const { mutateAsync: addVocabulary, isPending: isAddingVocabulary } = useAddVocabulary()
+  const { data: vocabularies } = useVocabularies(user?.$id)
+  const { speak } = useSpeech()
+  const [supplements, setSupplements] = useState<TrainingNoteSupplement[]>([])
+  const [addedMap, setAddedMap] = useState<Record<number, boolean>>({})
+  const [locallyAddedThai, setLocallyAddedThai] = useState<Record<string, boolean>>({})
+
+  const normalizeThaiKey = (thai: string) => thai.replace(/\s+/g, ' ').trim()
+
+  const existingThaiSet = useMemo(() => {
+    const list = (vocabularies as unknown as VocabularyDataType[]) || []
+    const set = new Set<string>()
+    for (const item of list) {
+      const key = normalizeThaiKey(String((item as any)?.thai ?? ''))
+      if (key) set.add(key)
+    }
+    return set
+  }, [vocabularies])
+
   // Clean Appwrite document data, remove internal properties
   const cleanAppwriteData = (data: any) => {
     if (!data) return initialPageData
@@ -62,7 +92,31 @@ const SettingSection = (props: SettingSectionProps) => {
       photos: data.photos || [],
       maxHeartRate: data.maxHeartRate || null,
       avgHeartRate: data.avgHeartRate || null,
+      noteAiTopic: data.noteAiTopic || '',
+      noteAiFeedback: data.noteAiFeedback || '',
+      noteAiSupplements: data.noteAiSupplements || '',
+      noteAiGeneratedAt: data.noteAiGeneratedAt || '',
+      noteAiModel: data.noteAiModel || '',
     }
+  }
+
+  const hydrateSupplements = (raw?: string) => {
+    if (!raw) return []
+    try {
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? (parsed as TrainingNoteSupplement[]) : []
+    } catch {
+      return []
+    }
+  }
+
+  const parseBilingual = (raw?: string) => {
+    const text = String(raw ?? '')
+    const idx = text.indexOf('\nEN:')
+    if (idx >= 0) {
+      return { th: text.slice(0, idx).trim(), en: text.slice(idx + 4).trim() }
+    }
+    return { th: text.trim(), en: '' }
   }
 
   const [error, setError] = useState({
@@ -198,8 +252,97 @@ const SettingSection = (props: SettingSectionProps) => {
   useEffect(() => {
     if (originalPageData) {
       setPageData(cleanAppwriteData(originalPageData))
+      setSupplements(hydrateSupplements(originalPageData?.noteAiSupplements))
     }
   }, [originalPageData])
+
+  const hasGeneratedAI = !!pageData.noteAiGeneratedAt || !!pageData.noteAiSupplements
+  const canRunAI = !!pageData.note?.trim() && !user?.isGuest && !hasGeneratedAI
+
+  const handleGenerateAI = async () => {
+    if (!canRunAI) return
+    const result = await generate({
+      date: pageData.date as any,
+      sessionNumber: String(pageData.sessionNumber ?? ''),
+      duration: pageData.duration as any,
+      calories: pageData.calories as any,
+      maxHeartRate: pageData.maxHeartRate as any,
+      avgHeartRate: pageData.avgHeartRate as any,
+      note: String(pageData.note ?? ''),
+    })
+    if (!result) return
+
+    // De-duplicate within this generation (AI can repeat across items)
+    const uniq: TrainingNoteSupplement[] = []
+    const seen = new Set<string>()
+    for (const s of result.supplements || []) {
+      const key = normalizeThaiKey(String(s?.thai ?? ''))
+      if (!key) continue
+      if (seen.has(key)) continue
+      seen.add(key)
+      uniq.push(s)
+      if (uniq.length >= 3) break
+    }
+    const nextSupplements = uniq
+    setSupplements(nextSupplements)
+    setAddedMap({})
+    setLocallyAddedThai({})
+
+    const nowIso = new Date().toISOString()
+    const nextPageData = {
+      ...pageData,
+      noteAiTopic: `${result.topic_th}\nEN: ${result.topic_en}`.trim(),
+      noteAiFeedback: `${result.feedback_th}\nEN: ${result.feedback_en}`.trim(),
+      noteAiSupplements: JSON.stringify(nextSupplements),
+      noteAiGeneratedAt: nowIso,
+      noteAiModel: 'gemini-2.0-flash',
+    }
+
+    setPageData(nextPageData)
+    // Persist immediately in edit mode so next open can display it.
+    if (isEdit) {
+      try {
+        await handleConfirmApi(nextPageData)
+      } catch (e) {
+        // Keep UI state, but inform user they need to press Update to save if update fails.
+        Alert.alert('Save failed', 'AI content generated, but failed to save. Please press Update to save.')
+      }
+    }
+  }
+
+  const handleAddSupplementToVocab = async (item: TrainingNoteSupplement, index: number) => {
+    if (user?.isGuest) return
+    if (addedMap[index]) return
+    const thaiKey = normalizeThaiKey(String(item.thai ?? ''))
+    const exists = (!!thaiKey && existingThaiSet.has(thaiKey)) || (!!thaiKey && locallyAddedThai[thaiKey])
+    if (exists) {
+      Alert.alert('Already exists', 'This word already exists in My Vocabularies.')
+      return
+    }
+
+    const tags = Array.isArray(item.tags) ? item.tags : []
+    const dateTag = pageData.date ? [`training:${String(pageData.date)}`] : []
+    const topicTag = pageData.noteAiTopic ? [`topic:${pageData.noteAiTopic}`] : []
+
+    const payload: any = {
+      userId: user?.$id,
+      thai: item.thai || '',
+      romanization: item.romanization || '',
+      english: item.english || '',
+      exampleTH: item.exampleTH || '',
+      exampleEN: item.exampleEN || '',
+      note: `From training note${pageData.date ? ` (${String(pageData.date)})` : ''}`,
+      url: '',
+      tags: [...new Set([...tags, ...dateTag, ...topicTag])],
+      favorite: false,
+    }
+
+    const res: any = await addVocabulary(payload)
+    if (res?.success !== false) {
+      setAddedMap((prev) => ({ ...prev, [index]: true }))
+      if (thaiKey) setLocallyAddedThai((prev) => ({ ...prev, [thaiKey]: true }))
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -308,6 +451,166 @@ const SettingSection = (props: SettingSectionProps) => {
               error={error[TrainingFieldEnum.Note].status}
               errorMessage={error[TrainingFieldEnum.Note].message}
             />
+
+            {/* AI feedback + supplements */}
+            <View
+              style={{
+                width: '90%',
+                margin: 12,
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#eee',
+                borderRadius: 12,
+                backgroundColor: 'white',
+              }}
+            >
+              <Text style={{ color: MUAY_PURPLE, fontWeight: '700', marginBottom: 8 }}>
+                AI Note Coach
+              </Text>
+
+              <TouchableOpacity
+                onPress={handleGenerateAI}
+                disabled={!canRunAI || aiLoading}
+                style={{
+                  backgroundColor: MUAY_PURPLE,
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  opacity: !canRunAI || aiLoading ? 0.35 : 1,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: 'white', fontWeight: '700' }}>
+                  {aiLoading
+                    ? 'Generating…'
+                    : user?.isGuest
+                      ? 'Guest cannot use AI'
+                      : hasGeneratedAI
+                        ? 'Already generated'
+                        : 'Get AI feedback'}
+                </Text>
+              </TouchableOpacity>
+
+              {aiError ? (
+                <Text style={{ color: '#ef4444', marginTop: 8 }}>{aiError}</Text>
+              ) : null}
+
+              {pageData.noteAiFeedback ? (
+                <View style={{ marginTop: 10 }}>
+                  {(() => {
+                    const topic = parseBilingual(pageData.noteAiTopic)
+                    const fb = parseBilingual(pageData.noteAiFeedback)
+                    return (
+                      <>
+                        {topic.th ? (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Text style={{ color: MUAY_PURPLE, fontWeight: '700', marginBottom: 4, flex: 1 }}>
+                              {topic.th}
+                            </Text>
+                            <SpeakerButton
+                              onPress={() => speak(topic.th)}
+                              accessibilityLabel="Speak Thai topic"
+                              size={18}
+                              color={MUAY_PURPLE}
+                            />
+                          </View>
+                        ) : null}
+                        {topic.en ? (
+                          <Text style={{ color: '#666', marginTop: 2, marginBottom: 6 }}>{topic.en}</Text>
+                        ) : null}
+
+                        {fb.th ? (
+                          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+                            <Text style={{ color: '#111', lineHeight: 20, flex: 1 }}>{fb.th}</Text>
+                            <SpeakerButton
+                              onPress={() => speak(fb.th)}
+                              accessibilityLabel="Speak Thai feedback"
+                              size={18}
+                              color={MUAY_PURPLE}
+                            />
+                          </View>
+                        ) : null}
+                        {fb.en ? (
+                          <Text style={{ color: '#666', marginTop: 6, lineHeight: 18 }}>{fb.en}</Text>
+                        ) : null}
+                      </>
+                    )
+                  })()}
+                </View>
+              ) : null}
+
+              {supplements.length > 0 ? (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={{ color: MUAY_PURPLE, fontWeight: '700', marginBottom: 8 }}>
+                    Thai supplements (3)
+                  </Text>
+                  {supplements.map((s, idx) => {
+                    const added = !!addedMap[idx]
+                    const thaiKey = normalizeThaiKey(String(s.thai ?? ''))
+                    const exists =
+                      (!!thaiKey && existingThaiSet.has(thaiKey)) || (!!thaiKey && locallyAddedThai[thaiKey])
+                    const buttonLabel = added ? 'Added' : exists ? 'Already exists' : 'Add to My Vocabularies'
+                    return (
+                      <View
+                        key={`${idx}-${s.thai}`}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: '#f0f0f0',
+                          borderRadius: 12,
+                          padding: 10,
+                          marginBottom: 10,
+                        }}
+                      >
+                        <Text style={{ fontWeight: '800', color: '#111' }}>
+                          {s.thai} {s.romanization ? `(${s.romanization})` : ''}
+                        </Text>
+                        <SpeakerButton
+                          onPress={() => speak(s.thai)}
+                          accessibilityLabel={`Speak Thai word ${idx + 1}`}
+                          size={18}
+                          color={MUAY_PURPLE}
+                          style={{ marginTop: 6 }}
+                        />
+                        <Text style={{ color: '#333', marginTop: 4 }}>{s.english}</Text>
+                        {s.exampleTH ? (
+                          <View style={{ marginTop: 6 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+                              <Text style={{ color: '#111', flex: 1 }}>{s.exampleTH}</Text>
+                              <SpeakerButton
+                                onPress={() => speak(s.exampleTH)}
+                                accessibilityLabel={`Speak Thai example ${idx + 1}`}
+                                size={18}
+                                color={MUAY_PURPLE}
+                              />
+                            </View>
+                          </View>
+                        ) : null}
+                        {s.exampleEN ? (
+                          <Text style={{ color: '#555', marginTop: 2 }}>{s.exampleEN}</Text>
+                        ) : null}
+
+                        <TouchableOpacity
+                          onPress={() => handleAddSupplementToVocab(s, idx)}
+                          disabled={user?.isGuest || isAddingVocabulary || added || exists}
+                          style={{
+                            marginTop: 8,
+                            backgroundColor: added ? '#2ecc71' : exists ? '#9ca3af' : MUAY_PURPLE,
+                            paddingVertical: 8,
+                            borderRadius: 10,
+                            opacity: user?.isGuest || isAddingVocabulary ? 0.5 : 1,
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Text style={{ color: 'white', fontWeight: '800' }}>
+                            {buttonLabel}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )
+                  })}
+                </View>
+              ) : null}
+            </View>
+
             <PhotoUploader
               photos={pageData.photos}
               setPhotos={(photos: string[]) => handleChange(photos, 'photos')}

@@ -9,6 +9,7 @@ import { useDailyVocabularyQuizFlow } from '@/hooks/useDailyVocabularyQuizFlow'
 import useSpeech from '@/hooks/useSpeech'
 import VocabularyReviewSummary from '@/components/learning/VocabularyReviewSummary'
 import SpeakerButton from '@/components/ui/SpeakerButton'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
 const formatOptionDisplay = (raw?: string) => {
   if (!raw) return ''
@@ -43,19 +44,22 @@ const DailyVocabularyReview = () => {
 
   if (flow.isFinished) {
     return (
-      <VocabularyReviewSummary
-        totalQuestions={flow.totalQuestions}
-        correctCount={flow.correctCount}
-        wrongCount={flow.wrongCount}
-        summaryItems={flow.summaryItems}
-        onBack={() => router.back()}
-        onReplay={flow.resetQuiz}
-      />
+      <ReadOnlyGuard>
+        <VocabularyReviewSummary
+          totalQuestions={flow.totalQuestions}
+          correctCount={flow.correctCount}
+          wrongCount={flow.wrongCount}
+          summaryItems={flow.summaryItems}
+          onBack={() => router.back()}
+          onReplay={flow.resetQuiz}
+        />
+      </ReadOnlyGuard>
     )
   }
 
   return (
-    <Box flex={1} bg={MUAY_WHITE}>
+    <ReadOnlyGuard>
+      <Box flex={1} bg={MUAY_WHITE}>
       <Box
         style={{
           backgroundColor: MUAY_WHITE,
@@ -214,7 +218,8 @@ const DailyVocabularyReview = () => {
           </VStack>
         </VStack>
       </ScrollView>
-    </Box>
+      </Box>
+    </ReadOnlyGuard>
   )
 }
 

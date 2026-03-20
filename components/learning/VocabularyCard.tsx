@@ -34,7 +34,6 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
 
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text)
-    console.log('Copied to clipboard:', text)
   }
 
   const toggleFavorite = (e: any) => {
@@ -42,7 +41,6 @@ const VocabularyCard: React.FC<VocabularyCardPropsType> = (props) => {
 
     // Prevent guests from updating favorites
     if (user?.isGuest) {
-      console.log('Guest users cannot modify favorites')
       return
     }
 

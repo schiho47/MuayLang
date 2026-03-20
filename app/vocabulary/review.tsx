@@ -11,9 +11,10 @@ import type { QuizDateWord } from '@/lib/quizPrefetch'
 import useSpeech from '@/hooks/useSpeech'
 import VocabularyReviewSummary from '@/components/learning/VocabularyReviewSummary'
 import SpeakerButton from '@/components/ui/SpeakerButton'
+import ReadOnlyGuard from '@/components/auth/ReadOnlyGuard'
 
-const formatOptionDisplay = (raw?: string) => {
-  if (!raw) return ''
+const parseOptionDisplay = (raw?: string) => {
+  if (!raw) return {}
   const parts = raw
     .split('|')
     .map((s) => s.trim())
@@ -24,10 +25,22 @@ const formatOptionDisplay = (raw?: string) => {
     const m = /^(EN|台羅|台語漢字)\s*:\s*(.+)$/.exec(part)
     if (m) parsed[m[1]] = m[2].trim()
   }
+  return parsed
+}
+
+const formatOptionDisplay = (raw?: string, opts?: { isTypeB?: boolean }) => {
+  if (!raw) return ''
+  const parsed = parseOptionDisplay(raw)
 
   const en = parsed['EN']
   const hanzi = parsed['台語漢字']
   const roman = parsed['台羅']
+
+  // TYPE_B (Thai -> English options): show 台語漢字 right next to English
+  if (opts?.isTypeB && en) {
+    // (No longer used in UI; TYPE_B shows hanzi inline next to the option)
+    return hanzi ? `EN: ${en}（台語漢字：${hanzi}）` : `EN: ${en}`
+  }
 
   if (en && hanzi && roman) return `EN: ${en} | 台語漢字: ${hanzi}｜台羅: ${roman}`
   if (en && hanzi) return `EN: ${en} | 台語漢字: ${hanzi}`
@@ -62,19 +75,22 @@ const VocabularyReview = () => {
 
   if (isFinished) {
     return (
-      <VocabularyReviewSummary
-        totalQuestions={totalQuestions}
-        correctCount={correctCount}
-        wrongCount={wrongCount}
-        summaryItems={summaryItems}
-        onBack={() => router.back()}
-        onReplay={resetQuiz}
-      />
+      <ReadOnlyGuard>
+        <VocabularyReviewSummary
+          totalQuestions={totalQuestions}
+          correctCount={correctCount}
+          wrongCount={wrongCount}
+          summaryItems={summaryItems}
+          onBack={() => router.back()}
+          onReplay={resetQuiz}
+        />
+      </ReadOnlyGuard>
     )
   }
 
   return (
-    <Box flex={1} bg={MUAY_WHITE}>
+    <ReadOnlyGuard>
+      <Box flex={1} bg={MUAY_WHITE}>
       <Box
         style={{
           backgroundColor: MUAY_WHITE,
@@ -161,9 +177,13 @@ const VocabularyReview = () => {
               const showFeedback = selectedIndex !== null && isSelected
               const borderColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
               const textColor = showFeedback ? (isAnswer ? '#2ecc71' : '#ef4444') : MUAY_PURPLE
-              const revealTranslations = isCorrect
+              const isTypeB = currentQuestion?.quiz_type === 'TYPE_B'
               const optionDisplay = currentQuestion?.options_display?.[index]
-              const formattedOptionDisplay = formatOptionDisplay(optionDisplay)
+              const parsedDisplay = parseOptionDisplay(optionDisplay)
+              const optionHanzi = parsedDisplay?.['台語漢字']
+              const formattedOptionDisplay = formatOptionDisplay(optionDisplay, { isTypeB })
+              const showOptionDisplayLine = !isTypeB && isCorrect
+              const translationColor = isAnswer ? '#2ecc71' : MUAY_PURPLE
 
               return (
                 <Pressable
@@ -185,10 +205,11 @@ const VocabularyReview = () => {
                     <VStack space="xs">
                       <GText color={textColor}>
                         {String.fromCharCode(65 + index)}. {option}
+                        {isTypeB && optionHanzi ? `（${optionHanzi}）` : ''}
                       </GText>
-                      {revealTranslations && formattedOptionDisplay ? (
+                      {showOptionDisplayLine && formattedOptionDisplay ? (
                         <GText
-                          color={isAnswer ? '#2ecc71' : MUAY_PURPLE}
+                          color={translationColor}
                           style={{ flexWrap: 'wrap', flexShrink: 1, fontSize: 13 }}
                         >
                           {formattedOptionDisplay}
@@ -241,7 +262,8 @@ const VocabularyReview = () => {
           </HStack> */}
         </VStack>
       </ScrollView>
-    </Box>
+      </Box>
+    </ReadOnlyGuard>
   )
 }
 

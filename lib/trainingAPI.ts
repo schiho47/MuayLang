@@ -6,7 +6,7 @@ import {
   getTrainingById,
   updateTraining,
 } from './traningAppwrite'
-import { Platform, ToastAndroid } from 'react-native'
+import { Alert, Platform, ToastAndroid } from 'react-native'
 import React from 'react'
 import { getCacheItem, setCacheItem } from './cacheStorage'
 import type { TrainingDataType } from '@/components/training/type'
@@ -16,8 +16,7 @@ const showToast = (message: string) => {
   if (Platform.OS === 'android') {
     ToastAndroid.show(message, ToastAndroid.SHORT)
   } else {
-    // iOS and Web use console.log
-    console.log(message)
+    Alert.alert('MuayLang', message)
   }
 }
 
@@ -105,7 +104,6 @@ export const useUpdateTraining = () => {
   return useMutation({
     mutationFn: (params: { id: string; [key: string]: any }) => {
       const { id, ...data } = params
-      console.log({ params })
       return updateTraining(id, data)
     },
     onSuccess: (result) => {

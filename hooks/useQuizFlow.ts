@@ -3,6 +3,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { QuizQuestion } from '@/hooks/useGetQuizQuestion'
 import { consumePrefetchedQuiz, type QuizDateWord } from '@/lib/quizPrefetch'
 
+const replaceFirst = (text: string, search: string, replace: string) => {
+  const idx = text.indexOf(search)
+  if (idx === -1) return text
+  return text.slice(0, idx) + replace + text.slice(idx + search.length)
+}
+
+const shuffleArray = <T,>(arr: T[]) => {
+  const out = [...arr]
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
 type FetchQuestion = (payload: {
   dateId: string
   tags: string
@@ -61,8 +76,72 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
       const j = Math.floor(Math.random() * (i + 1))
       ;[pool[i], pool[j]] = [pool[j], pool[i]]
     }
-    return pool.slice(0, 5)
+    return pool.slice(0, 10)
   }
+
+  const shouldUseLocalQuestion = (index: number) => index >= 0 && index < 4
+
+  const buildLocalQuestion = useCallback(
+    (index: number): QuizQuestion | null => {
+      const word = questionPool[index]
+      if (!word) return null
+
+      const sourceDateId = word.dayId ?? word.id ?? ''
+      const sourceTags = word.tags ?? ''
+      const sourceLine = `來源：${sourceDateId}${sourceTags ? `｜主題：${sourceTags}` : ''}`
+
+      const distractorPool = questionPool.filter((w) => w?.th && w.th !== word.th)
+      const distractors = shuffleArray(distractorPool).slice(0, 3)
+
+      const optionWords = [word, ...distractors]
+
+      // Alternate types: even -> TYPE_B, odd -> TYPE_A
+      if (index % 2 === 0) {
+        // TYPE_B: Thai word -> English options
+        const options = optionWords.map((w) => w.word ?? '')
+        const options_display = optionWords.map(
+          (w) => `EN: ${w.word ?? ''} | 台羅: ${w.tw_r ?? ''} | 台語漢字: ${w.tw_h ?? ''}`,
+        )
+        const paired = options.map((opt, i) => ({ opt, disp: options_display[i], isCorrect: i === 0 }))
+        const shuffledPaired = shuffleArray(paired)
+        return {
+          quiz_type: 'TYPE_B',
+          question: word.th ?? '',
+          phonetic: word.roman ?? '',
+          options: shuffledPaired.map((p) => p.opt),
+          options_display: shuffledPaired.map((p) => p.disp),
+          answerIndex: Math.max(0, shuffledPaired.findIndex((p) => p.isCorrect)),
+          cultural_note: `${sourceLine}\nEN: ${word.ex_en ?? ''} 【台語漢字：${word.ex_tw ?? ''}】`,
+          encouragement: '',
+        }
+      }
+
+      // TYPE_A: Cloze example -> Thai options
+      const cloze =
+        word.ex_th && word.th
+          ? replaceFirst(word.ex_th, word.th, '____')
+          : word.ex_th
+            ? word.ex_th
+            : '____'
+      const options = optionWords.map((w) => w.th ?? '')
+      const options_display = optionWords.map(
+        (w) => `EN: ${w.word ?? ''} | 台羅: ${w.tw_r ?? ''} | 台語漢字: ${w.tw_h ?? ''}`,
+      )
+      const paired = options.map((opt, i) => ({ opt, disp: options_display[i], isCorrect: i === 0 }))
+      const shuffledPaired = shuffleArray(paired)
+      return {
+        quiz_type: 'TYPE_A',
+        question: cloze,
+        phonetic: word.roman ?? '',
+        options: shuffledPaired.map((p) => p.opt),
+        options_display: shuffledPaired.map((p) => p.disp),
+        answerIndex: Math.max(0, shuffledPaired.findIndex((p) => p.isCorrect)),
+        cultural_note: `${sourceLine}\nEN: ${word.ex_en ?? ''} 【台語漢字：${word.ex_tw ?? ''}】`,
+        encouragement: '',
+      }
+    },
+    [questionPool],
+  )
 
   const prefetchQuestionAt = useCallback(
     (index: number) => {
@@ -70,13 +149,25 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
       if (prefetchedRef.current.has(index) || inFlightRef.current.has(index)) return
       const word = questionPool[index]
       if (!word) return
+      if (shouldUseLocalQuestion(index)) {
+        const localQ = buildLocalQuestion(index)
+        prefetchedRef.current.set(index, localQ)
+        return
+      }
       inFlightRef.current.add(index)
-      fetchQuestion(normalizeWordForQuiz(word)).then((result) => {
-        prefetchedRef.current.set(index, result)
-        inFlightRef.current.delete(index)
-      })
+      fetchQuestion(normalizeWordForQuiz(word))
+        .then((result) => {
+          prefetchedRef.current.set(index, result ?? buildLocalQuestion(index))
+        })
+        .catch(() => {
+          // AI failure fallback: fixed local question type
+          prefetchedRef.current.set(index, buildLocalQuestion(index))
+        })
+        .finally(() => {
+          inFlightRef.current.delete(index)
+        })
     },
-    [questionPool, fetchQuestion],
+    [questionPool, fetchQuestion, buildLocalQuestion],
   )
 
   useEffect(() => {
@@ -118,6 +209,7 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
     if (!wrongMapRef.current.has(currentIndex)) {
       wrongMapRef.current.set(currentIndex, false)
     }
+
     const cached = prefetchedRef.current.get(currentIndex)
     if (cached !== undefined) {
       setCurrentQuestion(cached)
@@ -125,19 +217,32 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
       return
     }
 
-    if (hasPrefetchedFirst && currentIndex === 0 && currentQuestion) {
-      prefetchQuestionAt(1)
+    if (shouldUseLocalQuestion(currentIndex)) {
+      const localQ = buildLocalQuestion(currentIndex)
+      prefetchedRef.current.set(currentIndex, localQ)
+      setCurrentQuestion(localQ)
+      prefetchQuestionAt(currentIndex + 1)
       return
     }
 
     setCurrentQuestion(null)
     let isActive = true
-    fetchQuestion(normalizeWordForQuiz(currentWord)).then((result) => {
-      if (!isActive) return
-      prefetchedRef.current.set(currentIndex, result)
-      setCurrentQuestion(result)
-      prefetchQuestionAt(currentIndex + 1)
-    })
+    fetchQuestion(normalizeWordForQuiz(currentWord))
+      .then((result) => {
+        if (!isActive) return
+        const nextQ = result ?? buildLocalQuestion(currentIndex)
+        prefetchedRef.current.set(currentIndex, nextQ)
+        setCurrentQuestion(nextQ)
+        prefetchQuestionAt(currentIndex + 1)
+      })
+      .catch(() => {
+        if (!isActive) return
+        // AI failure fallback: fixed local question type
+        const nextQ = buildLocalQuestion(currentIndex)
+        prefetchedRef.current.set(currentIndex, nextQ)
+        setCurrentQuestion(nextQ)
+        prefetchQuestionAt(currentIndex + 1)
+      })
     return () => {
       isActive = false
     }
@@ -146,7 +251,7 @@ export const useQuizFlow = ({ quizDateData, fetchQuestion }: UseQuizFlowParams) 
     currentIndex,
     fetchQuestion,
     hasPrefetchedFirst,
-    currentQuestion,
+    buildLocalQuestion,
     prefetchQuestionAt,
   ])
 

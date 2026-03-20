@@ -7,7 +7,7 @@ const useSpeech = () => {
       language: lang, // 'th-TH' | 'en-US' | 'ja-JP' ...
       pitch: 1.0,
       rate: 1.0,
-      onError: (e) => console.log('tts error', e),
+      onError: (e) => console.error('tts error', e),
     })
   }
   return {

@@ -39,7 +39,6 @@ const EditVocabulary = () => {
   const [pageData, setPageData] = useState<VocabularyDetailDataType | null>(null)
 
   const handleChangePageData = (value: string | string[], name: VocabularyFieldEnum) => {
-    console.log({ value, name })
     setPageData((prev) => (prev ? { ...prev, [name]: value } : null))
   }
 
@@ -100,9 +99,7 @@ const EditVocabulary = () => {
               handleBack={() => {
                 router.back()
               }}
-              handleDelete={() => {
-                console.log('delete')
-              }}
+              handleDelete={() => {}}
               pageData={pageData}
               handleChangePageData={handleChangePageData}
               isEdit={true}

@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native'
 import { Link, useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useUser } from '@/hooks/useUser'
 import { MUAY_PURPLE, MUAY_WHITE } from '@/constants/Colors'
@@ -25,6 +25,11 @@ const Register = () => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false)
 
   const { register } = useUser()
+
+  useEffect(() => {
+    // Registration is closed during private testing.
+    router.replace('/(auth)')
+  }, [router])
 
   const emailDomains = ['@gmail.com', '@hotmail.com', '@yahoo.com']
 

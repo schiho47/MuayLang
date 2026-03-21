@@ -36,12 +36,14 @@ const WelcomePage = () => {
           className="w-full h-[400px] mb-[60px]"
           resizeMode="contain"
         />
-        <Text className="text-center text-white text-base font-bold mb-4">v.20260305</Text>
+        <Text className="text-center text-white text-base font-bold mb-4">v.20260321</Text>
         {/* Main buttons: Register and Login */}
         <View className="flex-row justify-between gap-5 w-full px-6 mb-4">
           <Pressable
-            onPress={() => router.replace('/register')}
+            onPress={() => {}}
+            disabled
             className="bg-white py-3.5 px-6 rounded-lg flex-1 items-center"
+            style={{ opacity: 0.45 }}
           >
             <Text className="text-base font-bold" style={{ color: MUAY_PURPLE }}>
               REGISTER
@@ -55,6 +57,9 @@ const WelcomePage = () => {
             <Text className="text-white text-base font-bold">LOGIN</Text>
           </Pressable>
         </View>
+        <Text className="text-white/85 text-xs mb-3 text-center px-6">
+          MuayLang is currently in a private testing phase.
+        </Text>
 
         {/* Divider */}
         <View className="flex-row items-center w-full px-6 my-4">

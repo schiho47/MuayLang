@@ -69,6 +69,29 @@ const SettingSection = (props: SettingSectionProps) => {
 
   const normalizeThaiKey = (thai: string) => thai.replace(/\s+/g, ' ').trim()
 
+  const toSafeTag = (raw: unknown): string | null => {
+    if (typeof raw !== 'string') return null
+    const trimmed = raw.trim()
+    if (!trimmed) return null
+    // Remove newlines/extra spaces and unsafe separators.
+    let t = trimmed.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, '-')
+    t = t.replace(/[|:]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    if (!t) return null
+    if (t.length > 24) t = t.slice(0, 24)
+    return t
+  }
+
+  const toMmDd = (value: unknown) => {
+    const s = typeof value === 'string' ? value : ''
+    // "YYYY-MM-DD"
+    const m1 = /^(\d{4})-(\d{2})-(\d{2})/.exec(s)
+    if (m1) return `${m1[2]}${m1[3]}`
+    // "MMDD"
+    const m2 = /^(\d{2})(\d{2})$/.exec(s)
+    if (m2) return s
+    return ''
+  }
+
   const existingThaiSet = useMemo(() => {
     const list = (vocabularies as unknown as VocabularyDataType[]) || []
     const set = new Set<string>()
@@ -303,7 +326,7 @@ const SettingSection = (props: SettingSectionProps) => {
     if (isEdit) {
       try {
         await handleConfirmApi(nextPageData)
-      } catch (e) {
+      } catch {
         // Keep UI state, but inform user they need to press Update to save if update fails.
         Alert.alert('Save failed', 'AI content generated, but failed to save. Please press Update to save.')
       }
@@ -320,9 +343,12 @@ const SettingSection = (props: SettingSectionProps) => {
       return
     }
 
-    const tags = Array.isArray(item.tags) ? item.tags : []
-    const dateTag = pageData.date ? [`training:${String(pageData.date)}`] : []
-    const topicTag = pageData.noteAiTopic ? [`topic:${pageData.noteAiTopic}`] : []
+    const baseTags = Array.isArray(item.tags) ? item.tags : []
+    const dateKey = toMmDd(pageData.date)
+    const dateTag = dateKey ? [`tr-${dateKey}`] : []
+    // Topic is user-visible and can be very long; keep only a short safe tag.
+    const topicSafe = toSafeTag(pageData.noteAiTopic)
+    const topicTag = topicSafe ? [`tp-${topicSafe}`] : []
 
     const payload: any = {
       userId: user?.$id,
@@ -332,15 +358,25 @@ const SettingSection = (props: SettingSectionProps) => {
       exampleTH: item.exampleTH || '',
       exampleEN: item.exampleEN || '',
       note: `From training note${pageData.date ? ` (${String(pageData.date)})` : ''}`,
-      url: '',
-      tags: [...new Set([...tags, ...dateTag, ...topicTag])],
+      tags: [
+        ...new Set(
+          [...baseTags, ...dateTag, ...topicTag]
+            .map(toSafeTag)
+            .filter((t): t is string => !!t && t.length <= 24),
+        ),
+      ],
       favorite: false,
     }
 
-    const res: any = await addVocabulary(payload)
-    if (res?.success !== false) {
-      setAddedMap((prev) => ({ ...prev, [index]: true }))
-      if (thaiKey) setLocallyAddedThai((prev) => ({ ...prev, [thaiKey]: true }))
+    try {
+      const res: any = await addVocabulary(payload)
+      if (res?.success !== false) {
+        setAddedMap((prev) => ({ ...prev, [index]: true }))
+        if (thaiKey) setLocallyAddedThai((prev) => ({ ...prev, [thaiKey]: true }))
+      }
+    } catch (err: any) {
+      const message = String(err?.message ?? '')
+      Alert.alert('Add failed', message || 'Failed to add vocabulary.')
     }
   }
 

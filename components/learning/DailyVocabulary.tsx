@@ -23,14 +23,42 @@ import { formatDate, getRandomFourDate, getTodayKey } from '@/utils/dateUtils'
 import { QuizDateWord, setPrefetchedQuiz } from '@/lib/quizPrefetch'
 import SpeakerButton from '@/components/ui/SpeakerButton'
 import SearchInput from '@/components/ui/SearchInput'
-import { ScrollView } from 'react-native'
+import { Alert, ScrollView } from 'react-native'
 import { useUser } from '@/hooks/useUser'
+import { useAddVocabulary, useVocabularies } from '@/lib/learningAPI'
+import type { VocabularyDataType } from '@/components/learning/type'
 
 import { MUAY_PURPLE } from '@/constants/Colors'
+
+const normalizeThaiKey = (thai: string) => thai.replace(/\s+/g, ' ').trim()
+
+const toSafeTag = (raw: unknown): string | null => {
+  if (typeof raw !== 'string') return null
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  let t = trimmed.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, '-')
+  t = t.replace(/[|:]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+  if (!t) return null
+  if (t.length > 24) t = t.slice(0, 24)
+  return t
+}
 
 const DailyVocabularyList = () => {
   const router = useRouter()
   const { user } = useUser()
+  const { mutateAsync: addVocabulary, isPending: isAddingToMyVocab } = useAddVocabulary()
+  const { data: vocabularies } = useVocabularies(user?.$id)
+  const [localAddedThaiKeys, setLocalAddedThaiKeys] = useState<Record<string, boolean>>({})
+
+  const existingThaiSet = useMemo(() => {
+    const list = (vocabularies as unknown as VocabularyDataType[]) || []
+    const set = new Set<string>()
+    for (const item of list) {
+      const key = normalizeThaiKey(String((item as { thai?: string }).thai ?? ''))
+      if (key) set.add(key)
+    }
+    return set
+  }, [vocabularies])
   const todayKey = useMemo(() => getTodayKey(), [])
   const [activeDate, setActiveDate] = useState(todayKey)
   const [inputDateText, setInputDateText] = useState('')
@@ -48,6 +76,64 @@ const DailyVocabularyList = () => {
   const handlePress = (item: DailyVocabularyWord) => {
     setSelectedWord(item)
     setShowModal(true)
+  }
+
+  const selectedThaiKey = selectedWord ? normalizeThaiKey(selectedWord.th ?? '') : ''
+  const alreadyInMyVocab = !!(
+    selectedThaiKey &&
+    (existingThaiSet.has(selectedThaiKey) || localAddedThaiKeys[selectedThaiKey])
+  )
+
+  const handleAddToMyVocabulary = async () => {
+    if (user?.isGuest) {
+      Alert.alert('Sign in required', 'Guests cannot add to My Vocabulary.')
+      return
+    }
+    if (!user?.$id || !selectedWord) return
+
+    const thaiKey = normalizeThaiKey(selectedWord.th ?? '')
+    if (!thaiKey) {
+      Alert.alert('Cannot add', 'Missing Thai text.')
+      return
+    }
+    if (existingThaiSet.has(thaiKey) || localAddedThaiKeys[thaiKey]) {
+      Alert.alert('Already exists', 'This word is already in My Vocabularies.')
+      return
+    }
+
+    const dateTag = toSafeTag(`dv-${activeDate}`)
+    const topicRaw = vocabularyData?.tags ? `tp-${vocabularyData.tags}` : ''
+    const topicTag = toSafeTag(topicRaw)
+    const tags = [
+      ...new Set(
+        [dateTag, topicTag].filter((t): t is string => !!t && t.length <= 24),
+      ),
+    ]
+
+    const payload = {
+      userId: user.$id,
+      thai: selectedWord.th || '',
+      romanization: selectedWord.roman || '',
+      english: selectedWord.word || '',
+      exampleTH: selectedWord.ex_th || '',
+      exampleEN: selectedWord.ex_en || '',
+      note: `From daily vocabulary (${activeDate})`,
+      tags,
+      favorite: false,
+    }
+
+    try {
+      const res: { success?: boolean; error?: { message?: string } } = await addVocabulary(payload)
+      if (res?.success !== false) {
+        setLocalAddedThaiKeys((prev) => ({ ...prev, [thaiKey]: true }))
+        Alert.alert('Saved', 'Added to My Vocabulary.')
+      } else {
+        Alert.alert('Add failed', res?.error?.message || 'Could not save.')
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to add vocabulary.'
+      Alert.alert('Add failed', message)
+    }
   }
 
   const buildQuestionPool = (data: QuizDateWord[]) => {
@@ -401,30 +487,61 @@ const DailyVocabularyList = () => {
                     {selectedWord?.tw_r}
                   </Text>
                 </VStack>
-                </HStack>
-              </VStack>
+              </HStack>
+
               <Divider />
 
               <Box bg="$backgroundLight50" p="$4" borderRadius="$md">
-              <HStack justifyContent="space-between" alignItems="center">
-                <Text size="md" fontWeight="$medium" mb="$1" fontSize={28} color={MUAY_PURPLE}>
-                  {selectedWord?.ex_th}
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Text size="md" fontWeight="$medium" mb="$1" fontSize={28} color={MUAY_PURPLE}>
+                    {selectedWord?.ex_th}
+                  </Text>
+                  <SpeakerButton
+                    onPress={() => speak(selectedWord?.ex_th ?? '')}
+                    accessibilityLabel="Speak example Thai"
+                    size={26}
+                    color={MUAY_PURPLE}
+                  />
+                </HStack>
+                <Text size="sm" color="$text400" mb="$2" mt="$2">
+                  EN : {selectedWord?.ex_en}
                 </Text>
-                <SpeakerButton
-                  onPress={() => speak(selectedWord?.ex_th ?? '')}
-                  accessibilityLabel="Speak example Thai"
-                  size={26}
-                  color={MUAY_PURPLE}
-                />
-              </HStack>
-              {/* 例句標籤改為 TW 與 EN */}
-              <Text size="sm" color="$text400" mb="$2" mt="$2">
-                EN : {selectedWord?.ex_en}
-              </Text>
-              <Text size="sm" color="$secondary600" mb="$2">
-                TW : {selectedWord?.ex_tw}
-              </Text>
+                <Text size="sm" color="$secondary600" mb="$2">
+                  TW : {selectedWord?.ex_tw}
+                </Text>
               </Box>
+
+              <Pressable
+                onPress={handleAddToMyVocabulary}
+                disabled={
+                  user?.isGuest || isAddingToMyVocab || alreadyInMyVocab || !selectedWord
+                }
+                bg={MUAY_PURPLE}
+                py="$3"
+                borderRadius="$lg"
+                sx={{
+                  ':active': { opacity: 0.85 },
+                }}
+                opacity={
+                  user?.isGuest || isAddingToMyVocab || alreadyInMyVocab ? 0.45 : 1
+                }
+              >
+                <Text
+                  textAlign="center"
+                  color="$white"
+                  fontWeight="$bold"
+                  size="md"
+                >
+                  {user?.isGuest
+                    ? 'Sign in to add to My Vocabulary'
+                    : alreadyInMyVocab
+                      ? 'Already in My Vocabulary'
+                      : isAddingToMyVocab
+                        ? 'Adding…'
+                        : 'Add to My Vocabulary'}
+                </Text>
+              </Pressable>
+            </VStack>
           </ModalBody>
         </ModalContent>
       </Modal>
